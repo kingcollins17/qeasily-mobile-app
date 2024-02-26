@@ -23,12 +23,13 @@ class _OnboardingState extends State<Onboarding> {
       appBar: AppBar(
         automaticallyImplyLeading: false,
         elevation: 0,
+        backgroundColor: Colors.transparent,
         scrolledUnderElevation: 0,
       ),
       body: SingleChildScrollView(
         child: Column(children: [
           LimitedBox(
-            maxHeight: MediaQuery.of(context).size.height * 0.7,
+            maxHeight: MediaQuery.of(context).size.height * 0.65,
             child: PageView(
               controller: controller,
               onPageChanged: (value) => setState(() {
@@ -49,7 +50,7 @@ class _OnboardingState extends State<Onboarding> {
                                   // width: MediaQuery.of(context).size.width * 0.6,
                                 ),
                               ),
-                              const SizedBox(height: 30),
+                              const SizedBox(height: 20),
                               Text(onboards[index].title,
                                   style: GoogleFonts.poppins(
                                     fontSize: 30,
@@ -64,6 +65,7 @@ class _OnboardingState extends State<Onboarding> {
                                     color:
                                         Theme.of(context).colorScheme.outline),
                               ),
+                              const SizedBox(height: 50),
                             ],
                           ),
                         ))
@@ -104,7 +106,7 @@ class _OnboardingState extends State<Onboarding> {
                 //   ?..darkMode = true
                 //   ..save();
                 if (currentIndex >= onboards.length) {
-                  context.push('/test');
+                  context.push('/auth');
                 }
               },
               style: ButtonStyle(
@@ -118,10 +120,14 @@ class _OnboardingState extends State<Onboarding> {
                     fontSize: 16,
                     fontWeight: FontWeight.w500),
               )),
-          Text(
-            'Skip for now',
-            style: GoogleFonts.quicksand(
-                fontSize: 14, color: Theme.of(context).colorScheme.outline),
+          const SizedBox(height: 10),
+          GestureDetector(
+            onTap: () => context.go('/test'),
+            child: Text(
+              'Skip for now',
+              style: GoogleFonts.quicksand(
+                  fontSize: 14, color: Theme.of(context).colorScheme.outline),
+            ),
           ),
           const SizedBox(height: 20),
         ]),

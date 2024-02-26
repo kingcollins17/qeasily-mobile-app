@@ -6,14 +6,14 @@ typedef LoginResponse = ({
   bool status,
   AccessToken? token,
   UserData? user,
-  String message
+  String detail
 });
 
 class AuthAPI {
   static Future<LoginResponse> login(
     Dio dio, {
     String email = 'king@gmail.com',
-    String password = 'kingpassed',
+    String password = 'kingpass',
   }) async {
     try {
       final response = await dio.post(
@@ -28,7 +28,7 @@ class AuthAPI {
         user: response.statusCode == 200
             ? UserData.fromJson(response.data['user'])
             : null,
-        message: response.statusCode == 200
+        detail: response.statusCode == 200
             ? 'You are signed in'
             : response.data['detail'].toString()
       );
@@ -38,7 +38,7 @@ class AuthAPI {
         status: false,
         token: null,
         user: null,
-        message: e.toString(),
+        detail: e.toString(),
       );
     }
   }
