@@ -1,39 +1,31 @@
-// ignore_for_file: prefer_const_literals_to_create_immutables, prefer_const_constructors, unused_element
+// ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables, curly_braces_in_flow_control_structures, unused_element
 
 import 'package:flutter/material.dart';
-import 'package:flutter_redux/flutter_redux.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
+import 'package:qeasily/provider/auth_provider.dart';
+import 'package:qeasily/styles.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:qeasily/provider/dio.dart';
-import 'package:qeasily/redux/action/auth_actions.dart';
-import 'package:qeasily/redux/redux.dart';
-import 'package:qeasily/redux/state/auth.dart';
-import 'package:qeasily/widget/widget.dart';
-import 'package:redux/redux.dart';
+import 'package:qeasily/widget/notification.dart';
 
-class Authentication extends ConsumerStatefulWidget {
-  const Authentication({super.key});
+class LoginScreen extends ConsumerStatefulWidget {
+  const LoginScreen({super.key});
+
   @override
-  ConsumerState<Authentication> createState() => _AuthenticationState();
+  ConsumerState<LoginScreen> createState() => _LoginScreenState();
 }
 
-class _AuthenticationState extends ConsumerState<Authentication>
-    with SingleTickerProviderStateMixin {
-  final formKey = GlobalKey<FormState>();
-  bool obscurePassword = true;
+class _LoginScreenState extends ConsumerState<LoginScreen>
+    with SingleTickerProviderStateMixin, UIStyles {
   late AnimationController _controller;
 
+  final _formKey = GlobalKey<FormState>();
+
+  bool showPassword = false, isLoading = false;
+  bool rememberMe = true;
   String? email, password;
 
-  String? _emailValidator(String? value) => value == null || value.isEmpty
-      ? 'Email is required'
-      : value.split('@').length < 2
-          ? 'Email is not valid'
-          : value.split('.').length < 2
-              ? 'Email is not valid'
-              : null;
+  LocalNotification? notification;
 
   @override
   void initState() {
@@ -47,156 +39,294 @@ class _AuthenticationState extends ConsumerState<Authentication>
     super.dispose();
   }
 
+  Future<void> _notify(String message, {int delay = 5, bool? loading}) async {
+    setState(() {
+      isLoading = loading ?? isLoading;
+      notification =
+          LocalNotification(animation: _controller, message: message);
+    });
+    return await showNotification(_controller, delay);
+  }
+
+  void _handleLogin() async {
+    if (isLoading)
+      _notify('Please wait ...');
+    else if (_formKey.currentState?.validate() ?? false) {
+      _notify('Authenticating user ...', loading: true);
+      final notifier = ref.read(userAuthProvider.notifier);
+      final res = await notifier.login(email: email!, password: password!);
+      _notify(res.$2, loading: false)
+          .then((value) => res.$1 ? context.go('/home') : null);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return StoreConnector<QeasilyState, _ViewModel>(
-        converter: (store) => _ViewModel(store),
-        builder: (context, vm) {
-          return Stack(
-            children: [
-              Scaffold(
-                appBar: AppBar(
-                  title: Text(
-                    'Sign in to your account',
-                    style: GoogleFonts.poppins(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ),
-                body: SingleChildScrollView(
+    final auth = ref.watch(userAuthProvider);
+    return Scaffold(
+      // appBar: AppBar(),
+      resizeToAvoidBottomInset: true,
+      body: stackWithNotifier([
+        SingleChildScrollView(
+          child: sb(pad(
+            Column(
+              children: [
+                spacer(y: 50),
+                authSymbol(),
+                spacer(),
+                txt('Sign In', sz: 16),
+                spacer(y: 40),
+                Form(
+                  key: _formKey,
                   child: Column(
                     children: [
-                      const SizedBox(height: 10),
-                      Center(
-                        child: SvgPicture.asset(
-                          'asset/ils/undraw_completed_tasks_vs6q.svg',
-                          width: 100,
+                      TextFormField(
+                        enabled: !isLoading,
+                        validator: (value) => value == null || value.isEmpty
+                            ? 'Please enter your email to Login'
+                            : null,
+                        onChanged: (value) => email = value,
+                        decoration: InputDecoration(
+                          border: OutlineInputBorder(),
+                          isDense: true,
+                          prefixIcon: Icon(Icons.email),
+                          labelText: 'Email',
+                          hintText: 'example@gmail.com',
                         ),
                       ),
-                      const SizedBox(height: 50),
-                      Form(
-                          key: formKey,
-                          child: Padding(
-                            padding:
-                                const EdgeInsets.symmetric(horizontal: 15.0),
-                            child: Column(
-                              children: [
-                                TextFormField(
-                                  style: GoogleFonts.quicksand(),
-                                  onChanged: (value) => email = value,
-                                  validator: _emailValidator,
-                                  decoration: InputDecoration(
-                                    border: OutlineInputBorder(),
-                                    isDense: true,
-                                    labelText: 'Email',
-                                    prefixIcon:
-                                        Icon(Icons.mail_outline_rounded),
-                                    labelStyle: GoogleFonts.quicksand(),
-                                  ),
-                                ),
-                                const SizedBox(height: 10),
-                                TextFormField(
-                                  obscureText: obscurePassword,
-                                  onChanged: (value) => password = value,
-                                  validator: (value) => value == null ||
-                                          value.isEmpty
-                                      ? 'Password is required to authenticate your login'
-                                      : null,
-                                  style: GoogleFonts.quicksand(),
-                                  decoration: InputDecoration(
-                                    border: OutlineInputBorder(),
-                                    isDense: true,
-                                    labelText: 'Password',
-                                    prefixIcon:
-                                        Icon(Icons.lock_outline_rounded),
-                                    suffixIcon: GestureDetector(
-                                        onTap: () => setState(() =>
-                                            obscurePassword = !obscurePassword),
-                                        child: Icon(obscurePassword
-                                            ? Icons.visibility_off_rounded
-                                            : Icons.visibility_rounded)),
-                                    labelStyle: GoogleFonts.quicksand(),
-                                  ),
-                                ),
-                                const SizedBox(height: 20),
-                                FilledButton(
-                                    onPressed: () {
-                                      if (formKey.currentState?.validate() ??
-                                          false) {
-                                        showNotification(_controller);
-                                        vm.dispatch(AuthAction(
-                                          type: AuthActionType.login,
-                                          payload: LoginPayload(
-                                              client: ref.read(dioProvider),
-                                              email: email!,
-                                              password: password!,
-                                              onDone: (_) => showNotification(
-                                                  _controller)),
-                                        ));
-                                      }
-                                    },
-                                    style: ButtonStyle(
-                                        fixedSize: MaterialStatePropertyAll(
-                                            Size(
-                                                MediaQuery.of(context)
-                                                        .size
-                                                        .width *
-                                                    0.8,
-                                                45))),
-                                    child: Text(
-                                      'Sign In',
-                                      style: GoogleFonts.quicksand(
-                                          color: Colors.white,
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.w500),
-                                    )),
-                                const SizedBox(height: 10),
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Text(
-                                      'Don\'t have an account?',
-                                      style: GoogleFonts.poppins(fontSize: 14),
-                                    ),
-                                    SizedBox(width: 4),
-                                    Text('Sign up',
-                                        style: GoogleFonts.poppins(
-                                            fontSize: 14,
-                                            color: Theme.of(context)
-                                                .colorScheme
-                                                .primary))
-                                  ],
-                                )
-                              ],
-                            ),
-                          ))
+                      spacer(y: 15),
+                      TextFormField(
+                        obscureText: showPassword,
+                        enabled: !isLoading,
+                        validator: (value) => value == null || value.isEmpty
+                            ? 'Password is required'
+                            : null,
+                        onChanged: (value) => password = value,
+                        decoration: InputDecoration(
+                          prefixIcon: Icon(Icons.lock_outline),
+                          suffixIcon: GestureDetector(
+                            onTap: () =>
+                                setState(() => showPassword = !showPassword),
+                            child: Icon(!showPassword
+                                ? Icons.visibility_rounded
+                                : Icons.visibility_off),
+                          ),
+                          border: OutlineInputBorder(),
+
+                          isDense: true,
+                          labelText: 'Password',
+                          // hintText: 'example',
+                        ),
+                      ),
+                      spacer(),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          Checkbox.adaptive(
+                            value: rememberMe,
+                            onChanged: (value) => setState(
+                                () => rememberMe = value ?? rememberMe),
+                          ),
+                          // spacer(x: 2),
+                          txt('Remember me'),
+                        ],
+                      ),
+                      button(
+                          auth.isLoading
+                              ? loader(sz: 20, color: Colors.white)
+                              : txt('Login', sz: 16, cx: Colors.white),
+                          onTap: _handleLogin)
                     ],
                   ),
                 ),
-              ),
-              if (vm.auth.message != null)
-                Positioned(
-                    top: 25,
-                    width: MediaQuery.of(context).size.width,
-                    child: Center(
-                        child: LocalNotification(
-                      animation: _controller,
-                      message: vm.auth.message,
-                      color: const Color.fromARGB(255, 39, 39, 39),
-                      backgroundColor: Theme.of(context).colorScheme.background,
-                    )))
-            ],
-          );
-        });
+                // Align()
+                spacer(),
+                GestureDetector(
+                  onTap: () => context.pushReplacement('/sign-up'),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      txt('Dont have an account?'),
+                      spacer(),
+                      txt('Sign Up', cx: blue1),
+                    ],
+                  ),
+                )
+              ],
+            ),
+          )),
+        ),
+      ], notification), //stackWithNotifier
+    );
   }
 }
 
-class _ViewModel {
-  final Store<QeasilyState> _store;
-  final AuthState auth;
-  _ViewModel(Store<QeasilyState> store)
-      : _store = store,
-        auth = store.state.auth;
-  void dispatch(action) => _store.dispatch(action);
+class SignupScreen extends ConsumerStatefulWidget {
+  const SignupScreen({super.key});
+
+  @override
+  ConsumerState<SignupScreen> createState() => _SignupScreenState();
 }
+
+class _SignupScreenState extends ConsumerState<SignupScreen>
+    with SingleTickerProviderStateMixin, UIStyles {
+  late AnimationController _controller;
+  final formKey = GlobalKey<FormState>();
+  bool showPassword = false, showConfirm = false, isLoading = false;
+
+  String? username, email, password, confirmPassword;
+
+  LocalNotification? notification;
+
+  Future<void> _notify(String message, {int delay = 5, bool? loading}) async {
+    setState(() {
+      isLoading = loading ?? isLoading;
+      notification =
+          LocalNotification(animation: _controller, message: message);
+    });
+    return showNotification(_controller, delay);
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(vsync: this);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  Future<void> _handleSubmit() async {
+    if (isLoading)
+      _notify('Please wait ....');
+    else if (formKey.currentState?.validate() ?? false) {
+      _notify('Creating an account for you', loading: true);
+      final notifier = ref.read(userAuthProvider.notifier);
+      final res = await notifier.register(
+          username: username!, email: email!, password: password!);
+
+      await _notify('${res.message} Please go to Login',
+              loading: false, delay: 3)
+          .then((value) => res.status ? context.go('/login') : null);
+    }
+  }
+
+  String? validator(String? value) =>
+      value == null || value.isEmpty ? 'This field is required' : null;
+
+  @override
+  Widget build(BuildContext context) {
+    final auth = ref.watch(userAuthProvider);
+    return Scaffold(
+      body: stackWithNotifier([
+        SingleChildScrollView(
+          child: SizedBox(
+            width: MediaQuery.of(context).size.width,
+            child: Padding(
+              padding: EdgeInsets.symmetric(horizontal: 15),
+              child: Column(
+                children: [
+                  spacer(y: 30),
+                  authSymbol(),
+                  spacer(),
+                  txt('Create an Account with us', sz: 16),
+                  spacer(y: 40),
+                  Form(
+                    key: formKey,
+                    child: Column(
+                      children: [
+                        TextFormField(
+                          onChanged: (value) => username = value,
+                          enabled: !isLoading,
+                          validator: validator,
+                          decoration: InputDecoration(
+                              prefixIcon: Icon(Icons.person_2_outlined),
+                              border: OutlineInputBorder(),
+                              isDense: true,
+                              labelText: 'Username'),
+                        ),
+                        spacer(y: 12),
+                        TextFormField(
+                          onChanged: (value) => email = value,
+                          enabled: !isLoading,
+                          validator: validator,
+                          decoration: InputDecoration(
+                            isDense: true,
+                            prefixIcon: Icon(Icons.email_rounded),
+                            border: OutlineInputBorder(),
+                            labelText: 'Email',
+                          ),
+                        ),
+                        spacer(y: 10),
+                        TextFormField(
+                          onChanged: (value) => password = value,
+                          enabled: !isLoading,
+                          validator: (value) => value == null || value.isEmpty
+                              ? 'Password is required'
+                              : value.length < 8
+                                  ? 'Password cannot be less than eight characters'
+                                  : null,
+                          obscureText: showPassword,
+                          decoration: InputDecoration(
+                            prefixIcon: Icon(Icons.lock_outline),
+                            suffixIcon: Icon(Icons.visibility_rounded),
+                            isDense: true,
+                            border: OutlineInputBorder(),
+                            labelText: 'Password',
+                          ),
+                        ),
+                        spacer(y: 10),
+                        TextFormField(
+                          onChanged: (value) => confirmPassword = value,
+                          enabled: !isLoading,
+                          validator: (value) => value == null || value.isEmpty
+                              ? 'This field is required'
+                              : value != password
+                                  ? 'Confirm password does not match password'
+                                  : null,
+                          obscureText: showConfirm,
+                          decoration: InputDecoration(
+                            isDense: true,
+                            prefixIcon: Icon(Icons.lock_outline),
+                            suffixIcon: Icon(Icons.visibility_rounded),
+                            border: OutlineInputBorder(),
+                            labelText: 'Confirm Password',
+                          ),
+                        ),
+                        spacer(y: 30),
+                        button(
+                            auth.isLoading || isLoading
+                                ? loader(color: Colors.white, sz: 20)
+                                : txt('Create Account', cx: Colors.white),
+                            onTap: _handleSubmit),
+                        spacer(),
+                        GestureDetector(
+                          onTap: () => context.pushReplacement('/login'),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              txt('Already have an account?'),
+                              spacer(),
+                              txt('Login', cx: blue1),
+                            ],
+                          ),
+                        )
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ], notification //Stack with Notifier
+          ),
+    );
+  }
+}
+
+//
+typedef Prop<T> = MaterialStatePropertyAll<T>;

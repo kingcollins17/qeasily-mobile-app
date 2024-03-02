@@ -1,4 +1,4 @@
-// ignore_for_file: prefer_const_constructors, unused_element, unused_field
+// ignore_for_file: prefer_const_constructors, unused_element, unused_field, prefer_const_literals_to_create_immutables
 
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -28,33 +28,41 @@ class LocalNotification extends AnimatedWidget {
         offset: animation.drive(_position).value,
         child: Transform.scale(
             scaleX: animation.drive(_scale).value,
-            child: Material(
-              color: Colors.transparent,
-              child: ConstrainedBox(
+            child: Padding(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 10.0, vertical: 15),
+              child: Container(
                 constraints: BoxConstraints(
                   maxWidth: MediaQuery.of(context).size.width * 0.9,
                 ),
-                child: Ink(
-                  padding: EdgeInsets.symmetric(horizontal: 15, vertical: 10),
-                  decoration: BoxDecoration(
+                padding: EdgeInsets.symmetric(horizontal: 15, vertical: 10),
+                decoration: BoxDecoration(
                     color: message != null &&
                             child == null &&
                             backgroundColor == null
-                        ? Color(0xFF111111)
+                        ? Theme.of(context).colorScheme.background
                         : backgroundColor,
                     borderRadius: borderRadius ?? BorderRadius.circular(30),
-                  ),
-                  child: child ??
-                      Text(
-                        message ?? 'LocalNotification',
-                        style: GoogleFonts.poppins(
-                            color: message != null &&
-                                    child == null &&
-                                    color == null
-                                ? Colors.white
-                                : color),
-                      ),
+                    boxShadow: [
+                      BoxShadow(
+                          blurRadius: 3,
+                          offset: Offset(2, 3),
+                          color: Color(0x3B000000))
+                    ]
                 ),
+                child: child ??
+                    Text(
+                      message ?? 'LocalNotification',
+                      textAlign: TextAlign.center,
+                      style: GoogleFonts.poppins(
+                          decoration: TextDecoration.none,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w400,
+                          color:
+                              message != null && child == null && color == null
+                                  ? Theme.of(context).colorScheme.onBackground
+                                  : color),
+                    ),
               ),
             )),
       ),
@@ -65,8 +73,8 @@ class LocalNotification extends AnimatedWidget {
 Future<void> showNotification(AnimationController controller,
     [int delay = 5]) async {
   controller.reset();
-  controller.duration = const Duration(milliseconds: 150);
-  controller.reverseDuration = Duration(milliseconds: 100);
+  controller.duration = const Duration(milliseconds: 300);
+  controller.reverseDuration = Duration(milliseconds: 150);
   await controller.forward();
 
   await Future.delayed(Duration(seconds: delay));

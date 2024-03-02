@@ -102,11 +102,8 @@ class _OnboardingState extends State<Onboarding> {
                 controller.animateToPage(++currentIndex,
                     duration: Duration(milliseconds: 300),
                     curve: Curves.decelerate);
-                // Hive.box<AppConfig>('settings').get('config')
-                //   ?..darkMode = true
-                //   ..save();
                 if (currentIndex >= onboards.length) {
-                  context.push('/auth');
+                  context.push('/login');
                 }
               },
               style: ButtonStyle(
