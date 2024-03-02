@@ -6,7 +6,9 @@ import 'package:google_fonts/google_fonts.dart';
 mixin UIStyles {
   final purple1 = const Color(0xFF916BFF);
   final blue1 = const Color(0xFF5C99FF);
-  final blue10 =  const Color(0xFF1B56BD);
+  final blue10 = const Color(0xFF1B56BD);
+
+  final shimmer = const Color(0xFFD6D6D6);
 
   ///SizedBox()
   Widget sb(Widget child, [double? w, double? h]) => Builder(
