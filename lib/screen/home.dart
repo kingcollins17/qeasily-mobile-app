@@ -29,7 +29,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with UIStyles {
           width: MediaQuery.of(context).size.width,
           child: Stack(
             children: [
-              SizedBox(
+              Container(
+                decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.background),
                 height: MediaQuery.of(context).size.height * 0.95,
                 child: PageTransitionSwitcher(
                   duration: Duration(milliseconds: 650),
@@ -42,11 +44,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with UIStyles {
                   ),
                   child: navDestination.index == 0
                       ? IndexSubScreen()
-                      : Center(child: SizedBox.shrink()),
+                      : null,
                 ),
               ),
               Positioned(
-                bottom: 18,
+                bottom: 20,
                 width: MediaQuery.of(context).size.width,
                 child: HoverMenu(
                     onChanged: (dest) => setState(() => navDestination = dest)),

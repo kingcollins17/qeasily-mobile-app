@@ -13,12 +13,13 @@ class _IndexSubScreenState extends ConsumerState<IndexSubScreen> {
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(builder: (context, constraints) {
-      return Container(
-        color: Colors.black,
-        height: constraints.maxHeight,
-        width: constraints.maxWidth,
-        child: Column(
-          children: [],
+      return Material(
+        child: SizedBox(
+          height: constraints.maxHeight,
+          width: constraints.maxWidth,
+          child: Column(
+            children: [],
+          ),
         ),
       );
     });

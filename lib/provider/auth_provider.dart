@@ -4,6 +4,7 @@ import 'package:qeasily/model/model.dart';
 import 'package:qeasily/provider/dio_provider.dart';
 import 'package:qeasily/route_doc.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:dio/dio.dart';
 
 part 'auth_provider.g.dart';
 
@@ -59,27 +60,36 @@ class UserAuth extends _$UserAuth {
       {required String email, required String password}) async {
     final _dio = ref.read(generalDioProvider);
 
-    state = const AsyncValue.loading();
-    final response = await _dio
-        .post(APIUrl.login.url, data: {'email': email, 'password': password});
+    try {
+      state = const AsyncValue.loading();
+      final response = await _dio
+          .post(APIUrl.login.url, data: {'email': email, 'password': password});
 
-    if (response.statusCode == 200) {
-      ref
-          .read(generalDioProvider.notifier)
-          .authenticate(AccessToken(response.data['token']));
-      // return UserData.fromJson(response.data['user']);
-    } else {
-      state = AsyncValue.error(
-        response.data['detail'].toString(),
+      if (response.statusCode == 200) {
+        ref
+            .read(generalDioProvider.notifier)
+            .authenticate(AccessToken(response.data['token']));
+
+      } else {
+        state = AsyncValue.error(
+          response.data['detail'].toString(),
+          StackTrace.empty,
+        );
+      }
+      return (
+        response.statusCode == 200,
+        response.statusCode == 200
+            ? 'You are logged In'
+            : response.data['detail'].toString()
+      );
+} on DioException catch (_) {
+      const msg = 'Please check your internet connection and try again';
+      state = const AsyncValue.error(
+        msg,
         StackTrace.empty,
       );
+      return (false, msg);
     }
-    return (
-      response.statusCode == 200,
-      response.statusCode == 200
-          ? 'You are logged In'
-          : response.data['detail'].toString()
-    );
   }
 
   //

@@ -39,17 +39,20 @@ class _HoverMenuState extends State<HoverMenu>
   Widget build(BuildContext context) {
     const height = 56.0;
     return Center(
-        child: Ink(
+        child: Container(
       width: MediaQuery.of(context).size.width * 0.9,
       height: height,
       decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(50),
+          
           border: Border.all(color: Color(0xB3BEBEBE)),
           boxShadow: [
             BoxShadow(
-                blurRadius: 4, offset: Offset(2, 4), color: Color(0x60000000))
+              blurRadius: 2.5, offset: Offset(2, 3), color: Color(0x2B000000))
           ],
-          color: Theme.of(context).colorScheme.background),
+        color: Theme.of(context).colorScheme.background,
+        // color: Colors.white,
+      ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
