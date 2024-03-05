@@ -53,7 +53,6 @@ class _IndexShimmer extends StatelessWidget with UIStyles {
               spacer(),
               ContentPlaceholder(),
               spacer(y: 20),
-
               Align(
                   alignment: Alignment.centerLeft,
                   child: Container(color: Colors.white, height: 20, width: 60)),

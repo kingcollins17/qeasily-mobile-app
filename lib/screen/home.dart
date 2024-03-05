@@ -8,7 +8,7 @@ import 'package:qeasily/provider/auth_provider.dart';
 import 'package:qeasily/styles.dart';
 import 'package:qeasily/test.dart';
 import 'package:qeasily/widget/widget.dart';
-import 'home_nav/home_nav.dart';
+import 'nav/nav.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
