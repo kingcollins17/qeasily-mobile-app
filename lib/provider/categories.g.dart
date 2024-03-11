@@ -3,23 +3,37 @@
 part of 'categories.dart';
 
 // **************************************************************************
+// JsonSerializableGenerator
+// **************************************************************************
+
+CategoryData _$CategoryDataFromJson(Map<String, dynamic> json) => CategoryData(
+      id: json['id'] as int,
+      name: json['name'] as String,
+    );
+
+Map<String, dynamic> _$CategoryDataToJson(CategoryData instance) =>
+    <String, dynamic>{
+      'id': instance.id,
+      'name': instance.name,
+    };
+
+// **************************************************************************
 // RiverpodGenerator
 // **************************************************************************
 
-String _$catNotifierHash() => r'e7844aca359b1a20677df188e9d4ab4acdae9e14';
+String _$categoriesHash() => r'405aabd942492b0b76c541ff3ea38448bfe92d97';
 
-/// See also [CatNotifier].
-@ProviderFor(CatNotifier)
-final catNotifierProvider =
-    AsyncNotifierProvider<CatNotifier, dynamic>.internal(
-  CatNotifier.new,
-  name: r'catNotifierProvider',
+/// See also [categories].
+@ProviderFor(categories)
+final categoriesProvider = FutureProvider<List<CategoryData>>.internal(
+  categories,
+  name: r'categoriesProvider',
   debugGetCreateSourceHash:
-      const bool.fromEnvironment('dart.vm.product') ? null : _$catNotifierHash,
+      const bool.fromEnvironment('dart.vm.product') ? null : _$categoriesHash,
   dependencies: null,
   allTransitiveDependencies: null,
 );
 
-typedef _$CatNotifier = AsyncNotifier<dynamic>;
+typedef CategoriesRef = FutureProviderRef<List<CategoryData>>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member

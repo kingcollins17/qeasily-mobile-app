@@ -1,4 +1,3 @@
 export 'store.dart';
-export 'action/action.dart';
-
-
+export 'state/topic_state.dart';
+export 'state.dart';

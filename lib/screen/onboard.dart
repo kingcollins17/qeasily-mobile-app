@@ -6,6 +6,8 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hive_flutter/adapters.dart';
 import 'package:qeasily/db/db.dart';
+import 'package:qeasily/screen/screen.dart';
+import 'package:qeasily/styles.dart';
 
 class Onboarding extends StatefulWidget {
   const Onboarding({super.key});
@@ -14,7 +16,7 @@ class Onboarding extends StatefulWidget {
   State<Onboarding> createState() => _OnboardingState();
 }
 
-class _OnboardingState extends State<Onboarding> {
+class _OnboardingState extends State<Onboarding> with Ui {
   final controller = PageController();
   int currentIndex = 0;
   @override
@@ -51,19 +53,12 @@ class _OnboardingState extends State<Onboarding> {
                                 ),
                               ),
                               const SizedBox(height: 20),
-                              Text(onboards[index].title,
-                                  style: GoogleFonts.poppins(
-                                    fontSize: 30,
-                                    fontWeight: FontWeight.w600,
-                                  )),
+                              Text(onboards[index].title, style: big12),
                               const SizedBox(height: 20),
                               Text(
                                 onboards[index].content,
                                 textAlign: TextAlign.center,
-                                style: GoogleFonts.poppins(
-                                    fontSize: 14,
-                                    color:
-                                        Theme.of(context).colorScheme.outline),
+                                style: small01,
                               ),
                               const SizedBox(height: 50),
                             ],
@@ -103,23 +98,23 @@ class _OnboardingState extends State<Onboarding> {
                     duration: Duration(milliseconds: 300),
                     curve: Curves.decelerate);
                 if (currentIndex >= onboards.length) {
+                  // push(LoginScreen(), context);
                   context.push('/login');
                 }
               },
               style: ButtonStyle(
+                  foregroundColor: MaterialStatePropertyAll(Colors.white),
                   fixedSize: MaterialStatePropertyAll(
-                Size(MediaQuery.of(context).size.width * 0.8, 45),
-              )),
+                    Size(MediaQuery.of(context).size.width * 0.8, 45),
+                  )),
               child: Text(
-                currentIndex < onboards.length - 1 ? 'Continue' : 'Get started',
-                style: GoogleFonts.quicksand(
-                    color: Colors.white,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500),
-              )),
+                  currentIndex < onboards.length - 1
+                      ? 'Continue'
+                      : 'Get started',
+                  style: medium10)),
           const SizedBox(height: 10),
           GestureDetector(
-            onTap: () => context.go('/test'),
+            onTap: () => context.push('/home'),
             child: Text(
               'Skip for now',
               style: GoogleFonts.quicksand(

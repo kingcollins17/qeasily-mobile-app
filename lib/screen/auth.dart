@@ -2,6 +2,8 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:qeasily/provider/auth_provider.dart';
 import 'package:qeasily/styles.dart';
@@ -16,7 +18,7 @@ class LoginScreen extends ConsumerStatefulWidget {
 }
 
 class _LoginScreenState extends ConsumerState<LoginScreen>
-    with SingleTickerProviderStateMixin, UIStyles {
+    with SingleTickerProviderStateMixin, Ui {
   late AnimationController _controller;
 
   final _formKey = GlobalKey<FormState>();
@@ -48,116 +50,128 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
     return await showNotification(_controller, delay);
   }
 
-  void _handleLogin() async {
-    if (isLoading)
-      _notify('Please wait ...');
-    else if (_formKey.currentState?.validate() ?? false) {
-      _notify('Authenticating user ...', loading: true);
-      final notifier = ref.read(userAuthProvider.notifier);
-      final res = await notifier.login(email: email!, password: password!);
-      _notify(res.$2, loading: false)
-          .then((value) => res.$1 ? context.go('/home') : null);
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final auth = ref.watch(userAuthProvider);
-    return Scaffold(
-      // appBar: AppBar(),
-      resizeToAvoidBottomInset: true,
-      body: stackWithNotifier([
-        SingleChildScrollView(
-          child: sb(pad(
-            Column(
-              children: [
-                spacer(y: 50),
-                authSymbol(),
-                spacer(),
-                txt('Sign In', sz: 16),
-                spacer(y: 40),
-                Form(
-                  key: _formKey,
-                  child: Column(
-                    children: [
-                      TextFormField(
-                        enabled: !isLoading,
-                        validator: (value) => value == null || value.isEmpty
-                            ? 'Please enter your email to Login'
-                            : null,
-                        onChanged: (value) => email = value,
-                        decoration: InputDecoration(
-                          border: OutlineInputBorder(),
-                          isDense: true,
-                          prefixIcon: Icon(Icons.email),
-                          labelText: 'Email',
-                          hintText: 'example@gmail.com',
+    return LayoutBuilder(
+        builder: (context, constraints) => Scaffold(
+              body: stackWithNotifier([
+                SizedBox(
+                  width: MediaQuery.of(context).size.width,
+                  child: SingleChildScrollView(
+                    child: Column(
+                      children: [
+                        spacer(y: 70),
+                        SvgPicture.asset(
+                          'asset/ils/undraw_education_f8ru.svg',
+                          height: 150,
+                          width: MediaQuery.of(context).size.width * 0.7,
                         ),
-                      ),
-                      spacer(y: 15),
-                      TextFormField(
-                        obscureText: showPassword,
-                        enabled: !isLoading,
-                        validator: (value) => value == null || value.isEmpty
-                            ? 'Password is required'
-                            : null,
-                        onChanged: (value) => password = value,
-                        decoration: InputDecoration(
-                          prefixIcon: Icon(Icons.lock_outline),
-                          suffixIcon: GestureDetector(
-                            onTap: () =>
-                                setState(() => showPassword = !showPassword),
-                            child: Icon(!showPassword
-                                ? Icons.visibility_rounded
-                                : Icons.visibility_off),
-                          ),
-                          border: OutlineInputBorder(),
+                        spacer(y: 20),
+                        Text('Login in to your Account', style: medium00),
+                        spacer(y: 80),
+                        // auth.when(
+                        //     data: (data) => Center(child: Text('$data')),
+                        //     error: (_, __) => Text('$_'),
+                        //     loading: () => Text('Loading ...')),
+                        Form(
+                            key: _formKey,
+                            child: Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 18.0),
+                              child: Column(
+                                children: [
+                                  TextFormField(
+                                    onChanged: (value) => email = value,
+                                    validator: (value) =>
+                                        value == null || value.isEmpty
+                                            ? 'Field is required'
+                                            : null,
+                                    decoration: InputDecoration(
+                                        prefixIcon: Icon(Icons.mail_rounded),
+                                        // suffixIcon: Icon(Icons.),
+                                        labelText: 'Email',
+                                        labelStyle: small00,
+                                        border: OutlineInputBorder(),
+                                        isDense: true),
+                                  ),
+                                  spacer(y: 15),
+                                  TextFormField(
+                                    onChanged: (value) => password = value,
+                                    validator: (value) =>
+                                        value == null || value.isEmpty
+                                            ? 'Field is required'
+                                            : null,
+                                    obscureText: showPassword,
+                                    decoration: InputDecoration(
+                                        labelText: 'Password',
+                                        prefixIcon: Icon(Icons.lock_outlined),
+                                        suffixIcon: GestureDetector(
+                                            onTap: () => setState(() =>
+                                                showPassword = !showPassword),
+                                            child: Icon(showPassword
+                                                ? Icons.visibility_off
+                                                : Icons.visibility_rounded)),
+                                        labelStyle: small00,
+                                        border: OutlineInputBorder(),
+                                        isDense: true),
+                                  ),
+                                  spacer(y: 20),
+                                  Material(
+                                    child: InkWell(
+                                      borderRadius: BorderRadius.circular(5),
+                                      overlayColor:
+                                          MaterialStatePropertyAll(blue1),
+                                      onTap: () async {
+                                        if (_formKey.currentState?.validate() ??
+                                            false) {
+                                          _notify('Authenticating $email',
+                                              loading: true);
+                                          await ref
+                                              .read(userAuthProvider.notifier)
+                                              .login(email!, password!)
+                                              .then((value) {
+                                            
+                                            _notify(value.$1, loading: false)
+                                                .then((_) => (value.$2)
+                                                    ? context.go('/home')
+                                                    : null);
+                                          });
 
-                          isDense: true,
-                          labelText: 'Password',
-                          // hintText: 'example',
-                        ),
-                      ),
-                      spacer(),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: [
-                          Checkbox.adaptive(
-                            value: rememberMe,
-                            onChanged: (value) => setState(
-                                () => rememberMe = value ?? rememberMe),
-                          ),
-                          // spacer(x: 2),
-                          txt('Remember me'),
-                        ],
-                      ),
-                      button(
-                          auth.isLoading
-                              ? loader(sz: 20, color: Colors.white)
-                              : txt('Login', sz: 16, cx: Colors.white),
-                          onTap: _handleLogin)
-                    ],
-                  ),
-                ),
-                // Align()
-                spacer(),
-                GestureDetector(
-                  onTap: () => context.pushReplacement('/sign-up'),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      txt('Dont have an account?'),
-                      spacer(),
-                      txt('Sign Up', cx: blue1),
-                    ],
+                                          // _notify('$res', loading: false);
+                                        }
+                                      },
+                                      child: Ink(
+                                        width:
+                                            MediaQuery.of(context).size.width *
+                                                0.92,
+                                        height: 48,
+                                        decoration: BoxDecoration(
+                                            color: blue10,
+                                            borderRadius:
+                                                BorderRadius.circular(5)),
+                                        child: Center(
+                                            child: isLoading
+                                                ? SpinKitThreeInOut(
+                                                    color: Colors.white,
+                                                    size: 20)
+                                                : Text('Login',
+                                                    style: medium00)),
+                                      ),
+                                    ),
+                                  ),
+                                  spacer(y: 8),
+                                  Text('Dont have an account?  Register',
+                                      style: small01)
+                                ],
+                              ),
+                            ))
+                      ],
+                    ),
                   ),
                 )
-              ],
-            ),
-          )),
-        ),
-      ], notification), //stackWithNotifier
-    );
+              ], notification),
+            ));
   }
 }
 
@@ -169,7 +183,7 @@ class SignupScreen extends ConsumerStatefulWidget {
 }
 
 class _SignupScreenState extends ConsumerState<SignupScreen>
-    with SingleTickerProviderStateMixin, UIStyles {
+    with SingleTickerProviderStateMixin, Ui {
   late AnimationController _controller;
   final formKey = GlobalKey<FormState>();
   bool showPassword = false, showConfirm = false, isLoading = false;
@@ -199,134 +213,11 @@ class _SignupScreenState extends ConsumerState<SignupScreen>
     super.dispose();
   }
 
-  Future<void> _handleSubmit() async {
-    if (isLoading)
-      _notify('Please wait ....');
-    else if (formKey.currentState?.validate() ?? false) {
-      _notify('Creating an account for you', loading: true);
-      final notifier = ref.read(userAuthProvider.notifier);
-      final res = await notifier.register(
-          username: username!, email: email!, password: password!);
-
-      await _notify('${res.message} Please go to Login',
-              loading: false, delay: 3)
-          .then((value) => res.status ? context.go('/login') : null);
-    }
-  }
-
   String? validator(String? value) =>
       value == null || value.isEmpty ? 'This field is required' : null;
 
   @override
   Widget build(BuildContext context) {
-    final auth = ref.watch(userAuthProvider);
-    return Scaffold(
-      body: stackWithNotifier([
-        SingleChildScrollView(
-          child: SizedBox(
-            width: MediaQuery.of(context).size.width,
-            child: Padding(
-              padding: EdgeInsets.symmetric(horizontal: 15),
-              child: Column(
-                children: [
-                  spacer(y: 30),
-                  authSymbol(),
-                  spacer(),
-                  txt('Create an Account with us', sz: 16),
-                  spacer(y: 40),
-                  Form(
-                    key: formKey,
-                    child: Column(
-                      children: [
-                        TextFormField(
-                          onChanged: (value) => username = value,
-                          enabled: !isLoading,
-                          validator: validator,
-                          decoration: InputDecoration(
-                              prefixIcon: Icon(Icons.person_2_outlined),
-                              border: OutlineInputBorder(),
-                              isDense: true,
-                              labelText: 'Username'),
-                        ),
-                        spacer(y: 12),
-                        TextFormField(
-                          onChanged: (value) => email = value,
-                          enabled: !isLoading,
-                          validator: validator,
-                          decoration: InputDecoration(
-                            isDense: true,
-                            prefixIcon: Icon(Icons.email_rounded),
-                            border: OutlineInputBorder(),
-                            labelText: 'Email',
-                          ),
-                        ),
-                        spacer(y: 10),
-                        TextFormField(
-                          onChanged: (value) => password = value,
-                          enabled: !isLoading,
-                          validator: (value) => value == null || value.isEmpty
-                              ? 'Password is required'
-                              : value.length < 8
-                                  ? 'Password cannot be less than eight characters'
-                                  : null,
-                          obscureText: showPassword,
-                          decoration: InputDecoration(
-                            prefixIcon: Icon(Icons.lock_outline),
-                            suffixIcon: Icon(Icons.visibility_rounded),
-                            isDense: true,
-                            border: OutlineInputBorder(),
-                            labelText: 'Password',
-                          ),
-                        ),
-                        spacer(y: 10),
-                        TextFormField(
-                          onChanged: (value) => confirmPassword = value,
-                          enabled: !isLoading,
-                          validator: (value) => value == null || value.isEmpty
-                              ? 'This field is required'
-                              : value != password
-                                  ? 'Confirm password does not match password'
-                                  : null,
-                          obscureText: showConfirm,
-                          decoration: InputDecoration(
-                            isDense: true,
-                            prefixIcon: Icon(Icons.lock_outline),
-                            suffixIcon: Icon(Icons.visibility_rounded),
-                            border: OutlineInputBorder(),
-                            labelText: 'Confirm Password',
-                          ),
-                        ),
-                        spacer(y: 30),
-                        button(
-                            auth.isLoading || isLoading
-                                ? loader(color: Colors.white, sz: 20)
-                                : txt('Create Account', cx: Colors.white),
-                            onTap: _handleSubmit),
-                        spacer(),
-                        GestureDetector(
-                          onTap: () => context.pushReplacement('/login'),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              txt('Already have an account?'),
-                              spacer(),
-                              txt('Login', cx: blue1),
-                            ],
-                          ),
-                        )
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ], notification //Stack with Notifier
-          ),
-    );
+    return const Placeholder();
   }
 }
-
-//
-typedef Prop<T> = MaterialStatePropertyAll<T>;

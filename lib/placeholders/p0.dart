@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:qeasily/styles.dart';
 
-class ContentPlaceholder extends StatelessWidget with UIStyles {
+class ContentPlaceholder extends StatelessWidget with Ui {
   ContentPlaceholder({super.key});
 
   @override

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive/hive.dart';
 import 'package:qeasily/provider/auth_provider.dart';
+import 'package:qeasily/provider/categories.dart';
 import 'package:qeasily/provider/dio_provider.dart';
 import 'package:qeasily/redux/store.dart';
 import 'package:qeasily/styles.dart';
@@ -18,7 +19,7 @@ class TestWidget extends ConsumerStatefulWidget {
 }
 
 class _TestWidgetState extends ConsumerState<TestWidget>
-    with SingleTickerProviderStateMixin, UIStyles {
+    with SingleTickerProviderStateMixin, Ui {
   bool isLoading = false;
   dynamic data;
   String? response;
@@ -49,12 +50,12 @@ class _TestWidgetState extends ConsumerState<TestWidget>
 
   @override
   Widget build(BuildContext context) {
-    // final dio = ref.watch(provider)
+    final categories = ref.watch(categoriesProvider);
     final user = ref.watch(userAuthProvider);
     final dio = ref.watch(generalDioProvider);
     return SafeArea(
-      child: scrollable(
-        Material(
+      child: SingleChildScrollView(
+        child: Material(
           child: Stack(
             children: [
               SizedBox(
@@ -64,37 +65,33 @@ class _TestWidgetState extends ConsumerState<TestWidget>
                   children: [
                     Text('${dio.options.headers}'),
                     Text('$data'),
+                    categories.when(
+                        data: (val) => Center(
+                              child: Text('$val'),
+                            ),
+                        error: (_, __) => Center(
+                              child: Text('$_'),
+                            ),
+                        loading: () => Center()),
                     user.when(
                         data: (userData) => Center(
                               child: Text('$userData'),
                             ),
-                        error: (_, __) => center(Text('$_')),
+                        error: (_, __) => Center(child: Text('$_')),
                         loading: () => loader(color: Colors.black)),
                     FilledButton(
                       style: ButtonStyle(
                           fixedSize: MaterialStatePropertyAll(Size(100, 45))),
                       onPressed: () async {
-                        var notifier = ref.read(userAuthProvider.notifier);
-                        // setState(() {
-                        //   isLoading = true;
-                        // });
-                        // await notifier
-                        //     .updateProfile(
-                        // username: 'Bleh Kings',
-                        // email: 'bleh@gmail.com',
-                        // password: 'kingpass',
-                        //   firstName: 'Bleh',
-                        //   lastName: 'Kings',
-                        //   regNo: '2020/216017',
-                        //   dept: 'Law',
-                        //   level: '100',
-                        // )
-                        // .then((value) => setState(() {
-                        //       data = value;
-                        //       isLoading = false;
-                        //     }));
-                        // ref.refresh(userAuthProvider);
-                        Hive.box('settings').put('darkMode', false);
+                        setState(() => isLoading = true);
+                        final res = await ref
+                            .read(userAuthProvider.notifier)
+                            .login('king@gmail.com', 'kingpass')
+                            .catchError((err) => (err.toString(), false));
+                        setState(() {
+                          data = res;
+                          isLoading = false;
+                        });
                       },
                       child: isLoading ? loader(sz: 20) : Text('Test'),
                     ),
@@ -129,7 +126,7 @@ class APIDoc extends StatelessWidget {
           padding: const EdgeInsets.symmetric(vertical: 6.0),
           child: Container(
             padding: EdgeInsets.symmetric(horizontal: 10, vertical: 15),
-            decoration: BoxDecoration(color: Colors.white, boxShadow: [
+            decoration: BoxDecoration(boxShadow: [
               BoxShadow(
                 blurRadius: 3,
                 offset: Offset(2, 4),

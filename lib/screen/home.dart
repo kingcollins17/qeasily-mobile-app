@@ -2,7 +2,9 @@
 
 import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:hive/hive.dart';
 import 'package:qeasily/provider/auth_provider.dart';
 import 'package:qeasily/styles.dart';
@@ -16,50 +18,33 @@ class HomeScreen extends ConsumerStatefulWidget {
   ConsumerState<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends ConsumerState<HomeScreen> with UIStyles {
+class _HomeScreenState extends ConsumerState<HomeScreen> with Ui {
   var navDestination = HoverDestination.home;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(),
+        backgroundColor: Ui.black00,
+        appBar: AppBar(
+            elevation: 0,
+            scrolledUnderElevation: 0,
+            backgroundColor: Colors.transparent),
+
         drawer: _Drawer(),
         body: SizedBox(
           height: MediaQuery.of(context).size.height * 0.98,
           width: MediaQuery.of(context).size.width,
           child: Stack(
             children: [
-              Container(
-                decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.background),
-                height: MediaQuery.of(context).size.height * 0.95,
-                child: PageTransitionSwitcher(
-                  duration: Duration(milliseconds: 650),
-                  transitionBuilder: (child, primary, secondaryAnimation) =>
-                      SharedAxisTransition(
-                    animation: primary,
-                    secondaryAnimation: secondaryAnimation,
-                    transitionType: SharedAxisTransitionType.horizontal,
-                    child: child,
-                  ),
-                  child: navDestination.index == 0
-                      ? IndexSubScreen()
-                      : null,
-                ),
-              ),
-              Positioned(
-                bottom: 20,
-                width: MediaQuery.of(context).size.width,
-                child: HoverMenu(
-                    onChanged: (dest) => setState(() => navDestination = dest)),
-              )
+              IndexSubScreen(),
+              
             ],
           ),
         ));
   }
 }
 
-class _Drawer extends ConsumerWidget with UIStyles {
+class _Drawer extends ConsumerWidget with Ui {
   _Drawer({super.key});
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -67,6 +52,7 @@ class _Drawer extends ConsumerWidget with UIStyles {
 
     return Material(
       elevation: 10,
+      color: Ui.black00,
       child: Container(
         width: MediaQuery.of(context).size.width * 0.8,
         height: MediaQuery.of(context).size.height,
@@ -75,15 +61,12 @@ class _Drawer extends ConsumerWidget with UIStyles {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             spacer(y: 40),
-            txt('Qeasily 1.0',
-                sz: 18,
-                weight: FontWeight.bold,
-                cx: Theme.of(context)
-                    .colorScheme
-                    .onBackground
-                    .withOpacity(0.7)),
+            GestureDetector(
+                onTap: () => context.go('/test'),
+                child: Text('Qeasily 1.0', style: medium10)),
+            spacer(y: 10),
             Divider(color: purple1),
-            // spacer(),
+            //
             GestureDetector(
               onTap: () => push(APIDoc(), context),
               child: Container(
@@ -93,20 +76,21 @@ class _Drawer extends ConsumerWidget with UIStyles {
                       BoxShadow(
                           blurRadius: 2.5,
                           offset: Offset(2, 3),
-                          color: Color(0x2D000000))
+                          color: Color(0x5C000000))
                     ],
-                    borderRadius: BorderRadius.circular(4)),
-                padding: EdgeInsets.symmetric(horizontal: 5, vertical: 10),
+                    borderRadius: BorderRadius.circular(40)),
+                padding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
                     Icon(Icons.diamond, color: Colors.deepOrange),
                     spacer(y: 0),
-                    txt('Subscription and Pricing',
-                        cx: Theme.of(context)
-                            .colorScheme
-                            .onBackground
-                            .withOpacity(0.8))
+                    Text(
+                      'Subscription and Pricing',
+                      style: small10,
+                    ).animate(
+                        effects: [ShimmerEffect(), ShakeEffect()],
+                        autoPlay: true)
                   ],
                 ),
               ),
@@ -116,9 +100,9 @@ class _Drawer extends ConsumerWidget with UIStyles {
             spacer(y: 20),
             _drawerTile('Leaderboards', Icons.leaderboard_rounded),
             spacer(y: 20),
-            _drawerTile('Contact us', Icons.feedback),
+            _drawerTile('Stats', Icons.auto_graph_rounded),
             spacer(y: 20),
-            _drawerTile('Settings', Icons.settings_suggest_sharp),
+            _drawerTile('Earnings', Icons.monetization_on_rounded),
             spacer(y: 40),
             _AdminTiles(),
             Expanded(
@@ -127,16 +111,16 @@ class _Drawer extends ConsumerWidget with UIStyles {
               Row(children: [
                 Icon(Icons.logout, color: blue10),
                 spacer(x: 10),
-                txt('Log out', cx: blue10)
+                Text('Log out', style: small02)
               ]),
               spacer(y: 20),
               Row(children: [
                 Icon(Icons.delete, color: Colors.redAccent),
                 spacer(x: 10),
-                txt('Delete Account', cx: Colors.redAccent)
+                Text('Delete Account', style: small02)
               ]),
               spacer(y: 10),
-              txt('Terms of use'),
+              Text('Terms of use', style: small01),
               spacer(y: 25)
             ]))
           ],
@@ -154,15 +138,17 @@ class _Drawer extends ConsumerWidget with UIStyles {
             color: Theme.of(context).colorScheme.onBackground.withOpacity(0.7),
           ),
           spacer(x: 10),
-          txt(labelText,
-              cx: Theme.of(context).colorScheme.onBackground.withOpacity(0.8)),
+          Text(
+            labelText,
+            style: small00,
+          ),
         ],
       );
     });
   }
 }
 
-class _AdminTiles extends StatelessWidget with UIStyles {
+class _AdminTiles extends StatelessWidget with Ui {
   _AdminTiles({super.key});
 
   Widget _drawerTile(String labelText, IconData icon) {
@@ -174,8 +160,7 @@ class _AdminTiles extends StatelessWidget with UIStyles {
             color: Theme.of(context).colorScheme.onBackground.withOpacity(0.7),
           ),
           spacer(x: 10),
-          txt(labelText,
-              cx: Theme.of(context).colorScheme.onBackground.withOpacity(0.8)),
+          Text(labelText, style: small02),
         ],
       );
     });
@@ -186,10 +171,9 @@ class _AdminTiles extends StatelessWidget with UIStyles {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        txt(
+        Text(
           'Admin',
-          sz: 12,
-          cx: Theme.of(context).colorScheme.onBackground.withOpacity(0.7),
+          style: small01,
         ),
         Divider(color: Colors.grey),
         spacer(y: 15),

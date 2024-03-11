@@ -12,7 +12,7 @@ class HoverMenu extends StatefulWidget {
 }
 
 class _HoverMenuState extends State<HoverMenu>
-    with SingleTickerProviderStateMixin, UIStyles {
+    with SingleTickerProviderStateMixin, Ui {
   late AnimationController _controller;
 
   var _currentDestination = HoverDestination.home;
@@ -45,10 +45,10 @@ class _HoverMenuState extends State<HoverMenu>
       decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(50),
           
-          border: Border.all(color: Color(0xB3BEBEBE)),
+        // border: Border.all(color: Color(0xB3BEBEBE)),
           boxShadow: [
             BoxShadow(
-              blurRadius: 2.5, offset: Offset(2, 3), color: Color(0x2B000000))
+              blurRadius: 2.5, offset: Offset(2, 2.5), color: Color(0x4C000000))
           ],
         color: Theme.of(context).colorScheme.background,
         // color: Colors.white,
@@ -106,10 +106,10 @@ class _HoverMenuState extends State<HoverMenu>
                   color: value == groupValue ? Colors.white : blue10),
               if (value == groupValue) ...[
                 spacer(y: 0),
-                txt(() {
+                Text(() {
                   final h = value.name[0];
                   return h.toUpperCase() + value.name.substring(1);
-                }(), cx: Colors.white),
+                }()),
               ]
             ]),
           );

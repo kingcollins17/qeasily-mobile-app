@@ -1,4 +1,5 @@
-const domain = '192.168.43.0';
+// const domain = '192.168.43.0';
+const domain = '192.168.0.4';
 const baseUrl = 'http://$domain';
 const authPrefix = '/auth';
 const categoryPrefix = '/categories';
@@ -6,6 +7,7 @@ const topicsPrefix = '/topics';
 const quizPrefix = '/quiz';
 const followPrefix = '/follow';
 const challengePrefix = '/challenge';
+const questionsPrefix = '/questions';
 
 ///Holds all the details of the backend endpoints for the qeasily application
 ///Each enumeration is an endpoint in the app
@@ -31,22 +33,7 @@ enum APIUrl {
     },
   ),
   user(authPrefix, '/user', requiresAuth: false),
-  find(authPrefix, '/find', queryParams: ['email=kingcollins172@gmail.com']),
   //------------------------------
-  profile(authPrefix, '/profile'),
-
-  createProfile(
-    authPrefix,
-    '/profile/create',
-    method: _Method.post,
-    body: profileBody,
-  ),
-  updateProfile(
-    authPrefix,
-    '/profile/update',
-    method: _Method.put,
-    body: profileBody,
-  ),
   //------------------------------
   //All "/categories" prefixed route
   //--------------------------------
@@ -78,7 +65,8 @@ enum APIUrl {
   topics(topicsPrefix, '',
       requiresAuth: true,
       body: pageInfoBody,
-      queryParams: ['following=True', 'category=1']),
+      queryParams: ['following=true', 'category=1'],
+      extras: 'The query parameters are exclusive'),
   createTopic(topicsPrefix, '/create', method: _Method.post, body: [
     {
       'title': '',
@@ -112,6 +100,16 @@ enum APIUrl {
     body: pageInfoBody,
     requiresAuth: true,
   ),
+  createQuiz(quizPrefix, '/create', method: _Method.post, body: {
+    'title': 'Test Quiz',
+    'questions': [1, 4, 5, 66, 3, 2],
+    'topic_id': 6,
+    'duration': 2000,
+    'description': 'A tough one',
+    'difficulty': 'Medium',
+    'type': 'mcq'
+  }),
+  fetchCreatedQuiz(quizPrefix, '/created-quiz', body: pageInfoBody),
   deleteQuiz(quizPrefix, '/delete',
       method: _Method.delete, queryParams: ['qid=19']),
   //-------------------------------------
@@ -123,11 +121,13 @@ enum APIUrl {
 
   fetchChallenges(challengePrefix, '',
       method: _Method.get, queryParams: ['feed=true'], body: pageInfoBody),
+
   fetchUserCreatedChallenges(challengePrefix, '/created-challenges',
       body: pageInfoBody),
+
   fetchChallengeDetails(
     challengePrefix,
-    'details',
+    '/details',
     method: _Method.get,
     queryParams: ['cid=10'],
     extras: 'cid is Challenge Id',
@@ -136,11 +136,12 @@ enum APIUrl {
     challengePrefix,
     '/start',
     method: _Method.get,
+    queryParams: ['cid=6'],
     extras: 'Query this endpoint to enter a challenge. '
         'This endpoints initializes your entry in the leaderboards table',
   ),
   saveChallengeProgress(challengePrefix, '/save-progress',
-      method: _Method.post, extras: 'This route is not completed yet!'),
+      queryParams: ['cid=6', 'points=50'], method: _Method.post),
 
   fetchCurrentChallenges(challengePrefix, '/me',
       method: _Method.get,
@@ -149,25 +150,69 @@ enum APIUrl {
 
   createChallenge(
     challengePrefix,
-    '/admin routes for admins to create a challenge',
+    '/create',
     method: _Method.post,
     body: challengeBody,
   ),
   deleteChallenge(challengePrefix, '/delete',
       method: _Method.delete, queryParams: ['cid=6']),
-
+  fetchCreatedChallenges(
+    challengePrefix,
+    '/created-challenge',
+    body: pageInfoBody,
+  ),
   fetchNextTask(
     challengePrefix,
     '/next-task',
+    queryParams: ['cid=5'],
     extras: 'Fetches the next task of a challenge giving the users progress',
   ),
+
   fetchLeaderboards(
     challengePrefix,
     '/leaderboards',
+    queryParams: ['cid=6'],
+    body: pageInfoBody,
     method: _Method.get,
     extras: 'Fetch the leaderboards of a current challenge',
   ),
-
+  //---------------------------------------------------------------------
+  fetchQuizQuestions(questionsPrefix, '',
+      body: pageInfoBody, queryParams: ['quiz_id=5']),
+  fetchAllMcq(questionsPrefix, '/all-mcq',
+      body: pageInfoBody, queryParams: ['topic_Id=4']),
+  fetchCreatedDcq(questionsPrefix, '/created-dcq',
+      body: pageInfoBody,
+      queryParams: ['topic_id=5'],
+      extras: 'topic_id can be none'),
+  fetchAllDcq(questionsPrefix, '/all-dcq',
+      body: pageInfoBody, queryParams: ['topic_id']),
+  fetchCreatedMcq(questionsPrefix, '/created-mcq',
+      body: pageInfoBody, queryParams: ['topic_id']),
+  deleteMcq(questionsPrefix, '/delete',
+      method: _Method.delete, body: [4, 6, 3, 1, 4]),
+  deleteDcq(questionsPrefix, '/delete-dcq',
+      method: _Method.delete, body: [6, 7, 4, 22, 5, 6]),
+  createDcq(questionsPrefix, '/created-dcq',
+      body: [
+        {'query': '', 'correct': true, 'explanation': 'blah', 'topic_id': 5},
+      ],
+      method: _Method.post),
+  createMcq(questionsPrefix, '/create-mcq',
+      body: [
+        {
+          'query': '',
+          'A': '',
+          'B': '',
+          'C': '',
+          'D': '',
+          'correct': 'A',
+          'explanation': 'Blah',
+          'topic_id': 5,
+          'difficulty': 'Hard'
+        }
+      ],
+      method: _Method.post),
   ;
 
   final String prefix, path;
