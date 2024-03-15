@@ -4,5 +4,6 @@ import 'mware/mware.dart';
 
 final store = Store(appReducer, initialState: QeasilyState(), middleware: [
   topicMware,
+  quizMware,
 ]);
 

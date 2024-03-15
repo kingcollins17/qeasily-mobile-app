@@ -28,3 +28,21 @@ dynamic topicMware(Store<QeasilyState> store, action, NextDispatcher next) {
   }
   if (shouldCallNext) next(action);
 }
+
+dynamic quizMware(Store<QeasilyState> store, action, NextDispatcher next) {
+  bool shouldCallNext = true;
+  if (action is QuizAction) {
+    switch (action.type) {
+      case QuizActionType.fetch:
+        shouldCallNext = store.state.quizzes.page.hasNextPage;
+        if (action.payload is Dio && store.state.quizzes.page.hasNextPage) {
+          fetchQuizzes(action.payload as Dio,
+              page: store.state.quizzes.page..next());
+        }
+        break;
+      default:
+        break;
+    }
+  }
+  if (shouldCallNext) next(action);
+}

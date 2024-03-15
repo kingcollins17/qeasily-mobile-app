@@ -25,21 +25,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with Ui {
   Widget build(BuildContext context) {
     return Scaffold(
         backgroundColor: Ui.black00,
-        appBar: AppBar(
-            elevation: 0,
-            scrolledUnderElevation: 0,
-            backgroundColor: Colors.transparent),
-
         drawer: _Drawer(),
-        body: SizedBox(
-          height: MediaQuery.of(context).size.height * 0.98,
-          width: MediaQuery.of(context).size.width,
-          child: Stack(
-            children: [
-              IndexSubScreen(),
-              
-            ],
-          ),
+        body: Stack(
+          children: [
+            IndexSubScreen(),
+          ],
         ));
   }
 }
@@ -96,13 +86,14 @@ class _Drawer extends ConsumerWidget with Ui {
               ),
             ),
             spacer(y: 30),
-            _drawerTile('Paid Challenges', Icons.price_check_outlined),
+            _drawerTile('Dasboard', Icons.dashboard),
             spacer(y: 20),
-            _drawerTile('Leaderboards', Icons.leaderboard_rounded),
+            _drawerTile('Follow Creators', Icons.people_alt_rounded),
             spacer(y: 20),
-            _drawerTile('Stats', Icons.auto_graph_rounded),
+            _drawerTile('Notifications', Icons.notifications_active),
             spacer(y: 20),
-            _drawerTile('Earnings', Icons.monetization_on_rounded),
+            _drawerTile('Settings', Icons.settings_suggest),
+            
             spacer(y: 40),
             _AdminTiles(),
             Expanded(

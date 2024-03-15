@@ -20,7 +20,6 @@ mixin Ui {
       small01 = GoogleFonts.mukta(fontSize: 16, color: lightGrey),
       small02 = GoogleFonts.rubik(fontSize: 16),
       small03 = GoogleFonts.firaSans(fontSize: 16),
-      
       big04 = GoogleFonts.notoSans(fontSize: 16),
       medium00 = GoogleFonts.workSans(fontSize: 18, color: Colors.white),
       medium10 =
@@ -32,6 +31,20 @@ mixin Ui {
 
   Widget loader({Color color = Colors.white, double sz = 50}) =>
       Center(child: SpinKitThreeInOut(size: sz, color: color));
+
+  double maxWidth(BuildContext context) => MediaQuery.of(context).size.width;
+
+  double maxHeight(BuildContext context) => MediaQuery.of(context).size.height;
+
+  Widget vDivider({double? w, double? h, Color? color}) => Container(
+        width: w ?? 1.5,
+        height: h ?? 30,
+        margin: const EdgeInsets.symmetric(horizontal: 6),
+        decoration: BoxDecoration(
+          color: color ?? Color(0xB7636363),
+          borderRadius: BorderRadius.circular(15),
+        ),
+      );
 
   Widget spacer({
     double x = 5,

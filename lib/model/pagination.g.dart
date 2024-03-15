@@ -7,7 +7,7 @@ part of 'pagination.dart';
 // **************************************************************************
 
 PageData _$PageDataFromJson(Map<String, dynamic> json) => PageData(
-      page: json['page'] as int,
+      page: json['page'] as int? ?? 0,
       perPage: json['per_page'] as int? ?? 10,
     );
 
