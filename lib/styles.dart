@@ -4,10 +4,10 @@ import 'package:google_fonts/google_fonts.dart';
 
 ///
 mixin Ui {
-  final purple1 = const Color(0xFF916BFF);
+  final primary = const Color(0xFF916BFF);
   final blue1 = const Color(0xFF5C99FF);
   final blue10 = const Color(0xFF1B56BD);
-  final shimmer = const Color(0xFFD6D6D6);
+  // final shimmer = const Color(0xFFD6D6D6);
 
   static Color grey = const Color(0xFF8A8A8A),
       lightGrey = Color(0xFFC0C0C0),
@@ -15,11 +15,15 @@ mixin Ui {
       black00 = Colors.black,
       black01 = const Color(0xFF272727);
 
-  final TextStyle small00 = GoogleFonts.workSans(fontSize: 16),
+  final TextStyle xs00 = GoogleFonts.workSans(
+        fontSize: 12,
+      ),
+      xs01 = GoogleFonts.workSans(fontSize: 12, color: Color(0x88FFFFFF)),
+      small00 = GoogleFonts.workSans(fontSize: 16),
       small10 = GoogleFonts.workSans(fontSize: 16, fontWeight: FontWeight.w500),
-      small01 = GoogleFonts.mukta(fontSize: 16, color: lightGrey),
-      small02 = GoogleFonts.rubik(fontSize: 16),
-      small03 = GoogleFonts.firaSans(fontSize: 16),
+      mukta = GoogleFonts.mukta(fontSize: 16, color: lightGrey),
+      rubik = GoogleFonts.rubik(fontSize: 16),
+      // small03 = GoogleFonts.firaSans(fontSize: 16),
       big04 = GoogleFonts.notoSans(fontSize: 16),
       medium00 = GoogleFonts.workSans(fontSize: 18, color: Colors.white),
       medium10 =
@@ -35,6 +39,15 @@ mixin Ui {
   double maxWidth(BuildContext context) => MediaQuery.of(context).size.width;
 
   double maxHeight(BuildContext context) => MediaQuery.of(context).size.height;
+
+  Widget shimmer({double? w, double? h, double? br}) => Builder(
+      builder: (context) => Container(
+          width: w ?? maxWidth(context) * 0.4,
+          height: h ?? 10,
+          decoration: BoxDecoration(
+            color: Colors.grey,
+            borderRadius: BorderRadius.circular(br ?? 10),
+          )));
 
   Widget vDivider({double? w, double? h, Color? color}) => Container(
         width: w ?? 1.5,

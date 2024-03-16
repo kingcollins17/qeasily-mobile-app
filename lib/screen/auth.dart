@@ -162,7 +162,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                                   ),
                                   spacer(y: 8),
                                   Text('Dont have an account?  Register',
-                                      style: small01)
+                                      style: mukta)
                                 ],
                               ),
                             ))

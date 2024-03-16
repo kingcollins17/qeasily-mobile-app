@@ -35,9 +35,13 @@ dynamic quizMware(Store<QeasilyState> store, action, NextDispatcher next) {
     switch (action.type) {
       case QuizActionType.fetch:
         shouldCallNext = store.state.quizzes.page.hasNextPage;
+        //
         if (action.payload is Dio && store.state.quizzes.page.hasNextPage) {
           fetchQuizzes(action.payload as Dio,
-              page: store.state.quizzes.page..next());
+                  page: store.state.quizzes.page..next())
+              .then((response) => store.dispatch(
+                    QuizAction(type: QuizActionType.update, payload: response),
+                  ));
         }
         break;
       default:

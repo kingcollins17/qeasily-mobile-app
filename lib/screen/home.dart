@@ -55,7 +55,7 @@ class _Drawer extends ConsumerWidget with Ui {
                 onTap: () => context.go('/test'),
                 child: Text('Qeasily 1.0', style: medium10)),
             spacer(y: 10),
-            Divider(color: purple1),
+            Divider(color: primary),
             //
             GestureDetector(
               onTap: () => push(APIDoc(), context),
@@ -102,16 +102,16 @@ class _Drawer extends ConsumerWidget with Ui {
               Row(children: [
                 Icon(Icons.logout, color: blue10),
                 spacer(x: 10),
-                Text('Log out', style: small02)
+                Text('Log out', style: rubik)
               ]),
               spacer(y: 20),
               Row(children: [
                 Icon(Icons.delete, color: Colors.redAccent),
                 spacer(x: 10),
-                Text('Delete Account', style: small02)
+                Text('Delete Account', style: rubik)
               ]),
               spacer(y: 10),
-              Text('Terms of use', style: small01),
+              Text('Terms of use', style: mukta),
               spacer(y: 25)
             ]))
           ],
@@ -151,7 +151,7 @@ class _AdminTiles extends StatelessWidget with Ui {
             color: Theme.of(context).colorScheme.onBackground.withOpacity(0.7),
           ),
           spacer(x: 10),
-          Text(labelText, style: small02),
+          Text(labelText, style: rubik),
         ],
       );
     });
@@ -164,7 +164,7 @@ class _AdminTiles extends StatelessWidget with Ui {
       children: [
         Text(
           'Admin',
-          style: small01,
+          style: mukta,
         ),
         Divider(color: Colors.grey),
         spacer(y: 15),

@@ -94,7 +94,7 @@ class _HoverMenuState extends State<HoverMenu>
                 : constraints.maxWidth - 5,
             decoration: BoxDecoration(
               gradient: value == groupValue
-                  ? LinearGradient(colors: [purple1, blue1])
+                  ? LinearGradient(colors: [primary, blue1])
                   : null,
               borderRadius: BorderRadius.circular(40),
             ),

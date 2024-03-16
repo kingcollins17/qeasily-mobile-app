@@ -58,7 +58,7 @@ class _OnboardingState extends State<Onboarding> with Ui {
                               Text(
                                 onboards[index].content,
                                 textAlign: TextAlign.center,
-                                style: small01,
+                                style: mukta,
                               ),
                               const SizedBox(height: 50),
                             ],

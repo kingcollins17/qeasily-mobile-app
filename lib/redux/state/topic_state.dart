@@ -15,7 +15,7 @@ class TopicState {
   int? categoryId;
   //
   TopicState({PageData? page, this.topics = const []})
-      : this.page = page ?? PageData();
+      : this.page = page ?? PageData(perPage: 1);
 
   @override
   toString() => 'TopicState{isLoading: $isLoading, page: $page, '
@@ -137,6 +137,9 @@ Future<
       'following': useFollowing,
       if (categoryId != null) 'category': categoryId
     });
+    final pageData =
+        res.statusCode == 200 ? PageData.fromJson(res.data['page']) : null;
+    final hasNextPage = res.data['has_next_page'] as bool?;
 
     return (
       detail: res.data['detail'].toString(),
@@ -146,9 +149,8 @@ Future<
               .map((e) => TopicData.fromJson(e))
               .toList()
           : <TopicData>[],
-      page: res.statusCode == 200 ? PageData.fromJson(res.data['page']) : null,
-      hasNextPage:
-          res.statusCode == 200 ? res.data['has_next_page'] as bool : null
+      page: pageData?..hasNextPage = hasNextPage ?? page.hasNextPage,
+      hasNextPage: hasNextPage
     );
   } on Exception catch (e) {
     return (

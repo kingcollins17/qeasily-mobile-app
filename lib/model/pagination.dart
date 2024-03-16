@@ -11,7 +11,7 @@ class PageData {
   @JsonKey(name: 'per_page')
   int perPage;
 
-  @JsonKey(includeFromJson: false)
+  @JsonKey(includeFromJson: false, includeToJson: false)
   bool hasNextPage;
 
   factory PageData.fromJson(Map<String, dynamic> json) =>
