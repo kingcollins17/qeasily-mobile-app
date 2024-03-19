@@ -1,5 +1,6 @@
-// ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables, unused_element
+// ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables, unused_element, non_constant_identifier_names
 
+import 'package:animations/animations.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -7,11 +8,11 @@ import 'package:qeasily/model/model.dart';
 import 'package:qeasily/provider/dio_provider.dart';
 import 'package:qeasily/route_doc.dart';
 import 'package:qeasily/styles.dart';
-import 'package:redux/redux.dart';
 
-import 'package:flutter_redux/flutter_redux.dart';
 import 'package:qeasily/widget/widget.dart';
 import 'package:shimmer/shimmer.dart';
+
+import 'result_screen.dart';
 
 class MCQSessionScreen extends ConsumerStatefulWidget {
   const MCQSessionScreen({super.key, required this.data});
@@ -46,7 +47,7 @@ class _QuizSessionScreenState extends ConsumerState<MCQSessionScreen>
     super.initState();
     _controller = AnimationController(vsync: this);
 
-    _notify('Fetching Questions ...', loading: true);
+    _notify('Please wait ...', loading: true);
     options = List.generate(widget.data.questionsAsInt.length, (index) => null);
     fetchMCQQuestions(ref.read(generalDioProvider),
             page: nextPage, quiz_id: widget.data.id)
@@ -73,27 +74,28 @@ class _QuizSessionScreenState extends ConsumerState<MCQSessionScreen>
       _fetchNextPage().then((fetched) =>
           fetched ? setState(() => currentQuestionIndex += 1) : null);
     }
+    animateToQuestion(currentQuestionIndex);
   }
 
   void _goToPreviousQuest() {
     if (mcqs != null && currentQuestionIndex - 1 >= 0) {
       setState(() => currentQuestionIndex -= 1);
+      animateToQuestion(currentQuestionIndex);
     }
   }
 
-  dynamic animateToQuestion(double itemExtent, int index) {
-    //total item count
-    final itemCount = options.length;
-    final totalWidth = itemCount * itemExtent;
+  void animateToQuestion(int index) {
     final screen = maxWidth(context);
-    final position = itemExtent * index;
-    var scrollExtent = 0.0;
-
-    if ((totalWidth - position) > screen) {
-      scrollExtent = position - (screen / 2);
-    } else if (position < screen) {}
-
-    // scrollController.offset = 0;
+    final itemPosition = pointerWidth * index;
+    var offset = (itemPosition - (screen * 0.35));
+    if (itemPosition > screen * 0.5) {
+      scrollController.animateTo(
+        offset,
+        // 10,
+        duration: Duration(milliseconds: 150),
+        curve: Curves.easeOut,
+      );
+    }
   }
 
   Future<void> _notify(String message, {int delay = 5, bool? loading}) async {
@@ -154,7 +156,28 @@ class _QuizSessionScreenState extends ConsumerState<MCQSessionScreen>
   Widget build(BuildContext context) {
     return stackWithNotifier([
       Scaffold(
-        appBar: AppBar(automaticallyImplyLeading: false),
+        appBar: AppBar(
+          automaticallyImplyLeading: false,
+          title: GestureDetector(
+              onTap: () {
+                showModal(context: context, builder: _confirmSubmission)
+                    .then((value) {
+                  if (value == true) {
+                    Navigator.pop(context);
+                    push(ResultScreen(mcqs: mcqs!, options: options), context);
+                  }
+                });
+              },
+              child: Text(widget.data.title, style: mukta)),
+          actions: [
+            TextButton(
+              onPressed: () {},
+              style: ButtonStyle(
+                  foregroundColor: MaterialStatePropertyAll(deepSaffron)),
+              child: Text('Submit', style: small00),
+            )
+          ],
+        ),
         body: SingleChildScrollView(
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20.0),
@@ -175,7 +198,7 @@ class _QuizSessionScreenState extends ConsumerState<MCQSessionScreen>
               spacer(),
               if (isLoading) _shimmer(),
               // Text(currentPage.toString()),
-              if (mcqs != null && !isLoading)
+              if (mcqs != null && !isLoading && mcqs!.isNotEmpty)
                 Container(
                   decoration: BoxDecoration(),
                   child: Column(
@@ -191,8 +214,17 @@ class _QuizSessionScreenState extends ConsumerState<MCQSessionScreen>
                       spacer(y: 15),
                       Align(
                           alignment: Alignment.centerLeft,
-                          child: Text(mcqs![currentQuestionIndex].query,
-                              style: small00)),
+                          child: Container(
+                            width: maxWidth(context) * 0.86,
+                            constraints: BoxConstraints(minHeight: 50),
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 10, vertical: 10),
+                            decoration: BoxDecoration(
+                                color: raisingBlack,
+                                borderRadius: BorderRadius.circular(6)),
+                            child: Text(mcqs![currentQuestionIndex].query,
+                                style: small00),
+                          )),
                       spacer(y: 35),
                       ...List.generate(
                           4,
@@ -226,26 +258,31 @@ class _QuizSessionScreenState extends ConsumerState<MCQSessionScreen>
                     ],
                   ),
                 ),
-              spacer(),
+              spacer(y: 10),
               Row(
+                crossAxisAlignment: CrossAxisAlignment.end,
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   ElevatedButton(
                     onPressed: _goToPreviousQuest,
-                    child: Text('Previous'),
+                    style: ButtonStyle(
+                        foregroundColor: MaterialStatePropertyAll(
+                      vividOrange.withOpacity(0.5),
+                    )),
+                    child: Text('<', style: medium10),
                   ),
                   FilledButton(
                       style: ButtonStyle(
                           backgroundColor: MaterialStatePropertyAll(
-                              primary.withOpacity(0.3)),
+                              jungleGreen.withOpacity(0.8)),
                           foregroundColor:
                               MaterialStatePropertyAll(Color(0xFFF0F0F0))),
                       onPressed: goToNextQuestion,
-                      child: Text('Next Question', style: mukta))
+                      child: Text('>', style: mukta))
                 ],
               ),
-              spacer(y: 20),
-              _pointerList(),
+              // spacer(y: 50),
+
               spacer(y: 60),
               // Text(parseQuestions(widget.data.questions).toString())
             ]),
@@ -255,81 +292,106 @@ class _QuizSessionScreenState extends ConsumerState<MCQSessionScreen>
       Positioned(
         bottom: 20,
         width: maxWidth(context),
-        child: Center(
-          child: OutlinedButton(
-              style: ButtonStyle(
-                // backgroundColor: MaterialStatePropertyAll(Color(0xFF00AA58)),
-                foregroundColor: MaterialStatePropertyAll(primary),
-              ),
-              // onPressed: _fetchNextPage,
-              onPressed: () {
-                animateToQuestion(pointerWidth, currentQuestionIndex);
-              },
-              child: Text('Submit', style: medium00)),
-        ),
-      )
+        child: Material(child: Center(child: _pointerList())),
+      ),
     ], notification);
   }
 
+  Center _confirmSubmission(BuildContext context) {
+    return Center(
+      child: Material(
+          color: Colors.transparent,
+          child: Container(
+            width: maxWidth(context) * 0.9,
+            // height: maxHeight(context) * 0.4,
+            // height: 100,
+            constraints: BoxConstraints(minHeight: 80, maxHeight: 100),
+            decoration: BoxDecoration(
+              color: woodSmoke,
+              borderRadius: BorderRadius.circular(4),
+            ),
+            child: Column(
+              children: [
+                // spacer(y: 10),
+                spacer(y: 20),
+                Text('Are you sure you want to submit', style: small00),
+                Expanded(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      TextButton(
+                          onPressed: () => Navigator.pop(context, true),
+                          child: Text('Yes', style: mukta)),
+                      TextButton(
+                          onPressed: () => Navigator.pop(context, false),
+                          child: Text('Cancel', style: mukta))
+                    ],
+                  ),
+                ),
+                spacer(y: 10),
+              ],
+            ),
+          )),
+    );
+  }
+
   String _option(int idx) {
-    var opt = '';
-    switch (idx) {
-      case 0:
-        opt = mcqs![currentQuestionIndex].A;
-        break;
-      case 1:
-        opt = mcqs![currentQuestionIndex].B;
-        break;
-      case 2:
-        opt = mcqs![currentQuestionIndex].C;
-        break;
-      case 3:
-        opt = mcqs![currentQuestionIndex].D;
-        break;
-      default:
-        break;
-    }
+    var opt = switch (idx) {
+      0 => mcqs![currentQuestionIndex].A,
+      1 => mcqs![currentQuestionIndex].B,
+      2 => mcqs![currentQuestionIndex].C,
+      3 => mcqs![currentQuestionIndex].D,
+      _ => mcqs![currentQuestionIndex].A
+    };
     return opt;
   }
 
   SizedBox _pointerList() {
     return SizedBox(
       height: 60,
-      child: ListView.builder(
-          controller: scrollController,
-          scrollDirection: Axis.horizontal,
-          itemExtent: pointerWidth,
-          itemCount: options.length,
-          itemBuilder: (context, index) => GestureDetector(
-                onTap: () => mcqs != null && (index < mcqs!.length)
-                    ? setState(() {
-                        currentQuestionIndex = index;
-                      })
-                    : null,
-                child: Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 3),
-                  child: AnimatedContainer(
-                    // width: 50,
-                    // height: 50,
-                    duration: const Duration(milliseconds: 450),
-                    decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: options[index] != null
-                            ? primary
-                            : Color(0xFF363636),
-                        border: Border.all(
-                          color: index == currentQuestionIndex
-                              ? Colors.white
-                              : Colors.transparent,
-                          width: 2,
-                        )),
-                    child: Center(child: Text('${index + 1}', style: small00)),
-                  ),
-                ),
-              )),
+      child: (mcqs != null)
+          ? ListView.builder(
+              padding: EdgeInsets.symmetric(horizontal: 6),
+              controller: scrollController,
+              scrollDirection: Axis.horizontal,
+              itemExtent: pointerWidth,
+              itemCount: options.length,
+              itemBuilder: (context, index) => GestureDetector(
+                    onTap: () => mcqs != null && (index < mcqs!.length)
+                        ? setState(() {
+                            currentQuestionIndex = index;
+                          })
+                        : null,
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 3),
+                      child: AnimatedContainer(
+                        // width: 50,
+                        // height: 50,
+                        duration: const Duration(milliseconds: 450),
+                        decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: index > mcqs!.length - 1
+                                ? tiber.withOpacity(0.4)
+                                : options[index] != null
+                                    ? jungleGreen
+                                    : Color(0xFF363636),
+                            border: Border.all(
+                              color: index == currentQuestionIndex
+                                  ? Colors.white
+                                  : Colors.transparent,
+                              width: 2,
+                            )),
+                        child:
+                            Center(child: Text('${index + 1}', style: small00)),
+                      ),
+                    ),
+                  ))
+          : Text('No data yet', style: mukta),
     );
   }
 }
+
 
 Future<MCQResp> fetchMCQQuestions(Dio dio,
     {required PageData page, required int quiz_id}) async {

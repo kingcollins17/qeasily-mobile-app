@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:qeasily/model/model.dart';
 import 'package:qeasily/provider/auth_provider.dart';
+import 'package:qeasily/screen/quiz/dcq_session_screen.dart';
 // import 'package:qeasily/screen/quiz/quiz.dart';
 import 'package:qeasily/styles.dart';
 import 'package:redux/redux.dart';
@@ -70,17 +71,32 @@ class _QuizDetailScreenState extends ConsumerState<QuizDetailScreen> with Ui {
               Text(
                   'Please read the following instructions and Tips below before you start',
                   style: mukta),
-              spacer(y: 50),
+              spacer(y: 20),
               Container(
-                width: maxWidth(context) * 0.96,
+                padding: EdgeInsets.symmetric(vertical: 8, horizontal: 6),
+                decoration: BoxDecoration(
+                  color: raisingBlack,
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Text(
+                  widget.data.type == 'mcq'
+                      ? 'Multiple Choice Quiz'
+                      : 'Dual Choice Quiz',
+                  style: mukta,
+                ),
+              ),
+              spacer(y: 10),
+              Container(
+                width: maxWidth(context) * 0.92,
                 padding: EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                 decoration: BoxDecoration(
-                  color: Ui.black01,
-                  borderRadius: BorderRadius.circular(4),
+                  color: raisingBlack,
+                  borderRadius: BorderRadius.circular(6),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    
                     Text('Instructions and Tips', style: mukta)
                         .animate(
                             autoPlay: true,
@@ -94,7 +110,7 @@ class _QuizDetailScreenState extends ConsumerState<QuizDetailScreen> with Ui {
                                   }
                                 }))
                         .shimmer(
-                      colors: [Colors.white, primary],
+                      colors: [Colors.white, jungleGreen],
                       duration: Duration(seconds: 1),
                     ),
                     spacer(y: 15),
@@ -121,11 +137,16 @@ class _QuizDetailScreenState extends ConsumerState<QuizDetailScreen> with Ui {
                 style: ButtonStyle(
                     fixedSize:
                         MaterialStatePropertyAll(Size(maxWidth(context), 48)),
-                    backgroundColor: MaterialStatePropertyAll(primary),
+                    backgroundColor: MaterialStatePropertyAll(jungleGreen),
                     foregroundColor: MaterialStatePropertyAll(Colors.white)),
                 onPressed: () {
                   Navigator.pop(context);
-                  push(MCQSessionScreen(data: widget.data), context);
+
+                  push(
+                      widget.data.type == 'mcq'
+                          ? MCQSessionScreen(data: widget.data)
+                          : DCQSessionScreen(data: widget.data),
+                      context);
                 },
                 icon: Icon(Icons.play_arrow, size: 35, color: Colors.white),
                 label: Text('Start Quiz', style: small00),
@@ -139,13 +160,19 @@ class _QuizDetailScreenState extends ConsumerState<QuizDetailScreen> with Ui {
   }
 }
 
-List<String> getInstructions(String type) {
-  const instructions = <String>[
+List<String> getInstructions(String type) => switch (type) {
+      'mcq' => <String>[
     'All unanswered Questions will appear grey',
     'Answered Questions will appear in  Purple',
     'Double tap on option to unpick it',
     'Tap once on an option to select it',
     'If your time runs out, you will automatically submit',
-  ];
-  return type == 'mcq' ? instructions : [];
-}
+        ],
+      _ => <String>[
+          'Answer true or false for each question',
+          'Unanswered questions will appear grey',
+          'Answered questions would appear green',
+          'Try to finish before the alloted time',
+          'Goodluck and Godspeed',
+        ],
+    };

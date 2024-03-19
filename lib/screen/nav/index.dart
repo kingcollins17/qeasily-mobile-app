@@ -57,64 +57,64 @@ class _IndexSubScreenState extends ConsumerState<IndexSubScreen> with Ui {
     final categories = ref.watch(categoriesProvider);
     final user = ref.watch(userAuthProvider);
 
-    return SafeArea(
+    return Material(
+      color: Theme.of(context).colorScheme.background,
       child: SizedBox(
         width: maxWidth(context),
+        height: maxHeight(context),
         child: SingleChildScrollView(
           controller: scrollCtrl,
-          child: Material(
-            color: Ui.black00,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 15.0),
-              child: Column(children: [
-                spacer(y: 10),
-                Row(
-                  children: [
-                    GestureDetector(
-                        onTap: () {
-                          Scaffold.of(context).openDrawer();
-                        },
-                        child: Icon(Icons.menu_rounded)),
-                    spacer(x: 10),
-                    _searchBar(),
-                    spacer(x: 6),
-                    Icon(Icons.filter_alt),
-                    spacer(),
-                    user.when(
-                        data: (data) => Container(
-                              padding: EdgeInsets.all(10),
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: primary,
-                              ),
-                              child: Text(
-                                data.email[0],
-                                style: small00,
-                              ),
-                            ),
-                        error: (_, __) => Center(child: Text('_')),
-                        loading: () => Text('')),
-                  ],
-                ),
-                _filterList(),
+          child: Column(children: [
+            spacer(y: 25),
+            Row(
+              children: [
+                spacer(x: 15),
+                GestureDetector(
+                    onTap: () {
+                      Scaffold.of(context).openDrawer();
+                    },
+                    child: Icon(Icons.menu_rounded)),
+                spacer(x: 10),
+                _searchBar(),
                 spacer(),
-                PageTransitionSwitcher(
-                  duration: const Duration(milliseconds: 600),
-                  reverse: previous.index > filter.index,
-                  transitionBuilder:
-                      (child, primaryAnimation, secondaryAnimation) =>
-                          SharedAxisTransition(
-                    animation: primaryAnimation,
-                    secondaryAnimation: secondaryAnimation,
-                    transitionType: SharedAxisTransitionType.horizontal,
-                    child: Container(color: Colors.black, child: child),
-                  ),
-                  child: _filterContent(filter),
-                ),
-                spacer(y: 30)
-              ]),
+                Icon(Icons.filter_alt),
+                spacer(),
+                user.when(
+                    data: (data) => Container(
+                          padding: EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: tiber,
+                          ),
+                          child: Text(
+                            data.email[0],
+                            style: small00,
+                          ),
+                        ),
+                    error: (_, __) => Center(child: Text('_')),
+                    loading: () => Text('')),
+              ],
             ),
-          ),
+            _filterList(),
+            spacer(),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20.0),
+              child: PageTransitionSwitcher(
+                duration: const Duration(milliseconds: 600),
+                reverse: previous.index > filter.index,
+                transitionBuilder:
+                    (child, primaryAnimation, secondaryAnimation) =>
+                        SharedAxisTransition(
+                  animation: primaryAnimation,
+                  secondaryAnimation: secondaryAnimation,
+                  transitionType: SharedAxisTransitionType.horizontal,
+                  child: Container(color: Colors.transparent, child: child),
+                ),
+                child: _filterContent(filter),
+              ),
+            ),
+            spacer(y: 30)
+          ]),
         ),
       ),
     );
@@ -286,7 +286,7 @@ class _IndexSubScreenState extends ConsumerState<IndexSubScreen> with Ui {
           // height: 100,
           constraints: BoxConstraints(minHeight: 110),
           decoration: BoxDecoration(
-              color: Color(0xFF1A1A1A),
+              color: darkShade,
               borderRadius: BorderRadius.circular(8),
               // color: Ui.black01,
               boxShadow: [
@@ -298,30 +298,51 @@ class _IndexSubScreenState extends ConsumerState<IndexSubScreen> with Ui {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      Icon(Icons.query_builder_outlined,
-                          size: 10, color: Colors.grey),
-                      spacer(x: 6),
-                      Text(
-                        '${Duration(seconds: quiz.duration).inMinutes} Minutes',
-                        style: xs01,
-                      )
-                    ],
-                  ),
-                  Row(
-                    children: [
-                      Icon(Icons.star, color: Colors.grey, size: 12),
-                      spacer(x: 10),
-                      Text(quiz.difficulty, style: xs01),
-                    ],
-                  ),
-                ],
+              Container(
+                constraints: BoxConstraints(minHeight: 50),
+                padding: EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+                decoration: BoxDecoration(
+                  color: raisingBlack,
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Row(
+                      children: [
+                        ...List.generate(
+                          switch (quiz.difficulty) {
+                            'Hard' => 3,
+                            'Medium' => 2,
+                            'Easy' => 1,
+                            _ => 0,
+                          },
+                          (index) =>
+                              Icon(Icons.star, color: jungleGreen, size: 12),
+                        ),
+                        spacer(),
+                        Text(quiz.difficulty, style: xs01),
+                      ],
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        Icon(
+                          Icons.query_builder_outlined,
+                          size: 10,
+                          color: Colors.grey,
+                        ),
+                        spacer(x: 6),
+                        Text(
+                          '${Duration(seconds: quiz.duration).inMinutes} Minutes',
+                          style: xs01,
+                        )
+                      ],
+                    ),
+                  ],
+                ),
               ),
+             
               spacer(y: 10),
               Row(
                 children: [
@@ -337,7 +358,7 @@ class _IndexSubScreenState extends ConsumerState<IndexSubScreen> with Ui {
                 ],
               ),
               Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                mainAxisAlignment: MainAxisAlignment.start,
                 children: [
                   Text('Type: ', style: xs01),
                   Text(
@@ -345,7 +366,7 @@ class _IndexSubScreenState extends ConsumerState<IndexSubScreen> with Ui {
                       final temp = quiz.type;
                       return temp == 'mcq'
                           ? 'Multiple Choice'
-                          : 'Double Choice (True or False)';
+                          : 'True or False';
                     }(),
                     style: xs00,
                   ),
@@ -403,7 +424,7 @@ class _IndexSubScreenState extends ConsumerState<IndexSubScreen> with Ui {
                                 border: Border(
                                     bottom: BorderSide(
                                         color: index == (filter.index)
-                                            ? primary
+                                            ? jungleGreen
                                             : Color(0x7F5A5A5A))
                                     // width: index == (filter.index) ? 0.8 : 0.4,
                                     ),
@@ -466,83 +487,108 @@ class _IndexSubScreenState extends ConsumerState<IndexSubScreen> with Ui {
           );
         }
         justMountedChg = false;
-        return Container(
-          color: Ui.black00,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              if (vm.state.challenges.isEmpty && vm.state.isLoading)
-                _defaultShimmer(context),
-              if (vm.state.challenges.isNotEmpty)
-                ...vm.state.challenges.map((e) => Padding(
-                      key: ValueKey(e.id),
-                      padding: EdgeInsets.symmetric(vertical: 2),
-                      child: Container(
-                        width: maxWidth(context) * 0.9,
-                        constraints: BoxConstraints(minHeight: 80),
-                        padding:
-                            EdgeInsets.symmetric(vertical: 10, horizontal: 12),
-                        decoration: BoxDecoration(
-                            color: Color(0xFF181818),
-                            borderRadius: BorderRadius.circular(4),
-                            boxShadow: [
-                              BoxShadow(
-                                blurRadius: 4,
-                                offset: Offset(2, 4),
-                                color: Color(0x47000000),
-                              )
-                            ]),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(e.name, style: small00),
-                            spacer(y: 15),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                // Icon(Icons.monetization_on, size: 10),
-                                Text('Entry Fee: ', style: xs01),
-                                Text('${e.paid ? e.entryFee : "Free"}',
-                                    style: xs00),
-                              ],
-                            ),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text('Type', style: xs01),
-                                spacer(),
-                                // Divider(color: Colors.grey, height: 10),
-                                spacer(),
-                                Text(
+        return Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            if (vm.state.challenges.isEmpty && vm.state.isLoading)
+              _defaultShimmer(context),
+            if (vm.state.challenges.isNotEmpty)
+              ...vm.state.challenges.map((e) => Padding(
+                    key: ValueKey(e.id),
+                    padding: EdgeInsets.symmetric(vertical: 2),
+                    child: Container(
+                      width: maxWidth(context) * 0.9,
+                      constraints: BoxConstraints(minHeight: 80),
+                      padding:
+                          EdgeInsets.symmetric(vertical: 10, horizontal: 12),
+                      decoration: BoxDecoration(
+                          color: darkShade,
+                          borderRadius: BorderRadius.circular(4),
+                          boxShadow: [
+                            BoxShadow(
+                              blurRadius: 4,
+                              offset: Offset(2, 4),
+                              color: Color(0x47000000),
+                            )
+                          ]),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Row(children: [],),
+                          spacer(y: 15),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(e.name, style: small00),
+                              Container(
+                                padding: EdgeInsets.symmetric(
+                                    horizontal: 6, vertical: 6),
+                                decoration: BoxDecoration(
+                                  color: Color(0xFFA13131),
+                                  borderRadius: BorderRadius.circular(6),
+                                ),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(Icons.query_builder,
+                                        size: 10, color: athensGray),
+                                    spacer(),
+                                    Text(() {
+                                      final temp = e.dateAdded
+                                          .difference(DateTime.now())
+                                          .inDays;
+                                      return temp > 1
+                                          ? 'Ended'
+                                          : 'Ends in $temp Days';
+                                      // return e.duration.toString();
+                                    }(), style: mukta),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                          spacer(y: 15),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: [
+                              // Icon(Icons.monetization_on, size: 10),
+                              Text('Entry Fee: ', style: xs01),
+                              Text('${e.paid ? e.entryFee : "Free"}',
+                                  style: xs00),
+                            ],
+                          ),
+                          spacer(),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: [
+                              // Text('Type', style: xs01),
+                              // spacer(),
+                              // Divider(color: Colors.grey, height: 10),
+                              Icon(Icons.subscriptions_rounded,
+                                  size: 20, color: athensGray),
+                              spacer(),
+                              Container(
+                                padding: EdgeInsets.symmetric(
+                                    horizontal: 6, vertical: 6),
+                                decoration: BoxDecoration(
+                                    color: raisingBlack,
+                                    borderRadius: BorderRadius.circular(6)),
+                                child: Text(
                                     e.paid
                                         ? 'Paid Challenge'
                                         : 'Free Challenge',
-                                    style: xs01)
-                              ],
-                            ),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.end,
-                              children: [
-                                Icon(Icons.query_builder,
-                                    size: 10, color: Colors.redAccent),
-                                spacer(),
-                                Text(() {
-                                  final temp = e.dateAdded
-                                      .difference(DateTime.now())
-                                      .inDays;
-                                  return temp > 1
-                                      ? 'Ended'
-                                      : 'Ends in $temp Days';
-                                  // return e.duration.toString();
-                                }(), style: xs01),
-                              ],
-                            ),
-                          ],
-                        ),
+                                    style: xs01),
+                              ),
+                            ],
+                          ),
+                          
+                          
+                        ],
                       ),
-                    )),
-            ],
-          ),
+                    ),
+                  )),
+          ],
         );
       },
       converter: (store) => ChallengeVM(store));

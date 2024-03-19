@@ -52,3 +52,45 @@ const optionMap = {
   2: MCQOption.C,
   3: MCQOption.D
 };
+
+@JsonSerializable()
+class DCQData {
+  final int id;
+  final String query, explanation;
+
+  @_CorrectOptionConverter()
+  final bool correct;
+
+  @JsonKey(name: 'user_id')
+  final int userId;
+
+  @JsonKey(name: 'topic_id')
+  final int topicId;
+
+  factory DCQData.fromJson(Map<String, dynamic> json) =>
+      _$DCQDataFromJson(json);
+
+  DCQData({
+    required this.id,
+    required this.query,
+    required this.explanation,
+    required this.correct,
+    required this.userId,
+    required this.topicId,
+  });
+  Map<String, dynamic> toJson() => _$DCQDataToJson(this);
+
+  @override
+  String toString() =>
+      'DCQData {id: $id, query: $query, explanation: $explanation,'
+      ' correct: $correct, userId: $userId, topicId: $topicId}';
+}
+
+class _CorrectOptionConverter extends JsonConverter<bool, int> {
+  const _CorrectOptionConverter();
+  @override
+  fromJson(json) => switch (json) { 1 => true, _ => false };
+
+  @override
+  toJson(object) => object ? 1 : 0;
+}

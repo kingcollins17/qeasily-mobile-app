@@ -38,3 +38,21 @@ const _$MCQOptionEnumMap = {
   MCQOption.C: 'C',
   MCQOption.D: 'D',
 };
+
+DCQData _$DCQDataFromJson(Map<String, dynamic> json) => DCQData(
+      id: json['id'] as int,
+      query: json['query'] as String,
+      explanation: json['explanation'] as String,
+      correct: const _CorrectOptionConverter().fromJson(json['correct'] as int),
+      userId: json['user_id'] as int,
+      topicId: json['topic_id'] as int,
+    );
+
+Map<String, dynamic> _$DCQDataToJson(DCQData instance) => <String, dynamic>{
+      'id': instance.id,
+      'query': instance.query,
+      'explanation': instance.explanation,
+      'correct': const _CorrectOptionConverter().toJson(instance.correct),
+      'user_id': instance.userId,
+      'topic_id': instance.topicId,
+    };

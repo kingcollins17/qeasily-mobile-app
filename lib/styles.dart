@@ -7,18 +7,28 @@ mixin Ui {
   final primary = const Color(0xFF916BFF);
   final blue1 = const Color(0xFF5C99FF);
   final blue10 = const Color(0xFF1B56BD);
+
+  final Color jungleGreen = const Color(0xFF008669),
+      tiber = const Color(0xFF0E3031),
+      darkShade = const Color(0xFF181818),
+      bunker = const Color(0xFF1F2C34),
+      athensGray = const Color(0XFFEAECEF),
+      woodSmoke = const Color(0xFF121212),
+      deepSaffron = const Color(0xFFFF9A2F),
+      vividOrange = const Color(0XFFFE6005),
+      raisingBlack = const Color(0xFF252525);
   // final shimmer = const Color(0xFFD6D6D6);
 
-  static Color grey = const Color(0xFF8A8A8A),
+  static const grey = Color(0xFF8A8A8A),
       lightGrey = Color(0xFFC0C0C0),
-      darkGrey = const Color(0xFF2C2C2C),
+      darkGrey = Color(0xFF2C2C2C),
       black00 = Colors.black,
-      black01 = const Color(0xFF272727);
+      black01 = Color(0xFF272727);
 
   final TextStyle xs00 = GoogleFonts.workSans(
         fontSize: 12,
       ),
-      xs01 = GoogleFonts.workSans(fontSize: 12, color: Color(0x88FFFFFF)),
+      xs01 = GoogleFonts.workSans(fontSize: 12, color: const Color(0x88FFFFFF)),
       small00 = GoogleFonts.workSans(fontSize: 16),
       small10 = GoogleFonts.workSans(fontSize: 16, fontWeight: FontWeight.w500),
       mukta = GoogleFonts.mukta(fontSize: 16, color: lightGrey),
@@ -48,20 +58,20 @@ mixin Ui {
               decoration: const BoxDecoration(
                   color: Colors.grey, shape: BoxShape.circle))
           : Builder(
-      builder: (context) => Container(
-          width: w ?? maxWidth(context) * 0.4,
-          height: h ?? 10,
-          decoration: BoxDecoration(
-            color: Colors.grey,
-            borderRadius: BorderRadius.circular(br ?? 10),
-          )));
+              builder: (context) => Container(
+                  width: w ?? maxWidth(context) * 0.4,
+                  height: h ?? 10,
+                  decoration: BoxDecoration(
+                    color: Colors.grey,
+                    borderRadius: BorderRadius.circular(br ?? 10),
+                  )));
 
   Widget vDivider({double? w, double? h, Color? color}) => Container(
         width: w ?? 1.5,
         height: h ?? 30,
         margin: const EdgeInsets.symmetric(horizontal: 6),
         decoration: BoxDecoration(
-          color: color ?? Color(0xB7636363),
+          color: color ?? const Color(0xB7636363),
           borderRadius: BorderRadius.circular(15),
         ),
       );

@@ -55,7 +55,7 @@ class _Drawer extends ConsumerWidget with Ui {
                 onTap: () => context.go('/test'),
                 child: Text('Qeasily 1.0', style: medium10)),
             spacer(y: 10),
-            Divider(color: primary),
+            Divider(color: tiber),
             //
             GestureDetector(
               onTap: () => push(APIDoc(), context),
@@ -73,7 +73,7 @@ class _Drawer extends ConsumerWidget with Ui {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
-                    Icon(Icons.diamond, color: Colors.deepOrange),
+                    Icon(Icons.diamond, color: vividOrange),
                     spacer(y: 0),
                     Text(
                       'Subscription and Pricing',
@@ -84,7 +84,7 @@ class _Drawer extends ConsumerWidget with Ui {
                             autoPlay: true)
                         .shimmer(
                       duration: Duration(seconds: 2),
-                      colors: [primary, Colors.white],
+                      colors: [jungleGreen, Colors.white],
                     )
                   ],
                 ),

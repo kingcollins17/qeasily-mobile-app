@@ -2,9 +2,10 @@
 
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:qeasily/styles.dart';
 
-class LocalNotification extends AnimatedWidget {
-  const LocalNotification(
+class LocalNotification extends AnimatedWidget with Ui {
+  LocalNotification(
       {Key? key,
       required Animation<double> animation,
       this.message,
@@ -28,41 +29,36 @@ class LocalNotification extends AnimatedWidget {
         offset: animation.drive(_position).value,
         child: Transform.scale(
             scaleX: animation.drive(_scale).value,
-            child: Padding(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 10.0, vertical: 15),
-              child: Container(
-                constraints: BoxConstraints(
-                  maxWidth: MediaQuery.of(context).size.width * 0.9,
+            child: Material(
+              color: Colors.transparent,
+              child: Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 10.0, vertical: 15),
+                child: Container(
+                  constraints: BoxConstraints(
+                    maxWidth: MediaQuery.of(context).size.width * 0.9,
+                  ),
+                  padding: EdgeInsets.symmetric(horizontal: 15, vertical: 10),
+                  decoration: BoxDecoration(
+                      color: message != null &&
+                              child == null &&
+                              backgroundColor == null
+                          ? Theme.of(context).colorScheme.background
+                          : backgroundColor,
+                      borderRadius: borderRadius ?? BorderRadius.circular(30),
+                      boxShadow: [
+                        BoxShadow(
+                            blurRadius: 3,
+                            offset: Offset(2, 3),
+                            color: Color(0x3B000000))
+                      ]),
+                  child: child ??
+                      Text(
+                        message ?? 'LocalNotification',
+                        textAlign: TextAlign.center,
+                        style: mukta,
+                      ),
                 ),
-                padding: EdgeInsets.symmetric(horizontal: 15, vertical: 10),
-                decoration: BoxDecoration(
-                    color: message != null &&
-                            child == null &&
-                            backgroundColor == null
-                        ? Theme.of(context).colorScheme.background
-                        : backgroundColor,
-                    borderRadius: borderRadius ?? BorderRadius.circular(30),
-                    boxShadow: [
-                      BoxShadow(
-                          blurRadius: 3,
-                          offset: Offset(2, 3),
-                          color: Color(0x3B000000))
-                    ]
-                ),
-                child: child ??
-                    Text(
-                      message ?? 'LocalNotification',
-                      textAlign: TextAlign.center,
-                      style: GoogleFonts.poppins(
-                          decoration: TextDecoration.none,
-                          fontSize: 14,
-                          fontWeight: FontWeight.w400,
-                          color:
-                              message != null && child == null && color == null
-                                  ? Theme.of(context).colorScheme.onBackground
-                                  : color),
-                    ),
               ),
             )),
       ),
