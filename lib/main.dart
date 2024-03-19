@@ -7,6 +7,9 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hive_flutter/adapters.dart';
 import 'package:qeasily/redux/redux.dart';
+import 'package:qeasily/screen/quiz/quiz.dart';
+import 'package:qeasily/screen/sub/dashboard.dart';
+import 'package:qeasily/screen/sub/follow_creators.dart';
 
 import 'package:qeasily/screen/screen.dart';
 import 'package:flutter_redux/flutter_redux.dart';
@@ -34,26 +37,52 @@ void main() async {
 }
 
 final router = GoRouter(routes: [
-  GoRoute(
-      path: '/',
-      builder: (context, state) => Onboarding()),
+  GoRoute(path: '/', builder: (context, state) => Onboarding()),
   GoRoute(path: '/sign-up', builder: (context, state) => SignupScreen()),
   GoRoute(path: '/login', builder: (context, state) => LoginScreen()),
   GoRoute(path: '/test', builder: (context, state) => TestWidget()),
   GoRoute(
     path: '/home',
-    pageBuilder: (context, state) => CustomTransitionPage(
-      key: state.pageKey,
-      transitionDuration: Duration(milliseconds: 600),
-      reverseTransitionDuration: Duration(milliseconds: 500),
-      child: HomeScreen(),
-      transitionsBuilder: (context, animation, secondaryAnimation, child) =>
-          SharedAxisTransition(
-              animation: animation,
-              secondaryAnimation: secondaryAnimation,
-              transitionType: SharedAxisTransitionType.scaled,
-              child: child),
-    ),
-  )
+      pageBuilder: (context, state) => animatePage(HomeScreen(), state),
+      routes: [
+        GoRoute(
+          path: 'dashboard',
+          pageBuilder: (context, state) =>
+              animatePage(DashboardScreen(), state),
+        ),
+        GoRoute(
+            path: 'follow',
+            pageBuilder: (context, state) =>
+                animatePage(FollowCreatorScreen(), state)),
+      ]),
+
+  // GoRoute(path: '/quiz', routes: [
+  //   GoRoute(
+  //     path: '',
+  //     pageBuilder: (context, state) => animatePage(QuizDetailScreen(), state),
+  //   ),
+  //   GoRoute(
+  //     path: '/session',
+  //     pageBuilder: (context, state) => animatePage(QuizSessionScreen(), state),
+  //   )
+  // ])
+
+  // GoRoute(path: '/home')
 ]);
 
+//
+CustomTransitionPage<dynamic> animatePage(Widget child, GoRouterState state,
+    {Duration? duration}) {
+  return CustomTransitionPage(
+    key: state.pageKey,
+    transitionDuration: duration ?? Duration(milliseconds: 700),
+    reverseTransitionDuration: Duration(milliseconds: 500),
+    child: child,
+    transitionsBuilder: (context, animation, secondaryAnimation, child) =>
+        SharedAxisTransition(
+            animation: animation,
+            secondaryAnimation: secondaryAnimation,
+            transitionType: SharedAxisTransitionType.scaled,
+            child: child),
+  );
+}

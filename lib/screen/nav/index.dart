@@ -1,5 +1,6 @@
 // ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables, unused_field, unused_element
 
+import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_redux/flutter_redux.dart';
 // import 'package:flutter_animate/flutter_animate.dart';
@@ -11,6 +12,7 @@ import 'package:qeasily/provider/auth_provider.dart';
 import 'package:qeasily/provider/categories.dart';
 import 'package:qeasily/provider/dio_provider.dart';
 import 'package:qeasily/redux/redux.dart';
+import 'package:qeasily/screen/quiz/quiz.dart';
 import 'package:qeasily/screen/sub/search_screen.dart';
 import 'package:qeasily/styles.dart';
 import 'package:shimmer/shimmer.dart';
@@ -23,6 +25,8 @@ class IndexSubScreen extends ConsumerStatefulWidget {
 
 class _IndexSubScreenState extends ConsumerState<IndexSubScreen> with Ui {
   int currentCategoryIndex = 0;
+
+  var previous = _Filter.quiz;
   var filter = _Filter.quiz;
   final scrollCtrl = ScrollController();
 
@@ -94,7 +98,19 @@ class _IndexSubScreenState extends ConsumerState<IndexSubScreen> with Ui {
                 ),
                 _filterList(),
                 spacer(),
-                _filterContent(filter),
+                PageTransitionSwitcher(
+                  duration: const Duration(milliseconds: 600),
+                  reverse: previous.index > filter.index,
+                  transitionBuilder:
+                      (child, primaryAnimation, secondaryAnimation) =>
+                          SharedAxisTransition(
+                    animation: primaryAnimation,
+                    secondaryAnimation: secondaryAnimation,
+                    transitionType: SharedAxisTransitionType.horizontal,
+                    child: Container(color: Colors.black, child: child),
+                  ),
+                  child: _filterContent(filter),
+                ),
                 spacer(y: 30)
               ]),
             ),
@@ -105,6 +121,7 @@ class _IndexSubScreenState extends ConsumerState<IndexSubScreen> with Ui {
   }
 
   Widget _topicContent() => StoreConnector<QeasilyState, TopicVM>(
+        key: ValueKey(filter),
         builder: (context, vm) {
           if (justMountedTopics) {
             vm.dispatch(
@@ -125,6 +142,7 @@ class _IndexSubScreenState extends ConsumerState<IndexSubScreen> with Ui {
                   children: [
                     ...vm.state.topics.map(
                       (topic) => Padding(
+                        key: ValueKey(topic.id),
                         padding: EdgeInsets.symmetric(vertical: 2),
                         child: Container(
                           padding:
@@ -196,6 +214,7 @@ class _IndexSubScreenState extends ConsumerState<IndexSubScreen> with Ui {
   // Widget
 
   Widget _quizContent() => StoreConnector<QeasilyState, QuizVM>(
+      key: ValueKey(filter),
       converter: (store) => QuizVM(store),
       builder: (context, vm) {
         if (justMountedQuiz) {
@@ -212,7 +231,9 @@ class _IndexSubScreenState extends ConsumerState<IndexSubScreen> with Ui {
             ? _defaultShimmer(context)
             : Column(
                 children: [
-                  ...vm.state.quizzes.map((e) => _quizItem(e)),
+                  ...vm.state.quizzes.map((e) => GestureDetector(
+                      onTap: () => push(QuizDetailScreen(data: e), context),
+                      child: _quizItem(e))),
                   spacer(y: 10),
                   if (vm.state.quizzes.isNotEmpty && vm.state.isLoading)
                     SpinKitThreeBounce(color: Colors.white, size: 35),
@@ -235,26 +256,30 @@ class _IndexSubScreenState extends ConsumerState<IndexSubScreen> with Ui {
         child: Text('View more', style: xs00),
       );
 
-  Shimmer _defaultShimmer(BuildContext context) {
-    return Shimmer.fromColors(
-        baseColor: Color(0x00000000),
-        highlightColor: Color(0xB8979797),
-        child: Padding(
-          padding: EdgeInsets.symmetric(horizontal: 5, vertical: 10),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              shimmer(h: 15),
-              spacer(y: 10),
-              shimmer(w: 40, h: 10),
-              spacer(y: 8),
-              shimmer(w: maxWidth(context), h: 100),
-            ],
-          ),
-        ));
+  Widget _defaultShimmer(BuildContext context) {
+    return Container(
+      color: Ui.black00,
+      child: Shimmer.fromColors(
+          baseColor: Colors.transparent,
+          highlightColor: Color(0xB8979797),
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: 5, vertical: 10),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                shimmer(h: 15),
+                spacer(y: 10),
+                shimmer(w: 40, h: 10),
+                spacer(y: 8),
+                shimmer(w: maxWidth(context), h: 100),
+              ],
+            ),
+          )),
+    );
   }
 
   Padding _quizItem(QuizData quiz) => Padding(
+        key: ValueKey(quiz.id),
         padding: EdgeInsets.symmetric(vertical: 2),
         child: Container(
           padding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
@@ -308,7 +333,7 @@ class _IndexSubScreenState extends ConsumerState<IndexSubScreen> with Ui {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text('Total Questions: ', style: xs01),
-                  Text('${quiz.questions.length} Questions', style: xs00),
+                  Text('${quiz.questionsAsInt.length} Questions', style: xs00),
                 ],
               ),
               Row(
@@ -361,6 +386,7 @@ class _IndexSubScreenState extends ConsumerState<IndexSubScreen> with Ui {
                 _Filter.values.length,
                 (index) => GestureDetector(
                       onTap: () => setState(() {
+                        previous = filter;
                         filter = _Filter.values[index];
                       }),
                       child: Padding(
@@ -403,6 +429,7 @@ class _IndexSubScreenState extends ConsumerState<IndexSubScreen> with Ui {
     final temp = ref.read(categoriesProvider);
     return temp.when(
         data: (data) => SizedBox(
+              key: ValueKey(filter),
               width: maxWidth(context),
               child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -427,17 +454,98 @@ class _IndexSubScreenState extends ConsumerState<IndexSubScreen> with Ui {
         loading: () => _defaultShimmer(context));
   }
 
-  Widget _challengeContent() {
-    return FutureBuilder(
-      future: fetchChallenges(
-        ref.read(generalDioProvider),
-        PageData(page: 1),
-      ),
-      builder: (context, snapshot) => Text(snapshot.hasData
-          ? snapshot.data.data['challenges'].first.toString()
-          : 'Please wait ...'),
-    );
-  }
+  Widget _challengeContent() => StoreConnector<QeasilyState, ChallengeVM>(
+      key: ValueKey(filter),
+      builder: (context, vm) {
+        if (justMountedChg) {
+          vm.dispatch(
+            ChallengeAction(
+              type: ChgActionType.fetch,
+              payload: ref.read(generalDioProvider),
+            ),
+          );
+        }
+        justMountedChg = false;
+        return Container(
+          color: Ui.black00,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              if (vm.state.challenges.isEmpty && vm.state.isLoading)
+                _defaultShimmer(context),
+              if (vm.state.challenges.isNotEmpty)
+                ...vm.state.challenges.map((e) => Padding(
+                      key: ValueKey(e.id),
+                      padding: EdgeInsets.symmetric(vertical: 2),
+                      child: Container(
+                        width: maxWidth(context) * 0.9,
+                        constraints: BoxConstraints(minHeight: 80),
+                        padding:
+                            EdgeInsets.symmetric(vertical: 10, horizontal: 12),
+                        decoration: BoxDecoration(
+                            color: Color(0xFF181818),
+                            borderRadius: BorderRadius.circular(4),
+                            boxShadow: [
+                              BoxShadow(
+                                blurRadius: 4,
+                                offset: Offset(2, 4),
+                                color: Color(0x47000000),
+                              )
+                            ]),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(e.name, style: small00),
+                            spacer(y: 15),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                // Icon(Icons.monetization_on, size: 10),
+                                Text('Entry Fee: ', style: xs01),
+                                Text('${e.paid ? e.entryFee : "Free"}',
+                                    style: xs00),
+                              ],
+                            ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text('Type', style: xs01),
+                                spacer(),
+                                // Divider(color: Colors.grey, height: 10),
+                                spacer(),
+                                Text(
+                                    e.paid
+                                        ? 'Paid Challenge'
+                                        : 'Free Challenge',
+                                    style: xs01)
+                              ],
+                            ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              children: [
+                                Icon(Icons.query_builder,
+                                    size: 10, color: Colors.redAccent),
+                                spacer(),
+                                Text(() {
+                                  final temp = e.dateAdded
+                                      .difference(DateTime.now())
+                                      .inDays;
+                                  return temp > 1
+                                      ? 'Ended'
+                                      : 'Ends in $temp Days';
+                                  // return e.duration.toString();
+                                }(), style: xs01),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    )),
+            ],
+          ),
+        );
+      },
+      converter: (store) => ChallengeVM(store));
 
   Widget _searchBar() {
     return Align(

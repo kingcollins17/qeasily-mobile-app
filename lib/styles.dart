@@ -40,7 +40,14 @@ mixin Ui {
 
   double maxHeight(BuildContext context) => MediaQuery.of(context).size.height;
 
-  Widget shimmer({double? w, double? h, double? br}) => Builder(
+  Widget shimmer({double? w, double? h, double? br, bool circle = false}) =>
+      circle
+          ? Container(
+              width: w ?? 50,
+              height: w ?? 50,
+              decoration: const BoxDecoration(
+                  color: Colors.grey, shape: BoxShape.circle))
+          : Builder(
       builder: (context) => Container(
           width: w ?? maxWidth(context) * 0.4,
           height: h ?? 10,

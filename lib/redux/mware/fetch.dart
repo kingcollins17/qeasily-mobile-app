@@ -50,3 +50,25 @@ dynamic quizMware(Store<QeasilyState> store, action, NextDispatcher next) {
   }
   if (shouldCallNext) next(action);
 }
+
+dynamic chgMware(Store<QeasilyState> store, action, NextDispatcher next) {
+  bool shouldCallNext = true;
+  if (action is ChallengeAction) {
+    switch (action.type) {
+      case ChgActionType.fetch:
+        shouldCallNext = store.state.challenges.page.hasNextPage;
+        if (action.payload is Dio && store.state.challenges.page.hasNextPage) {
+          fetchChallenges(
+                  action.payload as Dio, store.state.challenges.page..next())
+              .then(
+            (value) => store.dispatch(
+                ChallengeAction(type: ChgActionType.update, payload: value)),
+          );
+        }
+        break;
+      default:
+        break;
+    }
+  }
+  if (shouldCallNext) next(action);
+}

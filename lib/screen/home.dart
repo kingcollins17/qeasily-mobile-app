@@ -61,7 +61,7 @@ class _Drawer extends ConsumerWidget with Ui {
               onTap: () => push(APIDoc(), context),
               child: Container(
                 decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.background,
+                    // color: Theme.of(context).colorScheme.background,
                     boxShadow: [
                       BoxShadow(
                           blurRadius: 2.5,
@@ -78,22 +78,33 @@ class _Drawer extends ConsumerWidget with Ui {
                     Text(
                       'Subscription and Pricing',
                       style: small10,
-                    ).animate(
-                        effects: [ShimmerEffect(), ShakeEffect()],
-                        autoPlay: true)
+                    )
+                        .animate(
+                            onInit: (controller) => controller.repeat(),
+                            autoPlay: true)
+                        .shimmer(
+                      duration: Duration(seconds: 2),
+                      colors: [primary, Colors.white],
+                    )
                   ],
                 ),
               ),
             ),
             spacer(y: 30),
-            _drawerTile('Dasboard', Icons.dashboard),
+
+            GestureDetector(
+                onTap: () => context.go('/home/dashboard'),
+                child: _drawerTile('Dasboard', Icons.dashboard)),
             spacer(y: 20),
-            _drawerTile('Follow Creators', Icons.people_alt_rounded),
+            GestureDetector(
+                onTap: () => context.go('/home/follow'),
+                child:
+                    _drawerTile('Follow Creators', Icons.people_alt_rounded)),
             spacer(y: 20),
             _drawerTile('Notifications', Icons.notifications_active),
             spacer(y: 20),
             _drawerTile('Settings', Icons.settings_suggest),
-            
+
             spacer(y: 40),
             _AdminTiles(),
             Expanded(

@@ -18,6 +18,8 @@ class QuizData {
   @JsonKey(name: 'date_added')
   final DateTime dateAdded;
 
+  List<int> get questionsAsInt => parseQuestions(questions);
+
   factory QuizData.fromJson(Map<String, dynamic> json) =>
       _$QuizDataFromJson(json);
 
@@ -47,4 +49,10 @@ class QuizData {
 
   @override
   int get hashCode => id.hashCode ^ title.hashCode ^ description.hashCode;
+}
+
+List<int> parseQuestions(String questions) {
+  final temp = questions.replaceFirst('[', '').replaceFirst(']', '').split(',');
+
+  return temp.map((e) => int.parse(e)).toList();
 }

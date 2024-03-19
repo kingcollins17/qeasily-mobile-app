@@ -8,7 +8,9 @@ class ChallengeData {
   final String name;
   final String quizzes;
 
+  @CustomConverter()
   final bool paid;
+
   final double reward;
 
   @JsonKey(name: 'entry_fee')
@@ -41,4 +43,17 @@ class ChallengeData {
   String toString() =>
       'ChallengeData{id: $id, name: $name, duration: $duration '
       'days, paid: $paid, reward: $reward, userId: $userId}';
+}
+
+class CustomConverter extends JsonConverter<bool, int> {
+  const CustomConverter();
+  @override
+  fromJson(json) {
+    return json == 1;
+  }
+
+  @override
+  toJson(object) {
+    return object ? 1 : 0;
+  }
 }

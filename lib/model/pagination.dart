@@ -9,7 +9,7 @@ class PageData {
   int page;
 
   @JsonKey(name: 'per_page')
-  int perPage;
+  final int perPage;
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   bool hasNextPage;
