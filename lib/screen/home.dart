@@ -42,7 +42,7 @@ class _Drawer extends ConsumerWidget with Ui {
 
     return Material(
       elevation: 10,
-      color: Ui.black00,
+      color: Theme.of(context).colorScheme.background,
       child: Container(
         width: MediaQuery.of(context).size.width * 0.8,
         height: MediaQuery.of(context).size.height,
@@ -61,7 +61,7 @@ class _Drawer extends ConsumerWidget with Ui {
               onTap: () => push(APIDoc(), context),
               child: Container(
                 decoration: BoxDecoration(
-                    // color: Theme.of(context).colorScheme.background,
+                    color: darkShade,
                     boxShadow: [
                       BoxShadow(
                           blurRadius: 2.5,
@@ -84,7 +84,7 @@ class _Drawer extends ConsumerWidget with Ui {
                             autoPlay: true)
                         .shimmer(
                       duration: Duration(seconds: 2),
-                      colors: [jungleGreen, Colors.white],
+                      colors: [Colors.white, vividOrange],
                     )
                   ],
                 ),
@@ -173,9 +173,21 @@ class _AdminTiles extends StatelessWidget with Ui {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'Admin',
-          style: mukta,
+        GestureDetector(
+          onTap: () {
+            context.push('/admin');
+          },
+          child: Container(
+            padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            decoration: BoxDecoration(
+              color: raisingBlack,
+              borderRadius: BorderRadius.circular(6),
+            ),
+            child: Text(
+              'Admin',
+              style: mukta,
+            ),
+          ),
         ),
         Divider(color: Colors.grey),
         spacer(y: 15),

@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:qeasily/model/model.dart';
 import 'package:qeasily/provider/dio_provider.dart';
 import 'package:qeasily/route_doc.dart';
+import 'package:qeasily/screen/quiz/mcq_revision.dart';
 import 'package:qeasily/styles.dart';
 
 import 'package:qeasily/widget/widget.dart';
@@ -163,8 +164,23 @@ class _QuizSessionScreenState extends ConsumerState<MCQSessionScreen>
                 showModal(context: context, builder: _confirmSubmission)
                     .then((value) {
                   if (value == true) {
-                    Navigator.pop(context);
-                    push(ResultScreen(mcqs: mcqs!, options: options), context);
+                    // Navigator.pop(context);
+                    final (score, total, attempted, incorrect) =
+                        markMCQQuiz(mcqs!, options);
+                    push<bool>(
+                            ResultScreen(
+                                score: score,
+                                total: total,
+                                attempted: attempted,
+                                incorrect: incorrect),
+                            context)
+                        .then((value) {
+                      Navigator.pop(context);
+                      if (value == true) {
+                        push(MCQRevision(options: options, questions: mcqs!),
+                            context);
+                      }
+                    });
                   }
                 });
               },
@@ -263,22 +279,12 @@ class _QuizSessionScreenState extends ConsumerState<MCQSessionScreen>
                 crossAxisAlignment: CrossAxisAlignment.end,
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  ElevatedButton(
-                    onPressed: _goToPreviousQuest,
-                    style: ButtonStyle(
-                        foregroundColor: MaterialStatePropertyAll(
-                      vividOrange.withOpacity(0.5),
-                    )),
-                    child: Text('<', style: medium10),
+                  GestureDetector(
+                    onTap: _goToPreviousQuest,
+                    child: direction(),
                   ),
-                  FilledButton(
-                      style: ButtonStyle(
-                          backgroundColor: MaterialStatePropertyAll(
-                              jungleGreen.withOpacity(0.8)),
-                          foregroundColor:
-                              MaterialStatePropertyAll(Color(0xFFF0F0F0))),
-                      onPressed: goToNextQuestion,
-                      child: Text('>', style: mukta))
+                  GestureDetector(
+                      onTap: goToNextQuestion, child: direction(dir: 'right'))
                 ],
               ),
               // spacer(y: 50),
@@ -391,7 +397,6 @@ class _QuizSessionScreenState extends ConsumerState<MCQSessionScreen>
     );
   }
 }
-
 
 Future<MCQResp> fetchMCQQuestions(Dio dio,
     {required PageData page, required int quiz_id}) async {

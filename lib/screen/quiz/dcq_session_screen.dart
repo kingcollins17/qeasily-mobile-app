@@ -1,5 +1,6 @@
-// ignore_for_file: prefer_const_literals_to_create_immutables, prefer_const_constructors, sort_child_properties_last
+// ignore_for_file: prefer_const_literals_to_create_immutables, prefer_const_constructors, sort_child_properties_last, use_build_context_synchronously
 import 'dart:math' as math;
+import 'package:animations/animations.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -7,6 +8,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:qeasily/model/model.dart';
 import 'package:qeasily/provider/dio_provider.dart';
 import 'package:qeasily/route_doc.dart';
+import 'package:qeasily/screen/quiz/dcq_revision.dart';
+import 'package:qeasily/screen/quiz/quiz.dart';
 import 'package:qeasily/styles.dart';
 import 'package:qeasily/widget/widget.dart';
 import 'package:shimmer/shimmer.dart';
@@ -69,22 +72,12 @@ class _DCQSessionScreenState extends ConsumerState<DCQSessionScreen>
   }
 
   void goToNext() async {
-    if (dcqs != null &&
-        currentQuestionIndex + 1 >= dcqs!.length - 1 &&
-        currentPage.hasNextPage) {
-      _notify('Please wait', loading: true);
-      final (:data, :detail, :page) = await fetchDCQQuestions(
-          ref.read(generalDioProvider), widget.data.id, currentPage..next());
-      dcqs?.addAll(data);
-      //if page has next, advance page pointer
-      page != null && page.hasNextPage ? currentPage.next() : null;
-      await _notify(detail, loading: false);
-    }
-
     if (dcqs != null && currentQuestionIndex < dcqs!.length - 1) {
-      setState(() {
-        currentQuestionIndex += 1;
-      });
+      setState(() => currentQuestionIndex += 1);
+      //
+    } else if (dcqs != null && currentQuestionIndex == dcqs!.length - 1) {
+      final fetched = await fetchNextPage();
+      fetched ? setState(() => currentQuestionIndex += 1) : null;
     }
   }
 
@@ -96,12 +89,48 @@ class _DCQSessionScreenState extends ConsumerState<DCQSessionScreen>
     }
   }
 
+  Future<bool> fetchNextPage() async {
+    if (currentPage.hasNextPage) {
+      isPointerOpen = false;
+      _notify('Fetching next batch', loading: true);
+      final (:detail, :data, :page) = await fetchDCQQuestions(
+          ref.read(generalDioProvider), widget.data.id, currentPage..next());
+
+      dcqs?.addAll(data);
+      currentPage = page ?? currentPage;
+      _notify(detail, loading: false);
+      return page != null && data.isNotEmpty;
+    }
+    return false;
+  }
+
+  Future<void> handleSubmit() async {
+    final value = await showModal<bool>(
+        context: context, builder: ((context) => _confirmSubmission()));
+
+    if (value == true) {
+      final (score, total, attempted, incorrect) = markDCQQuiz(dcqs!, options);
+      final revise = await push<bool>(
+          ResultScreen(
+              score: score,
+              total: total,
+              attempted: attempted,
+              incorrect: incorrect),
+          context);
+      Navigator.pop(context);
+      if (revise == true) {
+        push(DCQRevision(choices: options, questions: dcqs!, quiz: widget.data),
+            context);
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return BackButtonListener(
       onBackButtonPressed: () async {
-        _notify('You cannot go back at this time!');
-        return true;
+        // _notify('You cannot go back at this time!');
+        return false;
       },
       child: Scaffold(
         key: scaffoldKey,
@@ -195,33 +224,43 @@ class _DCQSessionScreenState extends ConsumerState<DCQSessionScreen>
                           ),
                         ),
                       ),
+                      spacer(y: 20),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          ElevatedButton.icon(
-                              onPressed: goToPrevious,
-                              icon: Icon(Icons.arrow_back_ios_new,
-                                  size: 15, color: athensGray),
-                              label: Text('Previous', style: mukta)),
-                          ElevatedButton(
-                              onPressed: () => goToNext(),
-                              // icon: Icon(Icons.arrow_back_ios_new, size: 15),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Text('Next', style: mukta),
-                                  spacer(),
-                                  Icon(Icons.arrow_forward_ios,
-                                      size: 15, color: athensGray),
-                                ],
-                              )),
+                          GestureDetector(
+                              onTap: goToPrevious,
+                              child: direction(dir: 'left')),
+                          GestureDetector(
+                              onTap: () => goToNext(),
+                              child: direction(dir: 'right')),
                         ],
-                      )
+                      ),
                     ],
                   ),
                 ),
+              spacer(y: 20),
             ],
           ),
+          Positioned(
+              bottom: 20,
+              left: 20,
+              child: Center(
+                  child: Material(
+                      child: InkWell(
+                          onTap: handleSubmit,
+                          borderRadius: BorderRadius.circular(6),
+                          overlayColor: MaterialStatePropertyAll(tiber),
+                          child: Ink(
+                            height: 42,
+                            width: 120,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(6),
+                              color: jungleGreen.withOpacity(0.5),
+                            ),
+                            child:
+                                Center(child: Text('Submit', style: small10)),
+                          ))))),
           if (isPointerOpen)
             Positioned(
                 bottom: 1.5,
@@ -260,10 +299,48 @@ class _DCQSessionScreenState extends ConsumerState<DCQSessionScreen>
     );
   }
 
+  Center _confirmSubmission() {
+    return Center(
+      child: Material(
+        color: Colors.transparent,
+        child: Container(
+          width: maxWidth(context) * 0.85,
+          height: 80,
+          decoration: BoxDecoration(color: woodSmoke),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text('Are you sure you want to submit', style: small00),
+              spacer(),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  GestureDetector(
+                      onTap: () => Navigator.pop(context, true),
+                      child: Padding(
+                        padding: const EdgeInsets.all(10.0),
+                        child: Text('Yes', style: rubik),
+                      )),
+                  spacer(x: 24),
+                  GestureDetector(
+                      onTap: () => Navigator.pop(context, false),
+                      child: Padding(
+                        padding: const EdgeInsets.all(10.0),
+                        child: Text('Cancel', style: mukta),
+                      ))
+                ],
+              )
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   Material _pointerList() {
     return Material(
         child: Container(
-      height: maxHeight(context) * 0.5,
+      height: maxHeight(context) * 0.4,
       width: maxWidth(context),
       decoration: BoxDecoration(
           color: Ui.black00,
@@ -316,6 +393,24 @@ class _DCQSessionScreenState extends ConsumerState<DCQSessionScreen>
   }
 }
 
+///Marks a double choice quiz
+(int score, int total, int attempted, int incorrect) markDCQQuiz(
+    List<DCQData> dcqs, List<bool?> choices) {
+  var attempted = 0, score = 0;
+  final total = choices.length;
+  for (var i = 0; i < dcqs.length; i++) {
+    score += dcqs[i].correct == choices[i] ? 1 : 0;
+  }
+
+  return (
+    score,
+    total,
+    choices.where((element) => element != null).length,
+    total - score
+  );
+}
+
+///Fetch a page of questions over the network
 Future<DCQResp> fetchDCQQuestions(Dio dio, int quizId, PageData page) async {
   try {
     final res = await dio.get(

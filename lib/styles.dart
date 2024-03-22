@@ -11,6 +11,7 @@ mixin Ui {
   final Color jungleGreen = const Color(0xFF008669),
       tiber = const Color(0xFF0E3031),
       darkShade = const Color(0xFF181818),
+      darkerShade = const Color(0xFF0F0F0F),
       bunker = const Color(0xFF1F2C34),
       athensGray = const Color(0XFFEAECEF),
       woodSmoke = const Color(0xFF121212),
@@ -45,6 +46,29 @@ mixin Ui {
 
   Widget loader({Color color = Colors.white, double sz = 50}) =>
       Center(child: SpinKitThreeInOut(size: sz, color: color));
+
+  Widget direction({String dir = 'left'}) => Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: athensGray,
+        shape: BoxShape.circle,
+        boxShadow: const [
+          BoxShadow(
+            blurRadius: 4,
+            offset: Offset(2, 4),
+            color: Color(0x6F000000),
+          )
+        ],
+      ),
+      child: Icon(
+        switch (dir) {
+          'left' => Icons.arrow_back_ios_new_rounded,
+          'right' => Icons.arrow_forward_ios,
+          _ => Icons.arrow_forward_ios,
+        },
+        size: 22,
+        color: woodSmoke,
+      ));
 
   double maxWidth(BuildContext context) => MediaQuery.of(context).size.width;
 

@@ -9,15 +9,20 @@ import 'package:qeasily/styles.dart';
 class ResultScreen extends StatelessWidget with Ui {
   ResultScreen({
     super.key,
-    required this.mcqs,
-    required this.options,
+    required this.score,
+    required this.total,
+    required this.attempted,
+    required this.incorrect,
+    // required this.mcqs,
+    // required this.options,
   });
-  final List<MCQData> mcqs;
-  final List<MCQOption?> options;
+  // final List<MCQData> mcqs;
+  // final List<MCQOption?> options;
+  final int score, total, attempted, incorrect;
 
   @override
   Widget build(BuildContext context) {
-    var (score, total, attempted, incorrect) = markQuiz(mcqs, options);
+    // var (score, total, attempted, incorrect) = markMCQQuiz(mcqs, options);
 
     final halfW = maxWidth(context) * 0.45;
     return Scaffold(
@@ -87,10 +92,7 @@ class ResultScreen extends StatelessWidget with Ui {
                     child: InkWell(
                       borderRadius: BorderRadius.circular(6),
                       onTap: () {
-                        push(
-                          MCQRevision(options: options, questions: mcqs),
-                          context,
-                        );
+                        Navigator.pop(context, true);
                       },
                       child: Ink(
                         height: 48,
@@ -134,7 +136,7 @@ class ResultScreen extends StatelessWidget with Ui {
   }
 }
 
-(int score, int totalQuestions, int attempted, int incorrect) markQuiz(
+(int score, int totalQuestions, int attempted, int incorrect) markMCQQuiz(
     List<MCQData> questions, List<MCQOption?> choices) {
   var score = 0;
   // var correct = 0;

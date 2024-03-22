@@ -161,18 +161,13 @@ class _MCQRevisionState extends ConsumerState<MCQRevision> with Ui {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  TextButton(
-                    style: ButtonStyle(
-                        foregroundColor: MaterialStatePropertyAll(jungleGreen)),
-                    onPressed: goToPrevious,
-                    child: Text('Previous', style: small00),
+                  GestureDetector(
+                    onTap: goToPrevious,
+                    child: direction(dir: 'left'),
                   ),
-                  FilledButton(
-                    style: ButtonStyle(
-                        backgroundColor: MaterialStatePropertyAll(jungleGreen),
-                        foregroundColor: MaterialStatePropertyAll(athensGray)),
-                    onPressed: goToNextQuestion,
-                    child: Text('Next Question', style: small00),
+                  GestureDetector(
+                    onTap: goToNextQuestion,
+                    child: direction(dir: 'right'),
                   ),
                 ],
               )),

@@ -4,10 +4,9 @@ import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:hive_flutter/adapters.dart';
 import 'package:qeasily/redux/redux.dart';
-import 'package:qeasily/screen/quiz/quiz.dart';
+import 'package:qeasily/screen/admin/admin.dart';
 import 'package:qeasily/screen/sub/dashboard.dart';
 import 'package:qeasily/screen/sub/follow_creators.dart';
 
@@ -55,19 +54,10 @@ final router = GoRouter(routes: [
             pageBuilder: (context, state) =>
                 animatePage(FollowCreatorScreen(), state)),
       ]),
-
-  // GoRoute(path: '/quiz', routes: [
-  //   GoRoute(
-  //     path: '',
-  //     pageBuilder: (context, state) => animatePage(QuizDetailScreen(), state),
-  //   ),
-  //   GoRoute(
-  //     path: '/session',
-  //     pageBuilder: (context, state) => animatePage(QuizSessionScreen(), state),
-  //   )
-  // ])
-
-  // GoRoute(path: '/home')
+  GoRoute(
+    path: '/admin',
+    pageBuilder: (context, state) => animatePage(AdminManageScreen(), state),
+  )
 ]);
 
 //
