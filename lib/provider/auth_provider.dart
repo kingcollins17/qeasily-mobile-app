@@ -10,6 +10,7 @@ part 'auth_provider.g.dart';
 
 @Riverpod(keepAlive: true)
 class UserAuth extends _$UserAuth {
+  //
   @override
   Future<UserData> build() async {
     final _dio = ref.watch(generalDioProvider);
@@ -26,17 +27,21 @@ class UserAuth extends _$UserAuth {
   }
 
   Future<(String, bool)> login(String email, String password) async {
-    final _dio = ref.read(generalDioProvider);
-    final res = await _dio
-        .post(APIUrl.login.url, data: {'email': email, 'password': password});
-    if (res.statusCode == 200) {
-      ref
-          .read(generalDioProvider.notifier)
-          .authenticate(AccessToken(res.data['token']));
+    try {
+      final _dio = ref.read(generalDioProvider);
+      final res = await _dio
+          .post(APIUrl.login.url, data: {'email': email, 'password': password});
+      if (res.statusCode == 200) {
+        ref
+            .read(generalDioProvider.notifier)
+            .authenticate(AccessToken(res.data['token']));
 
-      await future;
-      return ('You are logged in', true);
+        await future;
+        return ('You are logged in', true);
+      }
+      return (res.data['detail'].toString(), false);
+    } catch (e) {
+      return (e.toString(), false);
     }
-    return (res.data['detail'].toString(), false);
   }
 }

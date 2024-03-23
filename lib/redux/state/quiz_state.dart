@@ -1,24 +1,75 @@
 // ignore_for_file: no_leading_underscores_for_local_identifiers
 
+import 'dart:convert';
+
 import 'package:dio/dio.dart';
 import 'package:qeasily/model/model.dart';
 import 'package:qeasily/route_doc.dart';
 import 'package:redux/redux.dart';
+import 'package:json_annotation/json_annotation.dart';
 
+part 'quiz_state.g.dart';
+
+@JsonSerializable()
 class QuizState {
-  PageData page = PageData(perPage: 2);
-  List<QuizData> quizzes = [];
+
+  @_PageConverter()
+  PageData page;
+
+  @_DataConverter()
+  List<QuizData> quizzes;
+
+  @JsonKey(includeFromJson: false, includeToJson: false)
   String? message;
+
+  @JsonKey(includeFromJson: false, includeToJson: false)
   bool isLoading = false;
+  
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  int? topic, category;
+
+  QuizState({PageData? page, List<QuizData>? quizzes})
+      : page = page ?? PageData(perPage: 5),
+        quizzes = quizzes ?? const <QuizData>[];
 
   //
-  int? topic, category;
-  QuizState();
+  factory QuizState.fromJson(Map<String, dynamic> json) =>
+      _$QuizStateFromJson(json);
+
+  //
+  Map<String, dynamic> toJson() => _$QuizStateToJson(this);
 
   @override
   toString() => 'QuizState{page: $page, message: $message, quizzes:'
       ' $quizzes, isLoading:'
       ' $isLoading, topic: $topic, category: $category}';
+}
+
+class _DataConverter extends JsonConverter<List<QuizData>, List<dynamic>> {
+  const _DataConverter();
+  @override
+  List<QuizData> fromJson(List<dynamic> data) {
+    return data.map((e) => QuizData.fromJson(e)).toList();
+  }
+
+  @override
+  List<Map<String, dynamic>> toJson(List<QuizData> object) {
+    return object.map((e) => e.toJson()).toList();
+  }
+}
+
+class _PageConverter extends JsonConverter<PageData, Map<String, dynamic>> {
+  const _PageConverter();
+
+  @override
+  PageData fromJson(Map<String, dynamic> json) {
+    return PageData.fromJson(json);
+  }
+
+  @override
+  Map<String, dynamic> toJson(PageData object) {
+    return object.toJson();
+  }
 }
 
 final quizReducer = combineReducers([

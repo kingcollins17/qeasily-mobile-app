@@ -1,4 +1,5 @@
-const domain = '192.168.43.0';
+// const domain = '192.168.43.0';
+const domain = '192.168.0.3';
 const baseUrl = 'http://$domain';
 const authPrefix = '/auth';
 const categoryPrefix = '/categories';
@@ -133,7 +134,7 @@ enum APIUrl {
       requiresAuth: true, queryParams: ['id=7'], method: _Method.post),
   unfollow(followPrefix, '',
       requiresAuth: true, queryParams: ['id=7'], method: _Method.delete),
-fetchAccountToFollow(followPrefix, '/accounts',
+  fetchAccountToFollow(followPrefix, '/accounts',
       method: _Method.get, requiresAuth: true, body: pageInfoBody),
 
   fetchFollowers(followPrefix, '/followers',
@@ -141,7 +142,6 @@ fetchAccountToFollow(followPrefix, '/accounts',
 
   fetchChallenges(challengePrefix, '',
       method: _Method.get, queryParams: ['feed=true'], body: pageInfoBody),
-
 
   fetchUserCreatedChallenges(challengePrefix, '/created-challenges',
       body: pageInfoBody),

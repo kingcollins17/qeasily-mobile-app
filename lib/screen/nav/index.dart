@@ -31,7 +31,9 @@ class _IndexSubScreenState extends ConsumerState<IndexSubScreen> with Ui {
   final scrollCtrl = ScrollController();
 
   //Whether this widget was just mounted
-  bool justMountedQuiz = true, justMountedTopics = true, justMountedChg = true;
+  bool justMountedQuiz = false,
+      justMountedTopics = false,
+      justMountedChg = false;
 
   bool atBottom(ScrollController controller) =>
       controller.position.pixels == controller.position.maxScrollExtent;

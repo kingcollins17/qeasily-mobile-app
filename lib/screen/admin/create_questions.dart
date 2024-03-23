@@ -85,20 +85,6 @@ class _CreateQuestionsState extends ConsumerState<CreateQuestions>
             _ => SizedBox()
           },
         ),
-        // body: Center(
-        //   child: Column(
-        //     mainAxisAlignment: MainAxisAlignment.center,
-        //     children: [
-        //       Text('$response'),
-        //       FilledButton(
-        //         onPressed: () {
-        //           _notify('Adding dcq');
-        //         },
-        //         child: Text(isLoading ? 'Please wait ...' : 'Press'),
-        //       ),
-        //     ],
-        //   ),
-        // ),
       ),
     ], notification);
   }

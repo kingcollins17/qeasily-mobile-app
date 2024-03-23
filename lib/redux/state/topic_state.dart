@@ -4,22 +4,67 @@ import 'package:dio/dio.dart';
 import 'package:qeasily/model/model.dart';
 import 'package:qeasily/route_doc.dart';
 import 'package:redux/redux.dart';
+import 'package:json_annotation/json_annotation.dart';
 
+part 'topic_state.g.dart';
+
+@JsonSerializable()
 class TopicState {
+
+  @_PageConverter()
   PageData page;
+
+  @_DataConverter()
   List<TopicData> topics;
+
+  @JsonKey(includeFromJson: false, includeToJson: false)
   bool isLoading = false;
+
+  @JsonKey(includeFromJson: false, includeToJson: false)
   String? message;
 
   ///Holds the current selected categoryId
+  @JsonKey(includeFromJson: false, includeToJson: false)
   int? categoryId;
   //
   TopicState({PageData? page, this.topics = const []})
-      : this.page = page ?? PageData(perPage: 1);
+      : this.page = page ?? PageData(perPage: 6);
+
+  factory TopicState.fromJson(Map<String, dynamic> json) =>
+      _$TopicStateFromJson(json);
+
+  Map<String, dynamic> toJson() => _$TopicStateToJson(this);
 
   @override
   toString() => 'TopicState{isLoading: $isLoading, page: $page, '
       'topics: $topics, message: $message, categorId: $categoryId}';
+}
+
+class _DataConverter extends JsonConverter<List<TopicData>, List<dynamic>> {
+  const _DataConverter();
+  @override
+  List<TopicData> fromJson(List<dynamic> json) {
+    return json.map((e) => TopicData.fromJson(e)).toList();
+  }
+
+  @override
+  List<Map<String, dynamic>> toJson(List<TopicData> object) {
+    return object.map((e) => e.toJson()).toList();
+  }
+}
+
+class _PageConverter extends JsonConverter<PageData, Map<String, dynamic>> {
+  const _PageConverter();
+
+  @override
+  PageData fromJson(Map<String, dynamic> json) {
+    return PageData.fromJson(json);
+  }
+
+  @override
+  Map<String, dynamic> toJson(PageData object) {
+    return object.toJson();
+  }
 }
 
 typedef _Pholder0 = ({

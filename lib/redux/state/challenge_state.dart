@@ -2,20 +2,60 @@ import 'package:dio/dio.dart';
 import 'package:qeasily/model/model.dart';
 import 'package:qeasily/route_doc.dart';
 import 'package:redux/redux.dart';
+import 'package:json_annotation/json_annotation.dart';
 
+part 'challenge_state.g.dart';
+
+@JsonSerializable()
 class ChallengeState {
+  @_PageConverter()
   PageData page;
-  bool isLoading;
+
+  @_DataConverter()
   List<ChallengeData> challenges;
+
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  bool isLoading;
+
+  @JsonKey(includeFromJson: false, includeToJson: false)
   String? message;
 
-  ChallengeState({this.message, this.challenges = const <ChallengeData>[]})
-      : page = PageData(),
+  ChallengeState({this.challenges = const <ChallengeData>[], PageData? page})
+      : page = page ?? PageData(perPage: 5),
         isLoading = false;
+
+  //
+  factory ChallengeState.fromJson(Map<String, dynamic> json) =>
+      _$ChallengeStateFromJson(json);
+
+  //
+  Map<String, dynamic> toJson() => _$ChallengeStateToJson(this);
 
   @override
   toString() =>
       'ChallengeState{page: $page, isLoading: $isLoading, data: $challenges, message: $message}';
+}
+
+class _PageConverter extends JsonConverter<PageData, Map<String, dynamic>> {
+  const _PageConverter();
+  @override
+  PageData fromJson(Map<String, dynamic> json) => PageData.fromJson(json);
+
+  @override
+  Map<String, dynamic> toJson(PageData object) => object.toJson();
+}
+
+class _DataConverter extends JsonConverter<List<ChallengeData>, List<dynamic>> {
+  const _DataConverter();
+  @override
+  List<ChallengeData> fromJson(List<dynamic> json) {
+    return json.map((e) => ChallengeData.fromJson(e)).toList();
+  }
+
+  @override
+  List<Map<String, dynamic>> toJson(List<ChallengeData> object) {
+    return object.map((e) => e.toJson()).toList();
+  }
 }
 
 final chgReducer = combineReducers([
