@@ -15,7 +15,7 @@ import 'dart:math';
 import 'package:qeasily/screen/screen.dart';
 import 'package:flutter_redux/flutter_redux.dart';
 import 'package:qeasily/test.dart';
-import 'package:qeasily/redux/state.dart';
+import 'package:qeasily/redux/qeasily_state.dart';
 import 'package:redux/redux.dart';
 import 'redux/mware/mware.dart';
 import 'package:redux_thunk/redux_thunk.dart';
@@ -28,7 +28,7 @@ void main() async {
     final persistor = Persistor(
         storage: FlutterStorage(),
         serializer: JsonSerializer<QeasilyState>(QeasilyState.fromJson),
-        throttleDuration: Duration(seconds: 2));
+        throttleDuration: Duration(seconds: 5));
 
     final store = Store(appReducer,
         initialState:

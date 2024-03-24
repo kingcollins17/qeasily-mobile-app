@@ -15,6 +15,8 @@ import 'package:qeasily/redux/redux.dart';
 import 'package:qeasily/screen/quiz/quiz.dart';
 import 'package:qeasily/screen/sub/search_screen.dart';
 import 'package:qeasily/styles.dart';
+import 'package:qeasily/widget/topic_item.dart';
+import 'package:qeasily/widget/widget.dart';
 import 'package:shimmer/shimmer.dart';
 
 class IndexSubScreen extends ConsumerStatefulWidget {
@@ -143,58 +145,7 @@ class _IndexSubScreenState extends ConsumerState<IndexSubScreen> with Ui {
                   // crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     ...vm.state.topics.map(
-                      (topic) => Padding(
-                        key: ValueKey(topic.id),
-                        padding: EdgeInsets.symmetric(vertical: 2),
-                        child: Container(
-                          padding:
-                              EdgeInsets.symmetric(horizontal: 6, vertical: 6),
-                          constraints: BoxConstraints(minHeight: 70),
-                          width: maxWidth(context) * 0.92,
-                          decoration: BoxDecoration(
-                              // color: Ui.black01
-                              color: Color(0xFF1A1A1A),
-                              borderRadius: BorderRadius.circular(4),
-                              boxShadow: [
-                                BoxShadow(
-                                    color: Color(0x73000000),
-                                    offset: Offset(2, 4),
-                                    blurRadius: 3)
-                              ]),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(topic.title, style: small00),
-                              spacer(y: 10),
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text('Level', style: xs01),
-                                  Column(
-                                    crossAxisAlignment: CrossAxisAlignment.end,
-                                    children: [
-                                      Row(
-                                          children: List.generate(
-                                              (int.parse(topic.level) / 100)
-                                                  .ceil(),
-                                              (index) =>
-                                                  Icon(Icons.star, size: 10))),
-                                      Text('${topic.level} level', style: xs01)
-                                    ],
-                                  ),
-                                ],
-                              ),
-                              Text(() {
-                                final temp = topic.description;
-                                return temp.length > 20
-                                    ? '${temp.substring(0, 20)}...'
-                                    : temp;
-                              }(), style: xs01)
-                            ],
-                          ),
-                        ),
-                      ),
+                      (topic) => TopicItemWidget(topic: topic)
                     ),
                     spacer(y: 10),
                     if (vm.state.topics.isNotEmpty && vm.state.isLoading)
@@ -235,7 +186,7 @@ class _IndexSubScreenState extends ConsumerState<IndexSubScreen> with Ui {
                 children: [
                   ...vm.state.quizzes.map((e) => GestureDetector(
                       onTap: () => push(QuizDetailScreen(data: e), context),
-                      child: _quizItem(e))),
+                      child: QuizItemWidget(quiz: e))),
                   spacer(y: 10),
                   if (vm.state.quizzes.isNotEmpty && vm.state.isLoading)
                     SpinKitThreeBounce(color: Colors.white, size: 35),
@@ -280,105 +231,7 @@ class _IndexSubScreenState extends ConsumerState<IndexSubScreen> with Ui {
     );
   }
 
-  Padding _quizItem(QuizData quiz) => Padding(
-        key: ValueKey(quiz.id),
-        padding: EdgeInsets.symmetric(vertical: 2),
-        child: Container(
-          padding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-          // height: 100,
-          constraints: BoxConstraints(minHeight: 110),
-          decoration: BoxDecoration(
-              color: darkShade,
-              borderRadius: BorderRadius.circular(8),
-              // color: Ui.black01,
-              boxShadow: [
-                BoxShadow(
-                    blurRadius: 4,
-                    color: Color(0xCE000000),
-                    offset: Offset(2, 4))
-              ]),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                constraints: BoxConstraints(minHeight: 50),
-                padding: EdgeInsets.symmetric(horizontal: 6, vertical: 4),
-                decoration: BoxDecoration(
-                  color: raisingBlack,
-                  borderRadius: BorderRadius.circular(6),
-                ),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Row(
-                      children: [
-                        ...List.generate(
-                          switch (quiz.difficulty) {
-                            'Hard' => 3,
-                            'Medium' => 2,
-                            'Easy' => 1,
-                            _ => 0,
-                          },
-                          (index) =>
-                              Icon(Icons.star, color: jungleGreen, size: 12),
-                        ),
-                        spacer(),
-                        Text(quiz.difficulty, style: xs01),
-                      ],
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: [
-                        Icon(
-                          Icons.query_builder_outlined,
-                          size: 10,
-                          color: Colors.grey,
-                        ),
-                        spacer(x: 6),
-                        Text(
-                          '${Duration(seconds: quiz.duration).inMinutes} Minutes',
-                          style: xs01,
-                        )
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-             
-              spacer(y: 10),
-              Row(
-                children: [
-                  Text(quiz.title, style: small00),
-                ],
-              ),
-              spacer(y: 15),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text('Total Questions: ', style: xs01),
-                  Text('${quiz.questionsAsInt.length} Questions', style: xs00),
-                ],
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  Text('Type: ', style: xs01),
-                  Text(
-                    () {
-                      final temp = quiz.type;
-                      return temp == 'mcq'
-                          ? 'Multiple Choice'
-                          : 'True or False';
-                    }(),
-                    style: xs00,
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-      );
-
+  Widget _quizItem(QuizData quiz) => SizedBox();
   Widget _filterContent(_Filter filter) {
     Widget widget = SizedBox();
     switch (filter) {
@@ -495,101 +348,8 @@ class _IndexSubScreenState extends ConsumerState<IndexSubScreen> with Ui {
             if (vm.state.challenges.isEmpty && vm.state.isLoading)
               _defaultShimmer(context),
             if (vm.state.challenges.isNotEmpty)
-              ...vm.state.challenges.map((e) => Padding(
-                    key: ValueKey(e.id),
-                    padding: EdgeInsets.symmetric(vertical: 2),
-                    child: Container(
-                      width: maxWidth(context) * 0.9,
-                      constraints: BoxConstraints(minHeight: 80),
-                      padding:
-                          EdgeInsets.symmetric(vertical: 10, horizontal: 12),
-                      decoration: BoxDecoration(
-                          color: darkShade,
-                          borderRadius: BorderRadius.circular(4),
-                          boxShadow: [
-                            BoxShadow(
-                              blurRadius: 4,
-                              offset: Offset(2, 4),
-                              color: Color(0x47000000),
-                            )
-                          ]),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          // Row(children: [],),
-                          spacer(y: 15),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(e.name, style: small00),
-                              Container(
-                                padding: EdgeInsets.symmetric(
-                                    horizontal: 6, vertical: 6),
-                                decoration: BoxDecoration(
-                                  color: Color(0xFFA13131),
-                                  borderRadius: BorderRadius.circular(6),
-                                ),
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Icon(Icons.query_builder,
-                                        size: 10, color: athensGray),
-                                    spacer(),
-                                    Text(() {
-                                      final temp = e.dateAdded
-                                          .difference(DateTime.now())
-                                          .inDays;
-                                      return temp > 1
-                                          ? 'Ended'
-                                          : 'Ends in $temp Days';
-                                      // return e.duration.toString();
-                                    }(), style: mukta),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                          spacer(y: 15),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            children: [
-                              // Icon(Icons.monetization_on, size: 10),
-                              Text('Entry Fee: ', style: xs01),
-                              Text('${e.paid ? e.entryFee : "Free"}',
-                                  style: xs00),
-                            ],
-                          ),
-                          spacer(),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            children: [
-                              // Text('Type', style: xs01),
-                              // spacer(),
-                              // Divider(color: Colors.grey, height: 10),
-                              Icon(Icons.subscriptions_rounded,
-                                  size: 20, color: athensGray),
-                              spacer(),
-                              Container(
-                                padding: EdgeInsets.symmetric(
-                                    horizontal: 6, vertical: 6),
-                                decoration: BoxDecoration(
-                                    color: raisingBlack,
-                                    borderRadius: BorderRadius.circular(6)),
-                                child: Text(
-                                    e.paid
-                                        ? 'Paid Challenge'
-                                        : 'Free Challenge',
-                                    style: xs01),
-                              ),
-                            ],
-                          ),
-                          
-                          
-                        ],
-                      ),
-                    ),
-                  )),
+              ...vm.state.challenges
+                  .map((challenge) => ChallengeItemWidget(challenge: challenge))
           ],
         );
       },

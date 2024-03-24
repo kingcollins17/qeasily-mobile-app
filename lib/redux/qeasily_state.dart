@@ -7,7 +7,7 @@ import 'package:json_annotation/json_annotation.dart';
 import 'state/topic_state.dart';
 import 'state/quiz_state.dart';
 
-part 'state.g.dart';
+part 'qeasily_state.g.dart';
 
 @JsonSerializable()
 class QeasilyState {
