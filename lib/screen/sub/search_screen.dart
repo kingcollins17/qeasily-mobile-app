@@ -1,14 +1,17 @@
 // ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables, no_leading_underscores_for_local_identifiers
 
+import 'package:animations/animations.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_redux/flutter_redux.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:qeasily/model/model.dart';
 import 'package:qeasily/provider/dio_provider.dart';
 import 'package:qeasily/redux/redux.dart';
 import 'package:qeasily/route_doc.dart';
 import 'package:qeasily/styles.dart';
+import 'package:qeasily/widget/widget.dart';
 import 'package:riverpod/riverpod.dart';
 import 'package:shimmer/shimmer.dart';
 
@@ -21,7 +24,7 @@ class SearchScreen extends ConsumerStatefulWidget {
 class _SearchScreenState extends ConsumerState<SearchScreen> with Ui {
   final searchTextController = TextEditingController();
   String? query;
-
+  String searchFocus = 'Quizzes';
   bool isFocused = true;
 
   @override
@@ -64,7 +67,9 @@ class _SearchScreenState extends ConsumerState<SearchScreen> with Ui {
                                 shimmer(h: 70, w: maxWidth(context) * 0.9)
                               ],
                             )),
-                      if (vm.state.queries.isNotEmpty && !vm.state.isLoading)
+                      if (vm.state.queries.isNotEmpty &&
+                          !vm.state.isLoading &&
+                          isFocused)
                         ...List.generate(
                             _filter.length,
                             (index) => InkWell(
@@ -94,40 +99,70 @@ class _SearchScreenState extends ConsumerState<SearchScreen> with Ui {
                                   ),
                                 )),
                       spacer(y: 20),
-                      if (vm.state.topicsResult != null &&
-                          vm.state.topicsResult!.isNotEmpty &&
-                          !vm.state.isLoading) ...[
-                        Text('Topics search Results', style: small00),
-                        spacer(y: 10),
-                        ...List.generate(
-                            vm.state.topicsResult?.length ?? 0,
-                            (index) => Container(
-                                  padding: EdgeInsets.symmetric(
-                                    horizontal: 10,
-                                    vertical: 6,
-                                  ),
-                                  margin: EdgeInsets.symmetric(vertical: 2),
-                                  width: maxWidth(context),
-                                  decoration: BoxDecoration(
-                                    color: Ui.black00,
-                                    borderRadius: BorderRadius.circular(6),
-                                  ),
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        vm.state.topicsResult![index].title,
-                                        style: small00,
-                                      ),
-                                      Text(
-                                        '${vm.state.topicsResult![index].level} Level',
-                                        style: xs00,
-                                      )
-                                    ],
-                                  ),
-                                )),
-                      ]
+                      if (!vm.state.hasData && !isFocused) ...[
+                        Center(
+                          child: SvgPicture.asset(
+                            'asset/ils/undraw_no_data_re_kwbl.svg',
+                            width: maxWidth(context) * 0.4,
+                            height: 120,
+                          ),
+                        ),
+                        spacer(y: 15),
+                        Center(
+                          child: Text('No results for $query',
+                              textAlign: TextAlign.center, style: medium00),
+                        ),
+                      ],
+                      if (vm.state.hasData && !isFocused) ...[
+                        Text('Found results', style: small00),
+                        spacer(y: 15),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            _searchNav(
+                              'Quizzes',
+                              vm.state.quizResult?.length ?? 0,
+                            ),
+                            _searchNav(
+                              'Challenges',
+                              vm.state.challengeResult?.length ?? 0,
+                            ),
+                            _searchNav(
+                              'Topics',
+                              vm.state.topicsResult?.length ?? 0,
+                            ),
+                          ],
+                        ),
+                        spacer(y: 20),
+                        PageTransitionSwitcher(
+                            transitionBuilder:
+                                (child, animation, secondaryAnimation) =>
+                                    SharedAxisTransition(
+                                      animation: animation,
+                                      secondaryAnimation: secondaryAnimation,
+                                      transitionType:
+                                          SharedAxisTransitionType.vertical,
+                                      child: child,
+                                    ),
+                            child: Column(
+                              children: switch (searchFocus) {
+                                'Topics' => List.generate(
+                                    vm.state.topicsResult?.length ?? 0,
+                                    (index) => TopicItemWidget(
+                                        topic: vm.state.topicsResult![index])),
+                                'Quizzes' => List.generate(
+                                    vm.state.quizResult?.length ?? 0,
+                                    (index) => QuizItemWidget(
+                                        quiz: vm.state.quizResult![index])),
+                                _ => List.generate(
+                                    vm.state.challengeResult?.length ?? 0,
+                                    (index) => ChallengeItemWidget(
+                                          challenge:
+                                              vm.state.challengeResult![index],
+                                        ))
+                              },
+                            )),
+                      ],
                     ],
                   ),
                 );
@@ -136,6 +171,34 @@ class _SearchScreenState extends ConsumerState<SearchScreen> with Ui {
             ),
             spacer(y: 300),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _searchNav(String label, int total) {
+    return GestureDetector(
+      onTap: () => setState(() {
+        searchFocus = label;
+      }),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 400),
+        margin: EdgeInsets.symmetric(horizontal: 4),
+        padding: EdgeInsets.symmetric(
+          horizontal: 10,
+          vertical: 8,
+        ),
+        decoration: BoxDecoration(
+            color: searchFocus == label ? raisingBlack : Colors.transparent,
+            borderRadius: BorderRadius.circular(6),
+            border: Border(
+                bottom: BorderSide(
+              color: label == searchFocus ? athensGray : Colors.transparent,
+              width: 1.5,
+            ))),
+        child: Text(
+          '$total $label',
+          style: mukta,
         ),
       ),
     );
@@ -176,14 +239,14 @@ class _SearchScreenState extends ConsumerState<SearchScreen> with Ui {
             // height: 48,
             // width: maxWidth(context) * 0.8,
             child: TextField(
+              autofocus: true,
+              // autofillHints: ['Test', 'Physics'],
               controller: searchTextController,
-              onTap: () => setState(() {
-                isFocused = true;
-              }),
-              onTapOutside: (event) {
+              onTap: () => setState(() => isFocused = true),
+              onTapOutside: (event) => Future.delayed(Duration(seconds: 2), () {
+                setState(() => isFocused = false);
                 FocusScope.of(context).unfocus();
-                isFocused = false;
-              },
+              }),
               onChanged: (value) => setState(() => query = value),
               cursorHeight: 20,
               cursorColor: Color(0xA29E9E9E),

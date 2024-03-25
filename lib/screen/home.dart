@@ -194,7 +194,9 @@ class _AdminTiles extends StatelessWidget with Ui {
         _drawerTile('Creations', Icons.create_new_folder_rounded),
         spacer(y: 15),
         // Divider(color: Colors.grey),
-        _drawerTile('Drafts', Icons.drafts_rounded),
+        GestureDetector(
+            onTap: () => context.push('/admin/drafts'),
+            child: _drawerTile('Drafts', Icons.drafts_rounded)),
       ],
     );
   }

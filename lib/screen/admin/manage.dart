@@ -2,9 +2,10 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:qeasily/screen/admin/create_questions.dart';
 import 'package:qeasily/screen/admin/create_quiz.dart';
 import 'package:qeasily/styles.dart';
+
+import 'questions/questions.dart';
 
 class AdminManageScreen extends ConsumerStatefulWidget {
   const AdminManageScreen({super.key});
@@ -55,8 +56,8 @@ class _AdminManageScreenState extends ConsumerState<AdminManageScreen> with Ui {
                     GestureDetector(
                         onTap: () => push(CreateQuestions(), context),
                         child: _createTile('Add Questions +')),
-                    _createTile('Create Quiz +'),
-                    _createTile('Create Topic +'),
+                    // _createTile('Create Quiz +'),
+                    _createTile('Add Topic +'),
                   ],
                 ),
                 spacer(y: 30),

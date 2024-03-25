@@ -184,9 +184,11 @@ class _IndexSubScreenState extends ConsumerState<IndexSubScreen> with Ui {
             ? _defaultShimmer(context)
             : Column(
                 children: [
-                  ...vm.state.quizzes.map((e) => GestureDetector(
-                      onTap: () => push(QuizDetailScreen(data: e), context),
-                      child: QuizItemWidget(quiz: e))),
+                  ...vm.state.quizzes.map((e) => QuizItemWidget(
+                        quiz: e,
+                        onPress: (quiz) =>
+                            push(QuizDetailScreen(data: quiz), context),
+                      )),
                   spacer(y: 10),
                   if (vm.state.quizzes.isNotEmpty && vm.state.isLoading)
                     SpinKitThreeBounce(color: Colors.white, size: 35),

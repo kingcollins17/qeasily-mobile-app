@@ -42,7 +42,7 @@ class TopicData {
 
   @override
   String toString() =>
-      'TopicData{id: $id, title: $description, date: $dateAdded, categoryId: $categoryId}';
+      'TopicData{id: $id, title: $title,  description: $description, date: $dateAdded, categoryId: $categoryId}';
 
   @override
   int get hashCode => id.hashCode ^ title.hashCode;

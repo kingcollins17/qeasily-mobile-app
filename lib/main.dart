@@ -4,6 +4,7 @@ import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:hive_flutter/adapters.dart';
 import 'package:redux_persist/redux_persist.dart';
 import 'package:redux_persist_flutter/redux_persist_flutter.dart';
 import 'package:qeasily/redux/redux.dart';
@@ -17,6 +18,7 @@ import 'package:flutter_redux/flutter_redux.dart';
 import 'package:qeasily/test.dart';
 import 'package:qeasily/redux/qeasily_state.dart';
 import 'package:redux/redux.dart';
+import 'app_constants.dart';
 import 'redux/mware/mware.dart';
 import 'package:redux_thunk/redux_thunk.dart';
 
@@ -24,7 +26,12 @@ import 'theme.dart';
 
 void main() async {
   try {
+   
     WidgetsFlutterBinding.ensureInitialized();
+    await Hive.initFlutter();
+    await Hive.openBox<List>(mcqDrafts);
+    await Hive.openBox<List>(dcqDrafts);
+
     final persistor = Persistor(
         storage: FlutterStorage(),
         serializer: JsonSerializer<QeasilyState>(QeasilyState.fromJson),
@@ -99,6 +106,12 @@ final router = GoRouter(routes: [
   GoRoute(
     path: '/admin',
     pageBuilder: (context, state) => animatePage(AdminManageScreen(), state),
+      routes: [
+        GoRoute(
+            path: 'drafts',
+            pageBuilder: (context, state) =>
+                animatePage(QuestionDraftScreen(), state))
+      ]
   )
 ]);
 
