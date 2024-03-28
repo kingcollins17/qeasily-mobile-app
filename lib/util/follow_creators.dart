@@ -35,7 +35,7 @@ class FollowAccountData {
       'FollowAccountData{id: $id, username: $userName, followers: $followers,'
       ' topics: $topics, totalQuiz: $totalQuiz, department: $department}';
 }
-
+// Future<dynamic>
 Future<(bool, String, List<FollowAccountData>, PageData)> fetchAccountsToFollow(
     Dio dio, PageData page) async {
   try {
@@ -61,5 +61,20 @@ Future<(bool, String, List<FollowAccountData>, PageData)> fetchAccountsToFollow(
     // return res;
   } catch (e) {
     return (false, e.toString(), <FollowAccountData>[], page);
+  }
+}
+
+Future<(bool, String)> followCreator(Dio dio, int creatorId) async {
+  try {
+    final res = await dio.post(
+      APIUrl.follow.url,
+      queryParameters: {'id': creatorId},
+    );
+
+    final {'detail': msg} = res.data;
+    return (res.statusCode == 200, msg.toString());
+    // return res;
+  } catch (e) {
+    return (false, e.toString());
   }
 }

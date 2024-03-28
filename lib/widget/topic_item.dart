@@ -26,8 +26,10 @@ class TopicItemWidget extends StatelessWidget with Ui {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(topic.title, style: small00),
-            spacer(y: 10),
+            Text(topic.title, style: medium00),
+            // spacer(y: 10),
+            Text(topic.category, style: xs01),
+            spacer(y: 15),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [

@@ -175,14 +175,12 @@ Future<
           bool? hasNextPage
         })>
     fetchTopics(Dio client, PageData page,
-        {bool useFollowing = false, int? categoryId}) async {
+        {String? level, int? categoryId}) async {
   try {
-    final res = await client.get(APIUrl.topics.url, data: {
-      'page': page.page,
-      'per_page': page.perPage
-    }, queryParameters: {
-      'following': useFollowing,
-      if (categoryId != null) 'category': categoryId
+    final res = await client
+        .get(APIUrl.fetchTopics.url, data: page.toJson(), queryParameters: {
+      if (level != null) 'level': level,
+      if (categoryId != null) 'category_id': categoryId
     });
     final pageData =
         res.statusCode == 200 ? PageData.fromJson(res.data['page']) : null;

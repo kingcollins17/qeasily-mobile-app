@@ -6,3 +6,4 @@ export 'quiz.dart';
 export 'challenge.dart';
 export 'question_model.dart';
 export 'leaderboard.dart';
+export 'dashboard.dart';

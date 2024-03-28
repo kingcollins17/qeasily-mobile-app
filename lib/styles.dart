@@ -37,6 +37,7 @@ mixin Ui {
       small10 = GoogleFonts.workSans(fontSize: 16, fontWeight: FontWeight.w500),
       mukta = GoogleFonts.mukta(fontSize: 16, color: lightGrey),
       rubik = GoogleFonts.rubik(fontSize: 16),
+      rubikSmall = GoogleFonts.rubik(fontSize: 14),
       // small03 = GoogleFonts.firaSans(fontSize: 16),
       big04 = GoogleFonts.notoSans(fontSize: 16),
       medium00 = GoogleFonts.workSans(fontSize: 18, color: Colors.white),

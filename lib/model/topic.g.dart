@@ -14,12 +14,16 @@ TopicData _$TopicDataFromJson(Map<String, dynamic> json) => TopicData(
       categoryId: json['category_id'] as int,
       userId: json['user_id'] as int,
       level: json['level'] as String,
+      creator: json['creator'] as String,
+      category: json['category'] as String,
     );
 
 Map<String, dynamic> _$TopicDataToJson(TopicData instance) => <String, dynamic>{
       'id': instance.id,
       'title': instance.title,
       'description': instance.description,
+      'creator': instance.creator,
+      'category': instance.category,
       'date_added': instance.dateAdded.toIso8601String(),
       'category_id': instance.categoryId,
       'user_id': instance.userId,

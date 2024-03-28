@@ -5,7 +5,7 @@ part 'quiz.g.dart';
 @JsonSerializable()
 class QuizData {
   final int id;
-  final String title, questions, description, difficulty, type;
+  final String title, questions, description, difficulty, type, creator, topic;
 
   @JsonKey(name: 'user_id')
   final int userId;
@@ -33,7 +33,10 @@ class QuizData {
       required this.dateAdded,
       required this.description,
       required this.difficulty,
-      required this.type});
+    required this.type,
+    required this.topic,
+    required this.creator,
+  });
   Map<String, dynamic> toJson() => _$QuizDataToJson(this);
 
   @override

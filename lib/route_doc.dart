@@ -15,6 +15,7 @@ const activityPrefix = '/activity';
 ///Each enumeration is an endpoint in the app
 enum APIUrl {
   //All "/auth" prefixed routes are here
+  fetchPlans('/plans', '', method: _Method.get, requiresAuth: true),
   login(
     authPrefix,
     '/login',
@@ -33,6 +34,14 @@ enum APIUrl {
       'email': 'jon@doe.com',
       'password': 'password'
     },
+  ),
+  createProfile(authPrefix, '/create-profile',
+      body: {'department': 'Pharmacy', 'level': '300'}, method: _Method.post),
+  updateProfile(
+    authPrefix,
+    '/update-profile',
+    body: {'department': 'Pharmacy', 'level': '300'},
+    method: _Method.put,
   ),
   search('/search', '',
       requiresAuth: false,
@@ -79,18 +88,19 @@ enum APIUrl {
 
   //-------------------------------------
   //All "/topics" prefixed routes
-  topics(topicsPrefix, '',
+  fetchTopics(
+    topicsPrefix,
+    '',
       requiresAuth: true,
       body: pageInfoBody,
-      queryParams: ['following=true', 'category=1'],
-      extras: 'The query parameters are exclusive'),
+    queryParams: ['category_id=14', 'level=10'],
+  ),
   createTopic(topicsPrefix, '/create', method: _Method.post, body: [
     {
       'title': '',
       'description': '',
       'date_added': '',
       'category_id': '',
-      'user_id': ''
     }
   ]),
   deleteTopic(
@@ -103,11 +113,12 @@ enum APIUrl {
   //-------------------------------------
   //All "/quiz" prefixed routes
   fetchQuiz(quizPrefix, '', queryParams: ['topic=4'], body: pageInfoBody),
+  fetchAllQuiz(quizPrefix, '/all', body: pageInfoBody),
   quizFromCategory(
     quizPrefix,
     '/by-category',
     body: pageInfoBody,
-    queryParams: ['cid=10&level=400'],
+    queryParams: ['cid=10'],
     extras:
         'This route takes in a path parameter of the category_id thus; /<category_id>',
   ),
@@ -135,7 +146,7 @@ enum APIUrl {
       requiresAuth: true, queryParams: ['id=7'], method: _Method.post),
   unfollow(followPrefix, '',
       requiresAuth: true, queryParams: ['id=7'], method: _Method.delete),
-  fetchAccountToFollow(followPrefix, '/accounts',
+fetchAccountToFollow(followPrefix, '/accounts',
       method: _Method.get, requiresAuth: true, body: pageInfoBody),
 
   fetchFollowers(followPrefix, '/followers',
@@ -143,6 +154,7 @@ enum APIUrl {
 
   fetchChallenges(challengePrefix, '',
       method: _Method.get, queryParams: ['feed=true'], body: pageInfoBody),
+
 
   fetchUserCreatedChallenges(challengePrefix, '/created-challenges',
       body: pageInfoBody),

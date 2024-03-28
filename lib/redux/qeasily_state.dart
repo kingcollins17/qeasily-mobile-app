@@ -11,10 +11,12 @@ part 'qeasily_state.g.dart';
 
 @JsonSerializable()
 class QeasilyState {
-  @_TopicStateConverter()
+  // @_TopicStateConverter()
+  @JsonKey(includeFromJson: false, includeToJson: false)
   TopicState topics;
 
-  @_QuizStateConverter()
+  // @_QuizStateConverter()
+  @JsonKey(includeFromJson: false, includeToJson: false)
   QuizState quizzes;
 
   @_ChallengeStateConverter()

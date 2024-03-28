@@ -1,5 +1,9 @@
+// ignore_for_file: prefer_const_literals_to_create_immutables, prefer_const_constructors
+
 import 'package:flutter/material.dart';
+import 'package:flutter_redux/flutter_redux.dart';
 import 'package:qeasily/model/model.dart';
+import 'package:qeasily/redux/redux.dart';
 import 'package:qeasily/styles.dart';
 
 class QuizItemWidget extends StatelessWidget with Ui {
@@ -10,7 +14,10 @@ class QuizItemWidget extends StatelessWidget with Ui {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () => onPress != null ? onPress!(quiz) : null,
+      onTap: () {
+        // vm.dispatch(QuizAction(type: QuizActionType.reset));
+        onPress != null ? onPress!(quiz) : null;
+      },
       child: Padding(
         key: ValueKey(quiz.id),
         padding: const EdgeInsets.symmetric(vertical: 2),
@@ -76,16 +83,24 @@ class QuizItemWidget extends StatelessWidget with Ui {
                 ),
               ),
               spacer(y: 10),
+              Text(quiz.title, style: medium10),
+              Text(quiz.topic, style: xs01),
+              spacer(),
               Row(
+                crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  Text(quiz.title, style: small00),
+                  Text('Created by', style: xs01),
+                  spacer(x: 10),
+                  Text(quiz.creator, style: mukta)
                 ],
               ),
               spacer(y: 15),
+              spacer(y: 10),
               Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                // mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text('Total Questions: ', style: xs01),
+                  spacer(),
                   Text('${quiz.questionsAsInt.length} Questions', style: xs00),
                 ],
               ),

@@ -5,7 +5,7 @@ part 'topic.g.dart';
 @JsonSerializable()
 class TopicData {
   final int id;
-  final String title, description;
+  final String title, description, creator, category;
 
   @JsonKey(name: 'date_added')
   final DateTime dateAdded;
@@ -28,7 +28,9 @@ class TopicData {
       required this.dateAdded,
       required this.categoryId,
       required this.userId,
-      required this.level});
+      required this.level,
+      required this.creator,
+      required this.category});
   Map<String, dynamic> toJson() => _$TopicDataToJson(this);
 
   @override

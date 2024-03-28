@@ -17,6 +17,8 @@ QuizData _$QuizDataFromJson(Map<String, dynamic> json) => QuizData(
       description: json['description'] as String,
       difficulty: json['difficulty'] as String,
       type: json['type'] as String,
+      topic: json['topic'] as String,
+      creator: json['creator'] as String,
     );
 
 Map<String, dynamic> _$QuizDataToJson(QuizData instance) => <String, dynamic>{
@@ -26,6 +28,8 @@ Map<String, dynamic> _$QuizDataToJson(QuizData instance) => <String, dynamic>{
       'description': instance.description,
       'difficulty': instance.difficulty,
       'type': instance.type,
+      'creator': instance.creator,
+      'topic': instance.topic,
       'user_id': instance.userId,
       'topic_id': instance.topicId,
       'duration': instance.duration,
