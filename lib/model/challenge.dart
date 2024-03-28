@@ -1,3 +1,5 @@
+// ignore_for_file: unnecessary_this
+
 import 'package:json_annotation/json_annotation.dart';
 
 part 'challenge.g.dart';
@@ -24,6 +26,9 @@ class ChallengeData {
 
   final int duration;
 
+  Duration get endsIn =>
+      dateAdded.add(Duration(days: duration)).difference(DateTime.now());
+
   factory ChallengeData.fromJson(Map<String, dynamic> json) =>
       _$ChallengeDataFromJson(json);
 
@@ -43,6 +48,18 @@ class ChallengeData {
   String toString() =>
       'ChallengeData{id: $id, name: $name, duration: $duration '
       'days, paid: $paid, reward: $reward, userId: $userId}';
+
+  @override
+  bool operator ==(Object other) {
+    return (other is ChallengeData &&
+            (id == other.id) &&
+            (name == other.name)) ||
+        identical(this, other);
+  }
+
+  @override
+  int get hashCode =>
+      (this.id.hashCode ^ this.duration.hashCode ^ this.name.hashCode);
 }
 
 class CustomConverter extends JsonConverter<bool, int> {

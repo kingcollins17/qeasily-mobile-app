@@ -2,8 +2,9 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:qeasily/screen/admin/create_quiz.dart';
+import 'package:go_router/go_router.dart';
 import 'package:qeasily/styles.dart';
+import 'package:qeasily/util/create_question_util.dart';
 
 import 'questions/questions.dart';
 
@@ -19,7 +20,7 @@ class _AdminManageScreenState extends ConsumerState<AdminManageScreen> with Ui {
     return stackWithNotifier([
       Scaffold(
           appBar: AppBar(
-            title: Text('Manage Creations', style: mukta),
+            title: Text('Create and Manage', style: small00),
           ),
           body: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -40,7 +41,7 @@ class _AdminManageScreenState extends ConsumerState<AdminManageScreen> with Ui {
                   children: [
                     _createTile('Questions'),
                     _createTile('Quizzes'),
-                    _createTile('Challenges'),
+                    // _createTile('Challenges'),
                   ],
                 ),
                 spacer(y: 130),
@@ -51,26 +52,28 @@ class _AdminManageScreenState extends ConsumerState<AdminManageScreen> with Ui {
                   spacing: 4,
                   children: [
                     GestureDetector(
-                        onTap: () => push(CreateQuiz(), context),
+                        onTap: () => context.push('/admin/create-quiz'),
                         child: _createTile('Add Quiz +')),
                     GestureDetector(
-                        onTap: () => push(CreateQuestions(), context),
+                        onTap: () => context.push('/admin/create-question'),
                         child: _createTile('Add Questions +')),
                     // _createTile('Create Quiz +'),
-                    _createTile('Add Topic +'),
+                    GestureDetector(
+                        onTap: () => context.push('/admin/create-topic'),
+                        child: _createTile('Add Topic +')),
                   ],
                 ),
                 spacer(y: 30),
-                Text('Delete', style: mukta),
+                // Text('Delete', style: mukta),
                 spacer(y: 10),
-                Wrap(
-                  runSpacing: 4,
-                  spacing: 4,
-                  children: [
-                    _createTile('Delete Question'),
-                    _createTile('Delete Quiz'),
-                  ],
-                ),
+                // Wrap(
+                //   runSpacing: 4,
+                //   spacing: 4,
+                //   children: [
+                //     _createTile('Delete Question'),
+                //     _createTile('Delete Quiz'),
+                //   ],
+                // ),
               ],
             ),
           )),

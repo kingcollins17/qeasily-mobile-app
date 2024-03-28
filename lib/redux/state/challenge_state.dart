@@ -8,7 +8,9 @@ part 'challenge_state.g.dart';
 
 @JsonSerializable()
 class ChallengeState {
-  @_PageConverter()
+  // @_PageConverter()
+
+  @JsonKey(includeFromJson: false, includeToJson: false)
   PageData page;
 
   @_DataConverter()

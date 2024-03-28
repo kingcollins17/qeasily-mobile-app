@@ -34,7 +34,7 @@ class MCQData {
 
   @override
   String toString() => 'MCQData{id: $int, query: $query, correct:'
-      ' ${correct.name}, A: $A, B: $B, C: $C, D: $D}';
+      ' ${correct.name}, A: $A, B: $B, C: $C, D: $D, topicId: $topicId}';
 }
 
 enum MCQOption {

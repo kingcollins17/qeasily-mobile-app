@@ -4,11 +4,14 @@ import 'package:google_fonts/google_fonts.dart';
 
 ///
 mixin Ui {
+
+  // const Ui();
   final primary = const Color(0xFF916BFF);
   final blue1 = const Color(0xFF5C99FF);
   final blue10 = const Color(0xFF1B56BD);
 
   final Color jungleGreen = const Color(0xFF008669),
+      highlight = const Color(0xFFA13131),
       tiber = const Color(0xFF0E3031),
       darkShade = const Color(0xFF181818),
       darkerShade = const Color(0xFF0F0F0F),
@@ -46,6 +49,41 @@ mixin Ui {
 
   Widget loader({Color color = Colors.white, double sz = 50}) =>
       Center(child: SpinKitThreeInOut(size: sz, color: color));
+
+  TextFormField inputField(
+      {Key? key,
+      int maxLines = 1,
+      int minLines = 1,
+      String? label,
+      String? hint,
+      String? Function(String? value)? validator,
+      InputBorder? border,
+      void Function(PointerDownEvent)? onTapOutside,
+      void Function(String? value)? onChanged}) {
+    return TextFormField(
+      key: key,
+      // key: ValueKey('$label $current '),
+      onChanged: onChanged,
+      maxLines: maxLines,
+      minLines: minLines,
+      validator: validator,
+      onTapOutside: onTapOutside,
+      style: mukta,
+      decoration: InputDecoration(
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+        fillColor: raisingBlack,
+        // isDense: true,
+        border: border ?? const OutlineInputBorder(),
+        // hintText: 'Enter your Question',
+        hintText: hint,
+        hintStyle: mukta,
+        // labelText: 'Query',
+        labelText: label,
+        labelStyle: mukta,
+      ),
+    );
+  }
 
   Widget direction({String dir = 'left'}) => Container(
       padding: const EdgeInsets.all(14),

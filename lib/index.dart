@@ -7,25 +7,26 @@ import 'package:flutter_redux/flutter_redux.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:qeasily/model/model.dart';
-import 'package:qeasily/placeholders/placeholders.dart';
+// import 'package:qeasily/placeholders/placeholders.dart';
 import 'package:qeasily/provider/auth_provider.dart';
 import 'package:qeasily/provider/categories.dart';
 import 'package:qeasily/provider/dio_provider.dart';
 import 'package:qeasily/redux/redux.dart';
+import 'package:qeasily/screen/challenge/challenge.dart';
 import 'package:qeasily/screen/quiz/quiz.dart';
-import 'package:qeasily/screen/sub/search_screen.dart';
+import 'package:qeasily/screen/search_screen.dart';
 import 'package:qeasily/styles.dart';
-import 'package:qeasily/widget/topic_item.dart';
+
 import 'package:qeasily/widget/widget.dart';
 import 'package:shimmer/shimmer.dart';
 
-class IndexSubScreen extends ConsumerStatefulWidget {
-  const IndexSubScreen({super.key});
+class HomePageSubScreen extends ConsumerStatefulWidget {
+  const HomePageSubScreen({super.key});
   @override
-  ConsumerState<IndexSubScreen> createState() => _IndexSubScreenState();
+  ConsumerState<HomePageSubScreen> createState() => _IndexSubScreenState();
 }
 
-class _IndexSubScreenState extends ConsumerState<IndexSubScreen> with Ui {
+class _IndexSubScreenState extends ConsumerState<HomePageSubScreen> with Ui {
   int currentCategoryIndex = 0;
 
   var previous = _Filter.quiz;
@@ -33,9 +34,9 @@ class _IndexSubScreenState extends ConsumerState<IndexSubScreen> with Ui {
   final scrollCtrl = ScrollController();
 
   //Whether this widget was just mounted
-  bool justMountedQuiz = false,
-      justMountedTopics = false,
-      justMountedChg = false;
+  bool justMountedQuiz = true,
+      justMountedTopics = true,
+      justMountedChallenge = true;
 
   bool atBottom(ScrollController controller) =>
       controller.position.pixels == controller.position.maxScrollExtent;
@@ -144,9 +145,8 @@ class _IndexSubScreenState extends ConsumerState<IndexSubScreen> with Ui {
               : Column(
                   // crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    ...vm.state.topics.map(
-                      (topic) => TopicItemWidget(topic: topic)
-                    ),
+                    ...vm.state.topics
+                        .map((topic) => TopicItemWidget(topic: topic)),
                     spacer(y: 10),
                     if (vm.state.topics.isNotEmpty && vm.state.isLoading)
                       SpinKitThreeBounce(size: 35, color: Colors.white),
@@ -176,6 +176,7 @@ class _IndexSubScreenState extends ConsumerState<IndexSubScreen> with Ui {
                 type: QuizActionType.fetch,
                 payload: ref.read(generalDioProvider)),
           );
+          //attach the listener here cause justMounted is only true once
           scrollCtrl.addListener(() => _quizScrollListener(scrollCtrl, vm));
         }
         justMountedQuiz = false;
@@ -335,7 +336,7 @@ class _IndexSubScreenState extends ConsumerState<IndexSubScreen> with Ui {
   Widget _challengeContent() => StoreConnector<QeasilyState, ChallengeVM>(
       key: ValueKey(filter),
       builder: (context, vm) {
-        if (justMountedChg) {
+        if (justMountedChallenge) {
           vm.dispatch(
             ChallengeAction(
               type: ChgActionType.fetch,
@@ -343,15 +344,19 @@ class _IndexSubScreenState extends ConsumerState<IndexSubScreen> with Ui {
             ),
           );
         }
-        justMountedChg = false;
+        justMountedChallenge = false;
         return Column(
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
             if (vm.state.challenges.isEmpty && vm.state.isLoading)
               _defaultShimmer(context),
             if (vm.state.challenges.isNotEmpty)
-              ...vm.state.challenges
-                  .map((challenge) => ChallengeItemWidget(challenge: challenge))
+              ...vm.state.challenges.map((challenge) => ChallengeItemWidget(
+                    challenge: challenge,
+                    onPress: (value) {
+                      push(ChallengeDetailScreen(data: value), context);
+                    },
+                  ))
           ],
         );
       },

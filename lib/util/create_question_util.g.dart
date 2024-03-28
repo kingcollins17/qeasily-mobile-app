@@ -45,7 +45,7 @@ const _$MCQDifficultyEnumMap = {
   MCQDifficulty.hard: 'hard',
 };
 
-DCQDraft _$DCQDraftFromJson(Map json) => DCQDraft(
+DCQDraft _$DCQDraftFromJson(Map<String, dynamic> json) => DCQDraft(
       query: json['query'] as String?,
       explanation: json['explanation'] as String?,
       correct: json['correct'] as bool? ?? true,

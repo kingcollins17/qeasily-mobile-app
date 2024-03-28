@@ -20,7 +20,7 @@ class CustomDropdownField<Item> extends StatelessWidget with Ui {
   @override
   Widget build(BuildContext context) {
     return Container(
-        width: MediaQuery.of(context).size.width * 0.85,
+        width: maxWidth(context),
         height: 48,
         decoration: BoxDecoration(
           color: raisingBlack,

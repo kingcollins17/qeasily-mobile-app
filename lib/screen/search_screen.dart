@@ -157,8 +157,10 @@ class _SearchScreenState extends ConsumerState<SearchScreen> with Ui {
                                 _ => List.generate(
                                     vm.state.challengeResult?.length ?? 0,
                                     (index) => ChallengeItemWidget(
+                                      
                                           challenge:
                                               vm.state.challengeResult![index],
+                                          onPress: (value) {},
                                         ))
                               },
                             )),

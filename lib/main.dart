@@ -5,12 +5,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hive_flutter/adapters.dart';
+import 'package:qeasily/screen/quiz/quiz.dart';
+import 'package:qeasily/util/create_question_util.dart';
 import 'package:redux_persist/redux_persist.dart';
 import 'package:redux_persist_flutter/redux_persist_flutter.dart';
 import 'package:qeasily/redux/redux.dart';
 import 'package:qeasily/screen/admin/admin.dart';
-import 'package:qeasily/screen/sub/dashboard.dart';
-import 'package:qeasily/screen/sub/follow_creators.dart';
+import 'package:qeasily/screen/dashboard.dart';
+import 'package:qeasily/screen/follow_creators.dart';
 import 'dart:math';
 
 import 'package:qeasily/screen/screen.dart';
@@ -110,7 +112,24 @@ final router = GoRouter(routes: [
         GoRoute(
             path: 'drafts',
             pageBuilder: (context, state) =>
-                animatePage(QuestionDraftScreen(), state))
+                animatePage(QuestionDraftScreen(), state)),
+        GoRoute(
+            path: 'create-topic',
+            builder: (context, state) => CreateTopicScreen()),
+        GoRoute(
+            path: 'create-question',
+            builder: (context, state) {
+              if (state.extra case (List<Draft> draft, QuestionType type)) {
+                return CreateQuestionsScreen(
+                    initialDraft: draft, initialType: type);
+              }
+              return CreateQuestionsScreen();
+            }),
+        GoRoute(
+          path: 'create-quiz',
+          pageBuilder: (context, state) =>
+              animatePage(CreateQuizScreen(), state),
+        )
       ]
   )
 ]);
@@ -120,8 +139,8 @@ CustomTransitionPage<dynamic> animatePage(Widget child, GoRouterState state,
     {Duration? duration}) {
   return CustomTransitionPage(
     key: state.pageKey,
-    transitionDuration: duration ?? Duration(milliseconds: 700),
-    reverseTransitionDuration: Duration(milliseconds: 500),
+    transitionDuration: duration ?? Duration(milliseconds: 300),
+    reverseTransitionDuration: Duration(milliseconds: 300),
     child: child,
     transitionsBuilder: (context, animation, secondaryAnimation, child) =>
         SharedAxisTransition(

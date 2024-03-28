@@ -13,7 +13,9 @@ part 'quiz_state.g.dart';
 @JsonSerializable()
 class QuizState {
 
-  @_PageConverter()
+  // @_PageConverter()
+
+  @JsonKey(includeFromJson: false, includeToJson: false)
   PageData page;
 
   @_DataConverter()

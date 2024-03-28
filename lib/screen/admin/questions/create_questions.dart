@@ -14,13 +14,19 @@ import 'package:qeasily/styles.dart';
 import 'package:qeasily/util/util.dart';
 import 'package:qeasily/widget/widget.dart';
 
-class CreateQuestions extends ConsumerStatefulWidget {
-  const CreateQuestions({super.key});
+
+///The two constructor must either be provided together or not at all
+class CreateQuestionsScreen extends ConsumerStatefulWidget {
+  const CreateQuestionsScreen({super.key, this.initialDraft, this.initialType})
+      : assert((initialDraft == null && initialType == null) ||
+            (initialDraft != null) && initialType != null);
+  final List<Draft>? initialDraft;
+  final QuestionType? initialType;
   @override
-  ConsumerState<CreateQuestions> createState() => _CreateQuestionsState();
+  ConsumerState<CreateQuestionsScreen> createState() => _CreateQuestionsState();
 }
 
-class _CreateQuestionsState extends ConsumerState<CreateQuestions>
+class _CreateQuestionsState extends ConsumerState<CreateQuestionsScreen>
     with SingleTickerProviderStateMixin, Ui {
   final _formKey = GlobalKey<FormState>();
   bool isLoading = false;
@@ -62,6 +68,15 @@ class _CreateQuestionsState extends ConsumerState<CreateQuestions>
   void initState() {
     super.initState();
     _controller = AnimationController(vsync: this);
+    //
+    if (widget.initialDraft != null && widget.initialType != null) {
+      //Go to straight to creating
+      total = widget.initialDraft!.length;
+      current = 0;
+      draft = widget.initialDraft!;
+      questionType = widget.initialType!;
+      step = _Step.create;
+    }
   }
 
   @override
@@ -85,7 +100,9 @@ class _CreateQuestionsState extends ConsumerState<CreateQuestions>
     return stackWithNotifier([
       Scaffold(
         appBar: AppBar(
-          title: Text('Set Questions ${current + 1}', style: mukta),
+          title: step == _Step.create
+              ? Text('Set Questions ${current + 1}', style: small00)
+              : null,
         ),
         body: SingleChildScrollView(
           child: switch (step) {
@@ -118,32 +135,32 @@ class _CreateQuestionsState extends ConsumerState<CreateQuestions>
                 child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                inputField(
+                _inputField(
                   label: 'Query',
                   hint: _current.query,
                   onChanged: (value) => _current.query = value,
                 ),
                 spacer(y: 12),
-                inputField(
+                _inputField(
                   label: 'Option A',
                   hint: _current.A,
                   onChanged: (value) => _current.A = value,
                 ),
                 // spacer(),
                 spacer(y: 12),
-                inputField(
+                _inputField(
                     label: 'Option B',
                     hint: _current.B,
                     onChanged: (value) => _current.B = value),
                 // spacer(),
                 spacer(y: 12),
-                inputField(
+                _inputField(
                     label: 'Option C',
                     hint: _current.C,
                     onChanged: (value) => _current.C = value),
                 // spacer(),
                 spacer(y: 12),
-                inputField(
+                _inputField(
                     label: 'Option D',
                     hint: _current.D,
                     onChanged: (value) =>
@@ -164,7 +181,7 @@ class _CreateQuestionsState extends ConsumerState<CreateQuestions>
                   style: small00,
                 ),
                 spacer(y: 10),
-                inputField(
+                _inputField(
                   maxLines: 10,
                   minLines: 4,
                   hint: _current.explanation ??
@@ -281,7 +298,7 @@ class _CreateQuestionsState extends ConsumerState<CreateQuestions>
     );
   }
 
-  TextFormField inputField(
+  TextFormField _inputField(
       {int maxLines = 1,
       int minLines = 1,
       String? label,
@@ -321,7 +338,7 @@ class _CreateQuestionsState extends ConsumerState<CreateQuestions>
               child: Text('Questions ${current + 1} of ${draft!.length}',
                   style: mukta)),
           spacer(y: 20),
-          inputField(
+          _inputField(
             label: 'Query',
             hint: _current.query,
             onChanged: (value) => setState(() {
@@ -345,7 +362,7 @@ class _CreateQuestionsState extends ConsumerState<CreateQuestions>
               alignment: Alignment.centerLeft,
               child: Text('Explanation', style: small00)),
           spacer(y: 10),
-          inputField(
+          _inputField(
               // hint: 'Explain your answer',
               hint: _current.explanation ?? 'Explain your answer',
               onChanged: (value) => setState(() {
@@ -443,7 +460,7 @@ class _CreateQuestionsState extends ConsumerState<CreateQuestions>
                       spacer(y: 10),
                       Text('Name your draft', style: small00),
                       spacer(y: 10),
-                      inputField(
+                      _inputField(
                           hint: 'Draft name',
                           onChanged: (value) => draftName = value),
                       spacer(y: 20),

@@ -1,5 +1,6 @@
 // const domain = '192.168.43.0';
 const domain = '192.168.0.3';
+// const domain = '192.168.0.2';
 const baseUrl = 'http://$domain';
 const authPrefix = '/auth';
 const categoryPrefix = '/categories';

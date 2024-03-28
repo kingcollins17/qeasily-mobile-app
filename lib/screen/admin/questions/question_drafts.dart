@@ -57,7 +57,7 @@ class _QuestionDraftScreenState extends ConsumerState<QuestionDraftScreen>
     return stackWithNotifier([
       Scaffold(
         appBar: AppBar(
-          title: Text('Drafts', style: mukta),
+          title: Text('Drafts', style: small00),
         ),
         body: ValueListenableBuilder(
           valueListenable: dcqDraftBox.listenable(),

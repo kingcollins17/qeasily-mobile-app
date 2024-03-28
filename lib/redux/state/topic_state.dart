@@ -11,7 +11,9 @@ part 'topic_state.g.dart';
 @JsonSerializable()
 class TopicState {
 
-  @_PageConverter()
+  // @_PageConverter()
+
+  @JsonKey(includeFromJson: false, includeToJson: false)
   PageData page;
 
   @_DataConverter()

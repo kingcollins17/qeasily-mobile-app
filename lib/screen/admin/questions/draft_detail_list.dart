@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:hive/hive.dart';
 import 'package:qeasily/util/util.dart';
 import 'package:qeasily/app_constants.dart';
@@ -86,6 +87,16 @@ class _DraftListViewWidgetState extends State<DraftListViewWidget> with Ui {
                   child: Text(draft[index].explanation ?? 'No explanation yet',
                       style: small00),
                 ),
+                spacer(y: 10),
+                FilledButton(
+                    style: ButtonStyle(
+                        foregroundColor: MaterialStatePropertyAll(Colors.white),
+                        backgroundColor: MaterialStatePropertyAll(tiber)),
+                    onPressed: () {
+                      context.push('/admin/create-question',
+                          extra: (draft, QuestionType.dcq));
+                    },
+                    child: Text('Continue editing', style: rubik))
               ],
             ),
           ),
@@ -128,7 +139,7 @@ class _DraftListViewWidgetState extends State<DraftListViewWidget> with Ui {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 25.0),
           decoration: BoxDecoration(
-            color: Ui.black00,
+            color: darkerShade,
             borderRadius: BorderRadius.circular(6),
           ),
           child: PageView.builder(
@@ -176,7 +187,17 @@ class _DraftListViewWidgetState extends State<DraftListViewWidget> with Ui {
                 spacer(y: 10),
                 Text(draft[index].explanation ?? 'No explanation yet',
                     style: small00),
+                spacer(y: 10),
                 // Text(current.toString()),
+                FilledButton(
+                    style: ButtonStyle(
+                        foregroundColor: MaterialStatePropertyAll(Colors.white),
+                        backgroundColor: MaterialStatePropertyAll(tiber)),
+                    onPressed: () {
+                      context.push('/admin/create-question',
+                          extra: (draft, QuestionType.mcq));
+                    },
+                    child: Text('Continue editing', style: rubik))
               ],
             ),
           ),

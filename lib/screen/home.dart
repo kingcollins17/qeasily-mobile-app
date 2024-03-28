@@ -6,11 +6,12 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hive/hive.dart';
+import 'package:qeasily/index.dart';
 import 'package:qeasily/provider/auth_provider.dart';
 import 'package:qeasily/styles.dart';
 import 'package:qeasily/test.dart';
 import 'package:qeasily/widget/widget.dart';
-import 'nav/nav.dart';
+// import 'nav/nav.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -26,11 +27,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with Ui {
     return Scaffold(
         backgroundColor: Ui.black00,
         drawer: _Drawer(),
-        body: Stack(
-          children: [
-            IndexSubScreen(),
-          ],
-        ));
+        body: HomePageSubScreen());
   }
 }
 
@@ -173,30 +170,38 @@ class _AdminTiles extends StatelessWidget with Ui {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        GestureDetector(
-          onTap: () {
-            context.push('/admin');
-          },
-          child: Container(
-            padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-            decoration: BoxDecoration(
-              color: raisingBlack,
-              borderRadius: BorderRadius.circular(6),
-            ),
-            child: Text(
-              'Admin',
-              style: mukta,
-            ),
+        Container(
+          padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+          decoration: BoxDecoration(
+            color: raisingBlack,
+            borderRadius: BorderRadius.circular(6),
+          ),
+          child: Text(
+            'Admin',
+            style: mukta,
           ),
         ),
         Divider(color: Colors.grey),
-        spacer(y: 15),
-        _drawerTile('Creations', Icons.create_new_folder_rounded),
+        spacer(y: 10),
+        InkWell(
+            overlayColor: MaterialStatePropertyAll(raisingBlack),
+            onTap: () {
+              context.push('/admin');
+            },
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 8),
+              child: _drawerTile(
+                  'Create and Manage', Icons.create_new_folder_rounded),
+            )),
         spacer(y: 15),
         // Divider(color: Colors.grey),
-        GestureDetector(
+        InkWell(
+            overlayColor: MaterialStatePropertyAll(raisingBlack),
             onTap: () => context.push('/admin/drafts'),
-            child: _drawerTile('Drafts', Icons.drafts_rounded)),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 4.0, vertical: 6),
+              child: _drawerTile('Drafts', Icons.drafts_rounded),
+            )),
       ],
     );
   }
