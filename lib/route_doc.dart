@@ -1,9 +1,11 @@
 // const domain = '192.168.43.0';
-const domain = '192.168.0.3';
+// const domain = '192.168.0.3';
+const domain = 'qeasily-backend.onrender.com';
 // const domain = '192.168.79.8';
+const verifyUrl = "https://api.paystack.co/transaction/verify";
 
 // const domain = '192.168.0.2';
-const baseUrl = 'http://$domain';
+const baseUrl = 'https://$domain';
 const authPrefix = '/auth';
 const categoryPrefix = '/categories';
 const topicsPrefix = '/topics';
@@ -43,6 +45,8 @@ enum APIUrl {
       queryParams: ['ref=5rma9x47ypp']),
   pendingTransactions(transactionPrefix, '/pending',
       method: _Method.get, body: pageInfoBody, requiresAuth: true),
+  deleteTransaction(transactionPrefix, '/delete',
+      queryParams: ['ref=ls7m3phe2o'], method: _Method.get),
   fetchKeys('/keys', '', method: _Method.get),
 
   updateProfile(

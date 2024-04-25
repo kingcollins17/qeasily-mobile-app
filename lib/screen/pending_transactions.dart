@@ -20,6 +20,7 @@ class PendingTransactionView extends ConsumerStatefulWidget {
 class _PendingTransactionViewState extends ConsumerState<PendingTransactionView>
     with Ui {
   String? notification;
+  bool isLoading = false;
   @override
   Widget build(BuildContext context) {
     final transactions = ref.watch(pendingTranxProvider);
@@ -29,17 +30,26 @@ class _PendingTransactionViewState extends ConsumerState<PendingTransactionView>
         Scaffold(
           appBar: AppBar(title: Text('Pending Transactions', style: small00)),
           body: switch (transactions) {
-            AsyncData(:final value) => value.isEmpty
+            AsyncData(value: final values) => values.isEmpty
                 ? NoDataNotification()
                 : ListView(
                     children: List.generate(
-                        value.length,
-                        // 10,
+                        values.length,
                         (index) => GestureDetector(
-                            onTap: () => setState(() {
-                                  notification = 'Verifying purchase ...';
-                                }),
-                            child: TransactionItem(data: value[index]))),
+                            onTap: () {
+                              setState(() {
+                                isLoading = true;
+                                notification =
+                                    'Please wait while we verify your purchase ...';
+                              });
+                              verifyWithPaystack(keys.asData!.value,
+                                      values[index].reference)
+                                  .then((value) => setState(() {
+                                        notification = value.toString();
+                                        isLoading = false;
+                                      }));
+                            },
+                            child: TransactionItem(data: values[index]))),
                   ),
             AsyncLoading() => Center(
                 child: SpinKitDualRing(color: Colors.white, size: 40),
@@ -50,14 +60,23 @@ class _PendingTransactionViewState extends ConsumerState<PendingTransactionView>
             _ => Center()
           },
         ),
-        Positioned(
-            top: 20,
-            child: SleekNotification(
-                optionTitle: 'Purchase verification',
-                notification: notification,
-                closer: () => setState(() {
-                      notification = null;
-                    })))
+        if (notification != null)
+          Positioned(
+              top: 20,
+              child: SleekNotification(
+                  optionTitle: 'Purchase verification',
+                  notification: notification,
+                  closer: () => setState(() {
+                        notification = null;
+                      }))),
+        if (isLoading)
+          Positioned(
+              child: Center(
+            child: SpinKitDualRing(
+              color: Colors.white,
+              size: 40,
+            ),
+          ))
       ],
     );
   }

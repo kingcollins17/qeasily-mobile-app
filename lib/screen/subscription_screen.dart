@@ -1,4 +1,4 @@
-// ignore_for_file: prefer_const_constructors, avoid_unnecessary_containers, prefer_const_literals_to_create_immutables
+// ignore_for_file: prefer_const_constructors, avoid_unnecessary_containers, prefer_const_literals_to_create_immutables, unused_element
 
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
@@ -28,6 +28,19 @@ class _SubscriptionPlanScreenState extends ConsumerState<SubscriptionPlanScreen>
   // final pageController = PageController();
   PlanData? current;
   String? hint;
+
+  bool isLoading = false;
+
+  Future<void> _sleekNotify(String message,
+      [Duration duration = const Duration(seconds: 3)]) async {
+    setState(() => hint = message);
+    return Future.delayed(
+        duration,
+        () => setState(() {
+              hint = null;
+            }));
+  }
+
   @override
   Widget build(BuildContext context) {
     final plans = ref.watch(subPlanProvider);
@@ -116,10 +129,34 @@ class _SubscriptionPlanScreenState extends ConsumerState<SubscriptionPlanScreen>
                       backgroundColor: MaterialStatePropertyAll(
                         deepSaffron,
                       )),
-                  onPressed: () {},
-                  child: Text('Buy Package',
-                      style: small00.copyWith(
-                          fontWeight: FontWeight.bold, color: Colors.white))),
+                  onPressed: () {
+                    if (current != null) {
+                      isLoading = true;
+                      _sleekNotify(
+                          'Please wait while we process your request ...');
+                      ref
+                          .read(subPlanProvider.notifier)
+                          .buyPackage(current!)
+                          .then((value) {
+                        isLoading = false;
+                        final (status, msg, data) = value;
+                        _sleekNotify(msg, Duration(seconds: 10));
+                        if (status && data != null) {
+                          ref.invalidate(pendingTranxProvider);
+                          context.go('/home/plans/buy-package', extra: data);
+                        }
+                      });
+                    } else {
+                      _sleekNotify('Please select a plan to proceed');
+                    }
+                  },
+                  child: isLoading
+                      ? SpinKitDualRing(
+                          color: Colors.white, size: 25, lineWidth: 7)
+                      : Text('Buy Package',
+                          style: small00.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white))),
             )),
         Positioned(
             top: 20,

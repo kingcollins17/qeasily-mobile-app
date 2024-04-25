@@ -96,7 +96,8 @@ class SleekNotification extends StatelessWidget with Ui {
                   padding: EdgeInsets.symmetric(horizontal: 10, vertical: 12),
                   margin: EdgeInsets.symmetric(horizontal: 6, vertical: 6),
                   width: maxWidth(context) * 0.9,
-                  constraints: BoxConstraints(minHeight: 50, maxHeight: 200),
+                  constraints:
+                      BoxConstraints(minHeight: 50, maxHeight: double.infinity),
                   decoration: BoxDecoration(
                     color: athensGray,
                     borderRadius: BorderRadius.circular(12),
@@ -124,10 +125,10 @@ class SleekNotification extends StatelessWidget with Ui {
                           onTap: closer,
                           child: Container(
                             decoration: BoxDecoration(
-                                color: tiber, shape: BoxShape.circle),
+                                color: deepSaffron, shape: BoxShape.circle),
                             padding: EdgeInsets.all(10),
                             child: Icon(Icons.close,
-                                size: 25, color: Colors.white),
+                                size: 20, color: Colors.white),
                           ),
                         ),
                         // spacer(),
@@ -139,8 +140,8 @@ class SleekNotification extends StatelessWidget with Ui {
                         begin: 0,
                         curve: Curves.easeIn)
                     .slideY(
-                        duration: Duration(milliseconds: 400),
-                        begin: 10,
+                        duration: Duration(milliseconds: 300),
+                        begin: 4,
                         end: 0,
                         curve: Curves.decelerate)
                     .scaleX(

@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:qeasily/styles.dart';
+import 'package:go_router/go_router.dart';
 
 class TutorialHint extends StatefulWidget {
   const TutorialHint({super.key, required this.message});
@@ -58,9 +59,9 @@ class NetworkErrorNotification extends StatelessWidget with Ui {
       width: maxWidth(context),
       child: Column(
         children: [
-          spacer(y: 15),
+          spacer(y: 30),
           SvgPicture.asset(
-            'asset/ils/undraw_online_stats_0g94.svg',
+            'asset/undraw/no_internet.svg',
             width: width,
             height: width,
           ),
@@ -72,7 +73,10 @@ class NetworkErrorNotification extends StatelessWidget with Ui {
                 style: small00.copyWith(fontSize: 14, color: Colors.grey)),
           ),
           spacer(),
-          TextButton(onPressed: refresh, child: Text('Try again', style: rubik))
+          TextButton(
+              onPressed: refresh,
+              // onPressed: () => context.go('/'),
+              child: Text('Try again', style: rubik))
         ],
       ),
     );
@@ -89,9 +93,9 @@ class NoDataNotification extends StatelessWidget with Ui {
       width: maxWidth(context),
       child: Column(
         children: [
-          spacer(y: 15),
+          spacer(y: 25),
           SvgPicture.asset(
-            'asset/ils/undraw_no_data_re_kwbl.svg',
+            'asset/undraw/no_data.svg',
             width: width,
             height: width,
           ),

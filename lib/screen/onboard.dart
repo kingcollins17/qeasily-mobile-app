@@ -116,7 +116,7 @@ class _OnboardingState extends State<Onboarding> with Ui {
                   style: medium10)),
           const SizedBox(height: 10),
           GestureDetector(
-            onTap: () => context.push('/home'),
+            onTap: () => context.push('/login'),
             child: Text(
               'Skip for now',
               style: GoogleFonts.quicksand(
@@ -137,13 +137,13 @@ const onboards = <_OnboardContent>[
     title: 'Take Quizzes',
     content: 'Test your knowledge with quizzes by set creators on our platform '
         'over a wide range of topics and categories',
-    imageUrl: 'asset/ils/undraw_exams_re_4ios.svg'
+    imageUrl: 'asset/undraw/welcome_onboard.svg'
   ),
   (
     title: 'Follow Creators',
     content:
         'Follow creators on our platform to stay'
         ' up to date with their latest Quizzes on the platform',
-    imageUrl: 'asset/ils/undraw_completing_re_i7ap.svg'
+    imageUrl: 'asset/undraw/follow_users.svg'
   ),
 ];

@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:hive/hive.dart';
 // import 'package:qeasily/main.dart';
 import 'package:qeasily/model/model.dart';
+import 'package:qeasily/provider/plan_provider.dart';
 import 'package:qeasily/redux/redux.dart';
 // import 'package:qeasily/screen/admin/admin.dart';
 import 'package:qeasily/screen/admin/manage_views/views.dart';
@@ -51,6 +52,17 @@ GoRouter router(Box config) {
               path: 'plans',
               pageBuilder: (context, state) =>
                   animatePage(SubscriptionPlanScreen(), state),
+                routes: [
+                  GoRoute(
+                      path: 'buy-package',
+                      builder: (context, state) => switch (state.extra) {
+                            SubscriptionSessionData data =>
+                              BuyPackageScreen(data: data),
+                            _ => ErrorPage(
+                                error:
+                                    'SubscriptionSessionData was not provided')
+                          })
+                ]
             ),
             GoRoute(
                 path: 'quiz-list',

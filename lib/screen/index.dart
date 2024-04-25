@@ -44,6 +44,7 @@ class _IndexSubScreenState extends ConsumerState<HomePageSubScreen> with Ui {
   var previous = _Destination.quiz;
   var destination = _Destination.quiz;
   // final scrollController = ScrollController();
+  String? notification;
 
   final pageController = PageController();
 
@@ -358,7 +359,12 @@ class _IndexSubScreenState extends ConsumerState<HomePageSubScreen> with Ui {
               ]),
         ),
       AsyncError(:final error) => Center(
-          child: Text(error.toString(), style: small00),
+          child: SleekNotification(
+              optionTitle: 'Something went wrong!',
+              notification: error.toString().startsWith('DioException')
+                  ? 'Please check your internet connectivity'
+                  : error.toString(),
+              closer: () => ref.refresh(categoriesProvider)),
         ),
       AsyncLoading() => Shimmer.fromColors(
           baseColor: Colors.transparent,

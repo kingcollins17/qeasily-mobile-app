@@ -25,16 +25,54 @@ Map<String, dynamic> _$PlanDataToJson(PlanData instance) => <String, dynamic>{
       'admin_access': instance.adminAccess,
     };
 
+SubscriptionSessionData _$SubscriptionSessionDataFromJson(
+        Map<String, dynamic> json) =>
+    SubscriptionSessionData(
+      authorizationUrl: json['authorization_url'] as String,
+      accessCode: json['access_code'] as String,
+      reference: json['reference'] as String,
+    );
+
+Map<String, dynamic> _$SubscriptionSessionDataToJson(
+        SubscriptionSessionData instance) =>
+    <String, dynamic>{
+      'authorization_url': instance.authorizationUrl,
+      'access_code': instance.accessCode,
+      'reference': instance.reference,
+    };
+
+PaystackVerificationData _$PaystackVerificationDataFromJson(
+        Map<String, dynamic> json) =>
+    PaystackVerificationData(
+      id: json['id'] as int,
+      status: json['status'] as String,
+      channel: json['channel'] as String,
+      currency: json['currency'] as String,
+      message: json['message'] as String?,
+      amount: json['amount'] as int,
+    );
+
+Map<String, dynamic> _$PaystackVerificationDataToJson(
+        PaystackVerificationData instance) =>
+    <String, dynamic>{
+      'id': instance.id,
+      'status': instance.status,
+      'channel': instance.channel,
+      'currency': instance.currency,
+      'message': instance.message,
+      'amount': instance.amount,
+    };
+
 // **************************************************************************
 // RiverpodGenerator
 // **************************************************************************
 
-String _$subPlanHash() => r'bd0f7ea22fdc22b6d2e7e7410858d0c4fde1640a';
+String _$subPlanHash() => r'59b467b42bdfbbdc5b2b51074266be34b7fe6665';
 
-/// See also [subPlan].
-@ProviderFor(subPlan)
-final subPlanProvider = FutureProvider<List<PlanData>>.internal(
-  subPlan,
+/// See also [SubPlan].
+@ProviderFor(SubPlan)
+final subPlanProvider = AsyncNotifierProvider<SubPlan, List<PlanData>>.internal(
+  SubPlan.new,
   name: r'subPlanProvider',
   debugGetCreateSourceHash:
       const bool.fromEnvironment('dart.vm.product') ? null : _$subPlanHash,
@@ -42,6 +80,6 @@ final subPlanProvider = FutureProvider<List<PlanData>>.internal(
   allTransitiveDependencies: null,
 );
 
-typedef SubPlanRef = FutureProviderRef<List<PlanData>>;
+typedef _$SubPlan = AsyncNotifier<List<PlanData>>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member

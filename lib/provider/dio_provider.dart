@@ -14,10 +14,10 @@ class GeneralDio extends _$GeneralDio {
   Dio build() {
     final config = Hive.box('config');
     final token = config.get('accessToken'); //check if accessToken is stored
-    // if (token != null) {}
+    //
     return Dio(BaseOptions(
-        connectTimeout: Duration(seconds: 10),
-        receiveTimeout: Duration(seconds: 10),
+        connectTimeout: Duration(seconds: 60),
+        receiveTimeout: Duration(seconds: 60),
         validateStatus: (status) => true,
         baseUrl: baseUrl,
         headers: token != null

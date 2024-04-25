@@ -1,5 +1,5 @@
 name: qeasily
-description: "A new Flutter project."
+description: "Qeasily application for mobile and web"
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
@@ -52,8 +52,8 @@ dependencies:
   flutter_spinkit: ^5.2.0
   # sqflite: ^2.3.2
   shimmer: ^3.0.0
-  fl_chart: ^0.66.2
-  reselect: ^0.5.0
+  # fl_chart: ^0.66.2
+  # reselect: ^0.5.0
   flutter_dotenv: ^5.1.0
   webview_flutter: ^4.7.0
   redux_persist: ^0.9.0
@@ -92,7 +92,7 @@ flutter:
   # To add assets to your application, add an assets section, like this:
   assets:
     - asset/ils/
-  #   - images/a_dot_ham.jpeg
+    - asset/undraw/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

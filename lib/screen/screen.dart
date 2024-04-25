@@ -5,5 +5,5 @@ export 'admin/admin.dart';
 export 'topic/topic.dart';
 export 'subscription_screen.dart';
 export 'session_history_screen.dart';
-export 'payments_screen.dart';
+export 'buy_package.dart';
 export 'pending_transactions.dart';
