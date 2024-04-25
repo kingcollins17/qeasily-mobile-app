@@ -23,16 +23,16 @@ class QuizData {
   factory QuizData.fromJson(Map<String, dynamic> json) =>
       _$QuizDataFromJson(json);
 
-  QuizData(
-      {required this.id,
-      required this.title,
-      required this.questions,
-      required this.userId,
-      required this.topicId,
-      required this.duration,
-      required this.dateAdded,
-      required this.description,
-      required this.difficulty,
+  QuizData({
+    required this.id,
+    required this.title,
+    required this.questions,
+    required this.userId,
+    required this.topicId,
+    required this.duration,
+    required this.dateAdded,
+    required this.description,
+    required this.difficulty,
     required this.type,
     required this.topic,
     required this.creator,
@@ -48,7 +48,7 @@ class QuizData {
   toString() =>
       'QuizData{id: $id, title: $title, type: $type, duration: $duration'
       ' seconds, description: $description, questions: $questions, difficulty: $difficulty,'
-      ' topicId: $topicId, userId: $userId}';
+      ' topicId: $topicId, userId: $userId, creator: $creator, topic: $topic}';
 
   @override
   int get hashCode => id.hashCode ^ title.hashCode ^ description.hashCode;

@@ -1,5 +1,7 @@
 // const domain = '192.168.43.0';
 const domain = '192.168.0.3';
+// const domain = '192.168.79.8';
+
 // const domain = '192.168.0.2';
 const baseUrl = 'http://$domain';
 const authPrefix = '/auth';
@@ -10,6 +12,7 @@ const followPrefix = '/follow';
 const challengePrefix = '/challenge';
 const questionsPrefix = '/questions';
 const activityPrefix = '/activity';
+const transactionPrefix = '/transaction';
 
 ///Holds all the details of the backend endpoints for the qeasily application
 ///Each enumeration is an endpoint in the app
@@ -35,8 +38,13 @@ enum APIUrl {
       'password': 'password'
     },
   ),
-  createProfile(authPrefix, '/create-profile',
-      body: {'department': 'Pharmacy', 'level': '300'}, method: _Method.post),
+  subscribe(transactionPrefix, '/subscribe', queryParams: ['plan_id=2']),
+  forceVerifyTransaction(transactionPrefix, '/force-verify',
+      queryParams: ['ref=5rma9x47ypp']),
+  pendingTransactions(transactionPrefix, '/pending',
+      method: _Method.get, body: pageInfoBody, requiresAuth: true),
+  fetchKeys('/keys', '', method: _Method.get),
+
   updateProfile(
     authPrefix,
     '/update-profile',
@@ -88,13 +96,13 @@ enum APIUrl {
 
   //-------------------------------------
   //All "/topics" prefixed routes
-  fetchTopics(
-    topicsPrefix,
-    '',
+  fetchTopics(topicsPrefix, '',
       requiresAuth: true,
       body: pageInfoBody,
-    queryParams: ['category_id=14', 'level=10'],
-  ),
+      queryParams: ['category_id=14', 'level=10'],
+      extras: "Fetches all topics under the category or not, if not provided"),
+  fetchCreatedTopics(topicsPrefix, "/created-topics",
+      body: pageInfoBody, method: _Method.get),
   createTopic(topicsPrefix, '/create', method: _Method.post, body: [
     {
       'title': '',
@@ -113,6 +121,7 @@ enum APIUrl {
   //-------------------------------------
   //All "/quiz" prefixed routes
   fetchQuiz(quizPrefix, '', queryParams: ['topic=4'], body: pageInfoBody),
+
   fetchAllQuiz(quizPrefix, '/all', body: pageInfoBody),
   quizFromCategory(
     quizPrefix,
@@ -146,15 +155,16 @@ enum APIUrl {
       requiresAuth: true, queryParams: ['id=7'], method: _Method.post),
   unfollow(followPrefix, '',
       requiresAuth: true, queryParams: ['id=7'], method: _Method.delete),
-fetchAccountToFollow(followPrefix, '/accounts',
-      method: _Method.get, requiresAuth: true, body: pageInfoBody),
 
+  fetchAccountToFollow(followPrefix, '/accounts',
+      method: _Method.get, requiresAuth: true, body: pageInfoBody),
+  fetchFollowings(followPrefix, '/followings',
+      body: pageInfoBody, method: _Method.get),
   fetchFollowers(followPrefix, '/followers',
       body: pageInfoBody, method: _Method.get),
 
   fetchChallenges(challengePrefix, '',
       method: _Method.get, queryParams: ['feed=true'], body: pageInfoBody),
-
 
   fetchUserCreatedChallenges(challengePrefix, '/created-challenges',
       body: pageInfoBody),
@@ -223,7 +233,7 @@ fetchAccountToFollow(followPrefix, '/accounts',
       body: pageInfoBody, queryParams: ['topic_id']),
   fetchCreatedMcq(questionsPrefix, '/created-mcq',
       body: pageInfoBody, queryParams: ['topic_id']),
-  deleteMcq(questionsPrefix, '/delete',
+  deleteMcq(questionsPrefix, '/delete-mcq',
       method: _Method.delete, body: [4, 6, 3, 1, 4]),
   deleteDcq(questionsPrefix, '/delete-dcq',
       method: _Method.delete, body: [6, 7, 4, 22, 5, 6]),

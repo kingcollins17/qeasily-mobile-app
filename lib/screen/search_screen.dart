@@ -5,9 +5,11 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_redux/flutter_redux.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:qeasily/model/model.dart';
 import 'package:qeasily/provider/dio_provider.dart';
+import 'package:qeasily/provider/provider.dart';
 import 'package:qeasily/redux/redux.dart';
 import 'package:qeasily/route_doc.dart';
 import 'package:qeasily/styles.dart';
@@ -22,188 +24,109 @@ class SearchScreen extends ConsumerStatefulWidget {
 }
 
 class _SearchScreenState extends ConsumerState<SearchScreen> with Ui {
-  final searchTextController = TextEditingController();
+  final textController = TextEditingController();
   String? query;
-  String searchFocus = 'Quizzes';
-  bool isFocused = true;
+  // bool isFocused = true;
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: Theme.of(context).colorScheme.background,
-      child: SingleChildScrollView(
-        child: Column(
-          children: [
-            spacer(),
-            _searchBar(),
-            spacer(y: 10),
-            StoreConnector<QeasilyState, SearchViewModel>(
-              builder: (context, vm) {
-                final _filter = query == null
-                    ? vm.state.queries
-                    : vm.state.queries
-                        .where((arg) =>
-                            arg.toLowerCase().contains(query!.toLowerCase()))
-                        .toList();
-
-                return Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      if (vm.state.isLoading)
-                        Shimmer.fromColors(
-                            baseColor: Colors.transparent,
-                            highlightColor: Colors.grey,
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                spacer(),
-                                shimmer(w: maxWidth(context) * 0.3, h: 10),
-                                spacer(y: 10),
-                                shimmer(w: maxWidth(context) * 0.9, h: 10),
-                                spacer(y: 10),
-                                shimmer(h: 70, w: maxWidth(context) * 0.9)
-                              ],
-                            )),
-                      if (vm.state.queries.isNotEmpty &&
-                          !vm.state.isLoading &&
-                          isFocused)
+    final search = ref.watch(searchProvider(query ?? ''));
+    return StoreConnector<QeasilyState, SearchViewModel>(
+        converter: (store) => SearchViewModel(store),
+        builder: (context, vm) {
+          return Material(
+            color: Theme.of(context).colorScheme.background,
+            child: Column(
+              children: [
+                spacer(),
+                _searchBar(),
+                spacer(y: 10),
+                if (query == null ||
+                    query!.isEmpty ||
+                    (search.hasValue && search.value!.$1.isEmpty))
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 6.0, vertical: 6),
+                    child: Wrap(
+                      alignment: WrapAlignment.center,
+                      spacing: 2,
+                      runSpacing: 2,
+                      children: [
                         ...List.generate(
-                            _filter.length,
-                            (index) => InkWell(
-                                  overlayColor: MaterialStatePropertyAll(
-                                      Color(0x39818181)),
-                                  onTap: () => vm.dispatch(search(
-                                    dio: ref.read(generalDioProvider),
-                                    query: _filter[index],
-                                    page: PageData(page: 1),
-                                  )),
-                                  child: Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 0,
-                                      vertical: 15,
+                            vm.state.history.length,
+                            (index) => GestureDetector(
+                                  onTap: () => setState(
+                                      () => query = vm.state.history[index]),
+                                  child: Container(
+                                    padding: EdgeInsets.symmetric(
+                                        horizontal: 10, vertical: 6),
+                                    decoration: BoxDecoration(
+                                      color: raisingBlack,
+                                      borderRadius: BorderRadius.circular(20),
                                     ),
-                                    child: Row(
-                                      children: [
-                                        Icon(
-                                          Icons.history,
-                                          size: 20,
-                                          color: athensGray,
-                                        ),
-                                        spacer(x: 15),
-                                        Text(_filter[index], style: mukta),
-                                      ],
-                                    ),
+                                    child: Text(vm.state.history[index],
+                                        style: rubik.copyWith(
+                                            fontSize: 14,
+                                            color: Color(0xFFC5C5C5))),
                                   ),
-                                )),
-                      spacer(y: 20),
-                      if (!vm.state.hasData && !isFocused) ...[
-                        Center(
-                          child: SvgPicture.asset(
-                            'asset/ils/undraw_no_data_re_kwbl.svg',
-                            width: maxWidth(context) * 0.4,
-                            height: 120,
-                          ),
-                        ),
-                        spacer(y: 15),
-                        Center(
-                          child: Text('No results for $query',
-                              textAlign: TextAlign.center, style: medium00),
-                        ),
+                                ))
                       ],
-                      if (vm.state.hasData && !isFocused) ...[
-                        Text('Found results', style: small00),
-                        spacer(y: 15),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            _searchNav(
-                              'Quizzes',
-                              vm.state.quizResult?.length ?? 0,
-                            ),
-                            _searchNav(
-                              'Challenges',
-                              vm.state.challengeResult?.length ?? 0,
-                            ),
-                            _searchNav(
-                              'Topics',
-                              vm.state.topicsResult?.length ?? 0,
-                            ),
-                          ],
-                        ),
-                        spacer(y: 20),
-                        PageTransitionSwitcher(
-                            transitionBuilder:
-                                (child, animation, secondaryAnimation) =>
-                                    SharedAxisTransition(
-                                      animation: animation,
-                                      secondaryAnimation: secondaryAnimation,
-                                      transitionType:
-                                          SharedAxisTransitionType.vertical,
-                                      child: child,
-                                    ),
-                            child: Column(
-                              children: switch (searchFocus) {
-                                'Topics' => List.generate(
-                                    vm.state.topicsResult?.length ?? 0,
-                                    (index) => TopicItemWidget(
-                                        topic: vm.state.topicsResult![index])),
-                                'Quizzes' => List.generate(
-                                    vm.state.quizResult?.length ?? 0,
-                                    (index) => QuizItemWidget(
-                                        quiz: vm.state.quizResult![index])),
-                                _ => List.generate(
-                                    vm.state.challengeResult?.length ?? 0,
-                                    (index) => ChallengeItemWidget(
-                                      
-                                          challenge:
-                                              vm.state.challengeResult![index],
-                                          onPress: (value) {},
-                                        ))
-                              },
-                            )),
-                      ],
-                    ],
+                    ),
                   ),
-                );
-              },
-              converter: (store) => SearchViewModel(store),
-            ),
-            spacer(y: 300),
-          ],
-        ),
-      ),
-    );
-  }
+          
+                spacer(y: 10),
+                switch (search) {
+                  AsyncData(value: (final quizzes, final topics)) => quizzes
+                          .isEmpty
+                      ? NoDataNotification()
+                      : Expanded(
+                          child: ListView(
+                          padding:
+                              EdgeInsets.symmetric(horizontal: 15, vertical: 6),
+                          children: [
+                            Text('Found ${quizzes.length} Quizzes',
+                                style: small00),
+                            spacer(),
+                            ...List.generate(
+                                quizzes.length,
+                                (index) =>
+                                    QuizItemWidget(quiz: quizzes[index])),
+                            spacer(y: 15),
+                            Text('Found ${topics.length} topics',
+                                style: small00),
+                            spacer(),
+                            ...List.generate(
+                                topics.length,
+                                (index) =>
+                                    TopicItemWidget(topic: topics[index]))
+                          ],
+                        )),
+                  AsyncError(:final error) =>
+                    error.toString().startsWith('DioException')
+                        ? NetworkErrorNotification(
+                            refresh: () => ref.refresh(SearchProvider(query!)),
+                          )
+                        : query == null
+                            ? Center()
+                            : ErrorNotificationHint(error: error),
+                  AsyncLoading() => Center(
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          SpinKitDualRing(color: Colors.white, size: 30),
+                          spacer(x: 15),
+                          Text('searching for $query', style: rubik)
+                        ],
+                      ),
+                    ),
+                  _ => Center()
+                },
 
-  Widget _searchNav(String label, int total) {
-    return GestureDetector(
-      onTap: () => setState(() {
-        searchFocus = label;
-      }),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 400),
-        margin: EdgeInsets.symmetric(horizontal: 4),
-        padding: EdgeInsets.symmetric(
-          horizontal: 10,
-          vertical: 8,
-        ),
-        decoration: BoxDecoration(
-            color: searchFocus == label ? raisingBlack : Colors.transparent,
-            borderRadius: BorderRadius.circular(6),
-            border: Border(
-                bottom: BorderSide(
-              color: label == searchFocus ? athensGray : Colors.transparent,
-              width: 1.5,
-            ))),
-        child: Text(
-          '$total $label',
-          style: mukta,
-        ),
-      ),
-    );
+                // spacer(y: 300),
+              ],
+            ),
+          );
+        });
   }
 
   Container _searchBar() {
@@ -225,12 +148,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> with Ui {
               builder: (context, vm) {
                 return GestureDetector(
                     onTap: () {
-                      // Navigator.pop(context);
-                      vm.dispatch(search(
-                        dio: ref.read(generalDioProvider),
-                        query: query!,
-                        page: PageData(page: 1, perPage: 50),
-                      ));
+                      setState(() {});
                     },
                     child: Icon(Icons.arrow_back, color: Colors.white));
               }),
@@ -243,13 +161,13 @@ class _SearchScreenState extends ConsumerState<SearchScreen> with Ui {
             child: TextField(
               autofocus: true,
               // autofillHints: ['Test', 'Physics'],
-              controller: searchTextController,
-              onTap: () => setState(() => isFocused = true),
-              onTapOutside: (event) => Future.delayed(Duration(seconds: 2), () {
-                setState(() => isFocused = false);
-                FocusScope.of(context).unfocus();
-              }),
-              onChanged: (value) => setState(() => query = value),
+              // controller: searchTextController,
+              // onTap: () => setState(() => isFocused = true),
+              // onTapOutside: (event) => Future.delayed(Duration(seconds: 2), () {
+              //   setState(() => isFocused = false);
+              //   FocusScope.of(context).unfocus();
+              // }),
+              onChanged: (value) => query = value,
               cursorHeight: 20,
               cursorColor: Color(0xA29E9E9E),
               style: small00,

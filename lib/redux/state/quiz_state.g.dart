@@ -6,17 +6,26 @@ part of 'quiz_state.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-QuizState _$QuizStateFromJson(Map<String, dynamic> json) => QuizState(
-      quizzes: _$JsonConverterFromJson<List<dynamic>, List<QuizData>>(
-          json['quizzes'], const _DataConverter().fromJson),
-    );
+QuizDataState _$QuizDataStateFromJson(Map<String, dynamic> json) =>
+    QuizDataState(
+      page: json['page'] == null
+          ? null
+          : PageData.fromJson(json['page'] as Map<String, dynamic>),
+      quizzes: (json['quizzes'] as List<dynamic>?)
+          ?.map((e) => QuizData.fromJson(e as Map<String, dynamic>))
+          .toList(),
+    )
+      ..message = json['message'] as String?
+      ..isLoading = json['isLoading'] as bool
+      ..topic = json['topic'] as int?
+      ..category = json['category'] as int?;
 
-Map<String, dynamic> _$QuizStateToJson(QuizState instance) => <String, dynamic>{
-      'quizzes': const _DataConverter().toJson(instance.quizzes),
+Map<String, dynamic> _$QuizDataStateToJson(QuizDataState instance) =>
+    <String, dynamic>{
+      'page': instance.page,
+      'quizzes': instance.quizzes,
+      'message': instance.message,
+      'isLoading': instance.isLoading,
+      'topic': instance.topic,
+      'category': instance.category,
     };
-
-Value? _$JsonConverterFromJson<Json, Value>(
-  Object? json,
-  Value? Function(Json json) fromJson,
-) =>
-    json == null ? null : fromJson(json as Json);

@@ -13,11 +13,7 @@ class ResultScreen extends StatelessWidget with Ui {
     required this.total,
     required this.attempted,
     required this.incorrect,
-    // required this.mcqs,
-    // required this.options,
   });
-  // final List<MCQData> mcqs;
-  // final List<MCQOption?> options;
   final int score, total, attempted, incorrect;
 
   @override
@@ -136,7 +132,7 @@ class ResultScreen extends StatelessWidget with Ui {
   }
 }
 
-(int score, int totalQuestions, int attempted, int incorrect) markMCQQuiz(
+({int score, int total, int attempted, int incorrect}) markMCQQuiz(
     List<MCQData> questions, List<MCQOption?> choices) {
   var score = 0;
   // var correct = 0;
@@ -147,5 +143,10 @@ class ResultScreen extends StatelessWidget with Ui {
     }
     attempted += choices[i] != null ? 1 : 0;
   }
-  return (score, questions.length, attempted, questions.length - score);
+  return (
+    score: score,
+    total: questions.length,
+    attempted: attempted,
+    incorrect: questions.length - score
+  );
 }

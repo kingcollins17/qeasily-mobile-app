@@ -16,6 +16,7 @@ MCQData _$MCQDataFromJson(Map<String, dynamic> json) => MCQData(
       explanation: json['explanation'] as String,
       correct: $enumDecode(_$MCQOptionEnumMap, json['correct']),
       topicId: json['topic_id'] as int,
+      topicTitle: json['topic'] as String?,
       userId: json['user_id'] as int,
     );
 
@@ -29,6 +30,7 @@ Map<String, dynamic> _$MCQDataToJson(MCQData instance) => <String, dynamic>{
       'explanation': instance.explanation,
       'correct': _$MCQOptionEnumMap[instance.correct]!,
       'topic_id': instance.topicId,
+      'topic': instance.topicTitle,
       'user_id': instance.userId,
     };
 
@@ -46,6 +48,7 @@ DCQData _$DCQDataFromJson(Map<String, dynamic> json) => DCQData(
       correct: const _CorrectOptionConverter().fromJson(json['correct'] as int),
       userId: json['user_id'] as int,
       topicId: json['topic_id'] as int,
+      topicTitle: json['topic'] as String?,
     );
 
 Map<String, dynamic> _$DCQDataToJson(DCQData instance) => <String, dynamic>{
@@ -55,4 +58,5 @@ Map<String, dynamic> _$DCQDataToJson(DCQData instance) => <String, dynamic>{
       'correct': const _CorrectOptionConverter().toJson(instance.correct),
       'user_id': instance.userId,
       'topic_id': instance.topicId,
+      'topic': instance.topicTitle,
     };

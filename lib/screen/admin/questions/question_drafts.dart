@@ -4,7 +4,6 @@ import 'dart:collection';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hive/hive.dart';
 import 'package:hive_flutter/adapters.dart';
 import 'package:qeasily/app_constants.dart';
 import 'package:qeasily/model/model.dart';
@@ -66,17 +65,14 @@ class _QuestionDraftScreenState extends ConsumerState<QuestionDraftScreen>
             padding: const EdgeInsets.symmetric(horizontal: 20.0),
             child: SingleChildScrollView(
               child: Column(
-                // mainAxisAlignment: Mai,
+          
                 children: [
-                  Align(
-                      alignment: Alignment.centerLeft,
-                      child: Text('Select draft type', style: xs00)),
                   spacer(y: 10),
                   _selectDraftType(),
                   spacer(y: 20),
                   ...switch (type) {
                     QuestionType.mcq => mcqDraftBox.keys
-                        .map((e) => _mcqDraft(context, e, mcqDraftBox))
+                        .map((e) => _mcqDrafts(context, e, mcqDraftBox))
                         .toList(),
                     _ => _dcqDrafts(dcqDraftBox)
                   },
@@ -89,7 +85,7 @@ class _QuestionDraftScreenState extends ConsumerState<QuestionDraftScreen>
     ], notification);
   }
 
-  Widget _mcqDraft(
+  Widget _mcqDrafts(
     BuildContext context,
     draftName,
     Box<List<dynamic>> mcqDraftBox,
@@ -97,21 +93,41 @@ class _QuestionDraftScreenState extends ConsumerState<QuestionDraftScreen>
     return GestureDetector(
       onTap: () =>
           push(DraftListViewWidget(draftName: draftName, type: type), context),
-      child: Container(
-        margin: EdgeInsets.symmetric(vertical: 4),
-        padding: EdgeInsets.symmetric(vertical: 15, horizontal: 10),
-        constraints: BoxConstraints(minHeight: 50, minWidth: maxWidth(context)),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(6),
-          color: darkShade,
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+      child: Padding(
+        padding: EdgeInsets.symmetric(vertical: 15),
+        child: Row(
           children: [
-            Text(draftName.toString(), style: small00),
-            Text(
-              '${loadMCQFromStorage(mcqDraftBox, draftName)?.length ?? '0'} Questions',
-              style: xs00,
+            Container(
+              padding: EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: deepSaffron,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(Icons.drafts, size: 18, color: Colors.white),
+            ),
+            spacer(x: 10),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(draftName.toString(), style: small00),
+                spacer(),
+                Row(
+                  children: [
+                    Icon(Icons.query_builder, size: 12, color: jungleGreen),
+                    spacer(),
+                    Text(
+                      '${loadMCQFromStorage(mcqDraftBox, draftName)?.length ?? '0'} Questions',
+                      style: xs00,
+                    ),
+                  ],
+                )
+              ],
+            ),
+            Expanded(
+              child: Align(
+                  alignment: Alignment.centerRight,
+                  child: Icon(Icons.arrow_forward_ios,
+                      size: 8, color: athensGray)),
             )
           ],
         ),
@@ -121,24 +137,44 @@ class _QuestionDraftScreenState extends ConsumerState<QuestionDraftScreen>
 
   List<Widget> _dcqDrafts(Box<List> box) => box.keys
       .map((e) => GestureDetector(
-            onTap: () => push(
-                DraftListViewWidget(draftName: e.toString(), type: type),
-                context),
-            child: Container(
-              margin: EdgeInsets.symmetric(vertical: 3),
-              width: maxWidth(context),
-              padding: EdgeInsets.symmetric(vertical: 15, horizontal: 12),
-              decoration: BoxDecoration(
-                color: darkShade,
-                borderRadius: BorderRadius.circular(6),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+            onTap: () {
+              push(
+                  DraftListViewWidget(
+                    draftName: e.toString(),
+                    type: type,
+                  ),
+                  context);
+            },
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 15.0),
+              child: Row(
                 children: [
-                  Text(e.toString(), style: small10),
-                  spacer(),
-                  Text('${box.get(e)?.length.toString() ?? '0'} Questions',
-                      style: xs00),
+                  Container(
+                    padding: EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: deepSaffron,
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(Icons.drafts, size: 18, color: Colors.white),
+                  ),
+                  spacer(x: 10),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(e.toString(), style: small10),
+                      spacer(),
+                      Row(
+                        children: [
+                          Icon(Icons.query_builder,
+                              size: 12, color: jungleGreen),
+                          spacer(),
+                          Text(
+                              '${box.get(e)?.length.toString() ?? '0'} Questions',
+                              style: xs00),
+                        ],
+                      ),
+                    ],
+                  ),
                 ],
               ),
             ),

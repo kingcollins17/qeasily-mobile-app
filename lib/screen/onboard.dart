@@ -53,7 +53,7 @@ class _OnboardingState extends State<Onboarding> with Ui {
                                 ),
                               ),
                               const SizedBox(height: 20),
-                              Text(onboards[index].title, style: big12),
+                              Text(onboards[index].title, style: big00),
                               const SizedBox(height: 20),
                               Text(
                                 onboards[index].content,
@@ -83,7 +83,7 @@ class _OnboardingState extends State<Onboarding> with Ui {
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
                             color: index == currentIndex
-                                ? Theme.of(context).colorScheme.primary
+                                ? jungleGreen
                                 : Colors.grey,
                           ),
                           duration: Duration(milliseconds: 300),
@@ -106,7 +106,9 @@ class _OnboardingState extends State<Onboarding> with Ui {
                   foregroundColor: MaterialStatePropertyAll(Colors.white),
                   fixedSize: MaterialStatePropertyAll(
                     Size(MediaQuery.of(context).size.width * 0.8, 45),
-                  )),
+                    
+                  ),
+                  backgroundColor: MaterialStatePropertyAll(jungleGreen)),
               child: Text(
                   currentIndex < onboards.length - 1
                       ? 'Continue'
@@ -132,28 +134,16 @@ typedef _OnboardContent = ({String title, String content, String imageUrl});
 
 const onboards = <_OnboardContent>[
   (
-    title: 'Quiz',
+    title: 'Take Quizzes',
     content: 'Test your knowledge with quizzes by set creators on our platform '
-        'over a wide range of topics and category',
+        'over a wide range of topics and categories',
     imageUrl: 'asset/ils/undraw_exams_re_4ios.svg'
   ),
   (
-    title: 'Progress Tracking',
-    content: 'Track all your quiz progress and see how you have '
-        'performed for a specific timeline',
-    imageUrl: 'asset/ils/undraw_personal_goals_re_iow7.svg'
-  ),
-  (
-    title: 'Paid Challenge',
+    title: 'Follow Creators',
     content:
-        'Participate in online paid challenges and compete with other users '
-        'on our platform to earn real cash rewards ',
+        'Follow creators on our platform to stay'
+        ' up to date with their latest Quizzes on the platform',
     imageUrl: 'asset/ils/undraw_completing_re_i7ap.svg'
-  ),
-  (
-    title: 'Leaderboards',
-    content:
-        'See the leaderboards and ranking to see your progress and performance in a Quiz Challenge',
-    imageUrl: 'asset/ils/undraw_grades_re_j7d6.svg'
   ),
 ];

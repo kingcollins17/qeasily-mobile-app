@@ -1,10 +1,16 @@
+// ignore_for_file: constant_identifier_names
+
 import 'package:json_annotation/json_annotation.dart';
 
 part 'question_model.g.dart';
 
+
+
+
 @JsonSerializable()
 class MCQData {
   final int id;
+
   final String query;
   final String A, B, C, D, explanation;
 
@@ -12,6 +18,9 @@ class MCQData {
 
   @JsonKey(name: 'topic_id')
   final int topicId;
+
+  @JsonKey(name: 'topic')
+  final String? topicTitle;
 
   @JsonKey(name: 'user_id')
   final int userId;
@@ -29,11 +38,12 @@ class MCQData {
       required this.explanation,
       required this.correct,
       required this.topicId,
+      this.topicTitle,
       required this.userId});
   Map<String, dynamic> toJson() => _$MCQDataToJson(this);
 
   @override
-  String toString() => 'MCQData{id: $int, query: $query, correct:'
+  String toString() => 'MCQData{id: $id, query: $query, correct:'
       ' ${correct.name}, A: $A, B: $B, C: $C, D: $D, topicId: $topicId}';
 }
 
@@ -56,7 +66,8 @@ const optionMap = {
 @JsonSerializable()
 class DCQData {
   final int id;
-  final String query, explanation;
+  final String query;
+  final String explanation;
 
   @_CorrectOptionConverter()
   final bool correct;
@@ -67,22 +78,25 @@ class DCQData {
   @JsonKey(name: 'topic_id')
   final int topicId;
 
+  @JsonKey(name: 'topic')
+  final String? topicTitle;
+
   factory DCQData.fromJson(Map<String, dynamic> json) =>
       _$DCQDataFromJson(json);
 
-  DCQData({
-    required this.id,
-    required this.query,
-    required this.explanation,
-    required this.correct,
-    required this.userId,
-    required this.topicId,
-  });
+  DCQData(
+      {required this.id,
+      required this.query,
+      required this.explanation,
+      required this.correct,
+      required this.userId,
+      required this.topicId,
+      this.topicTitle});
   Map<String, dynamic> toJson() => _$DCQDataToJson(this);
 
   @override
   String toString() =>
-      'DCQData {id: $id, query: $query, explanation: $explanation,'
+      'DCQData {id: $id, query: $query, explanation: $explanation, topic: $topicTitle'
       ' correct: $correct, userId: $userId, topicId: $topicId}';
 }
 

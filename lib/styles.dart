@@ -4,7 +4,6 @@ import 'package:google_fonts/google_fonts.dart';
 
 ///
 mixin Ui {
-
   // const Ui();
   final primary = const Color(0xFF916BFF);
   final blue1 = const Color(0xFF5C99FF);
@@ -23,30 +22,63 @@ mixin Ui {
       raisingBlack = const Color(0xFF252525);
   // final shimmer = const Color(0xFFD6D6D6);
 
+  final btn = const ButtonStyle(
+      foregroundColor: MaterialStatePropertyAll(Colors.black),
+      backgroundColor: MaterialStatePropertyAll(Colors.white));
+
   static const grey = Color(0xFF8A8A8A),
       lightGrey = Color(0xFFC0C0C0),
       darkGrey = Color(0xFF2C2C2C),
       black00 = Colors.black,
       black01 = Color(0xFF272727);
 
+  Widget refreshBtn([void Function()? onTap]) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(15),
+        decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            boxShadow: [
+              BoxShadow(color: athensGray.withOpacity(0.4), blurRadius: 4)
+            ],
+            color: Colors.white),
+        child: Icon(
+          Icons.refresh_rounded,
+          color: tiber,
+          size: 30,
+        ),
+      ),
+    );
+  }
+
   final TextStyle xs00 = GoogleFonts.workSans(
         fontSize: 12,
       ),
       xs01 = GoogleFonts.workSans(fontSize: 12, color: const Color(0x88FFFFFF)),
       small00 = GoogleFonts.workSans(fontSize: 16),
+      smallDark00 = GoogleFonts.workSans(fontSize: 16, color: Colors.black),
       small10 = GoogleFonts.workSans(fontSize: 16, fontWeight: FontWeight.w500),
       mukta = GoogleFonts.mukta(fontSize: 16, color: lightGrey),
       rubik = GoogleFonts.rubik(fontSize: 16),
       rubikSmall = GoogleFonts.rubik(fontSize: 14),
       // small03 = GoogleFonts.firaSans(fontSize: 16),
-      big04 = GoogleFonts.notoSans(fontSize: 16),
+
       medium00 = GoogleFonts.workSans(fontSize: 18, color: Colors.white),
       medium10 =
           GoogleFonts.workSans(fontSize: 18, fontWeight: FontWeight.bold),
-      big14 = GoogleFonts.notoSans(fontSize: 24, fontWeight: FontWeight.bold),
-      big12 = GoogleFonts.rubik(
+      big00 = GoogleFonts.rubik(
+          fontSize: 24, fontWeight: FontWeight.normal, color: Colors.white),
+      big10 = GoogleFonts.rubik(
           fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white),
       clock = GoogleFonts.notoSans(fontSize: 24);
+
+  Widget circleWrap(String string, {double? px}) {
+    return Container(
+        padding: EdgeInsets.all(px ?? 12),
+        decoration: BoxDecoration(color: tiber, shape: BoxShape.circle),
+        child: Text(string[0], style: small00));
+  }
 
   Widget loader({Color color = Colors.white, double sz = 50}) =>
       Center(child: SpinKitThreeInOut(size: sz, color: color));

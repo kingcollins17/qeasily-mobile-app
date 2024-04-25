@@ -5,11 +5,16 @@ import 'package:qeasily/styles.dart';
 
 class TimerDisplay extends StatefulWidget {
   const TimerDisplay(
-      {super.key, required this.duration, this.onElapse, this.controller});
+      {super.key,
+      required this.duration,
+      this.onElapse,
+      this.controller,
+      this.style});
 
   final Duration duration;
   final VoidCallback? onElapse;
   final TimerController? controller;
+  final TextStyle? style;
 
   @override
   State<TimerDisplay> createState() => TimerDisplayState();
@@ -84,7 +89,8 @@ class TimerDisplayState extends State<TimerDisplay> with Ui {
           return Container(
             // width: maxWidth(context) * 0.9,
             decoration: BoxDecoration(),
-            child: Text(_parse(seconds).toString(), style: rubik),
+            child:
+                Text(_parse(seconds).toString(), style: widget.style ?? rubik),
           );
         });
   }
@@ -93,6 +99,9 @@ class TimerDisplayState extends State<TimerDisplay> with Ui {
 class TimerController {
   TimerDisplayState? state;
   TimerController();
+
+  ///Gets the current seconds from the timer
+  int? get seconds => state?.seconds;
 
   void init(TimerDisplayState widgetState) => state = widgetState;
   void addTime(int seconds) => state?.addTime(seconds);

@@ -1,9 +1,10 @@
 // import 'package:qeasily/redux/redux.dart';
 import 'package:qeasily/redux/reducers/reducers.dart';
+import 'package:qeasily/redux/state/quiz_session.dart';
 import 'package:qeasily/redux/state/search_state.dart';
 
-import 'state/challenge_state.dart';
 import 'package:json_annotation/json_annotation.dart';
+
 import 'state/topic_state.dart';
 import 'state/quiz_state.dart';
 
@@ -11,63 +12,34 @@ part 'qeasily_state.g.dart';
 
 @JsonSerializable()
 class QeasilyState {
-  // @_TopicStateConverter()
   @JsonKey(includeFromJson: false, includeToJson: false)
-  TopicState topics;
+  TopicDataState topics;
 
-  // @_QuizStateConverter()
   @JsonKey(includeFromJson: false, includeToJson: false)
-  QuizState quizzes;
+  QuizDataState quizzes;
 
-  @_ChallengeStateConverter()
-  ChallengeState challenges;
+  ///search history
+  SearchHistoryState search;
 
-  SearchState search;
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  QuizSession session;
+
+  SessionHistory sessionHistory;
 
   QeasilyState(
-      {TopicState? topics,
-      QuizState? quizzes,
-      ChallengeState? challenges,
-      SearchState? search})
-      : topics = topics ?? TopicState(),
-        quizzes = quizzes ?? QuizState(),
-        challenges = challenges ?? ChallengeState(),
-        search = search ?? SearchState();
+      {TopicDataState? topics,
+      QuizDataState? quizzes,
+      SearchHistoryState? search,
+      SessionHistory? history})
+      : topics = topics ?? TopicDataState(),
+        quizzes = quizzes ?? QuizDataState(),
+        search = search ?? SearchHistoryState(),
+        sessionHistory = history ?? SessionHistory(),
+        session = QuizSession();
 
   factory QeasilyState.fromJson(dynamic json) => _$QeasilyStateFromJson(json);
 
   Map<String, dynamic> toJson() => _$QeasilyStateToJson(this);
-}
-
-class _TopicStateConverter
-    extends JsonConverter<TopicState, Map<String, dynamic>> {
-  const _TopicStateConverter();
-  @override
-  TopicState fromJson(Map<String, dynamic> json) => TopicState.fromJson(json);
-
-  @override
-  Map<String, dynamic> toJson(TopicState object) => object.toJson();
-}
-
-class _QuizStateConverter
-    extends JsonConverter<QuizState, Map<String, dynamic>> {
-  const _QuizStateConverter();
-  @override
-  QuizState fromJson(Map<String, dynamic> json) => QuizState.fromJson(json);
-
-  @override
-  Map<String, dynamic> toJson(QuizState object) => object.toJson();
-}
-
-class _ChallengeStateConverter
-    extends JsonConverter<ChallengeState, Map<String, dynamic>> {
-  const _ChallengeStateConverter();
-  @override
-  ChallengeState fromJson(Map<String, dynamic> json) =>
-      ChallengeState.fromJson(json);
-
-  @override
-  Map<String, dynamic> toJson(ChallengeState object) => object.toJson();
 }
 
 //
@@ -75,8 +47,9 @@ QeasilyState appReducer(QeasilyState state, action) {
   state
     ..topics = topicReducer(state.topics, action)
     ..quizzes = quizReducer(state.quizzes, action)
-    ..challenges = chgReducer(state.challenges, action)
-    ..search = searchReducer(state.search, action);
+    ..search = searchReducer(state.search, action)
+    ..session = sessionReducer(state.session, action)
+    ..sessionHistory = sessionHistoryReducer(state.sessionHistory, action);
 
   return state;
 }

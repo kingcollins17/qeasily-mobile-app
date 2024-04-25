@@ -1,4 +1,4 @@
-// ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables, unused_element, no_leading_underscores_for_local_identifiers
+// ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables, unused_element, no_leading_underscores_for_local_identifiers, use_build_context_synchronously
 
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
@@ -6,12 +6,16 @@ import 'package:flutter_redux/flutter_redux.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:qeasily/model/model.dart';
+import 'package:qeasily/provider/categories.dart';
+// import 'package:qeasily/provider/created_quizzes.dart';
 import 'package:qeasily/provider/dio_provider.dart';
 import 'package:qeasily/redux/redux.dart';
+import 'package:qeasily/redux/view_model/topic_vm.dart';
 import 'package:qeasily/route_doc.dart';
 import 'package:qeasily/styles.dart';
 import 'package:qeasily/util/util.dart';
-import 'package:qeasily/widget/notification.dart';
+import 'package:qeasily/widget/local_notification.dart';
 import 'package:qeasily/widget/widget.dart';
 
 import 'widget/widget.dart';
@@ -31,8 +35,10 @@ class _CreateQuizScreenState extends ConsumerState<CreateQuizScreen>
 
   //form arguments
   String? title, description, difficulty;
-  QuestionType? quizType;
-  int? duration, topicId;
+  QuestionType? questionType;
+  int? duration;
+  CategoryData? category;
+  TopicData? topic;
   List<int>? questions;
 
   //test data
@@ -58,19 +64,24 @@ class _CreateQuizScreenState extends ConsumerState<CreateQuizScreen>
     return showNotification(_controller);
   }
 
-  Future<dynamic> _goToPickQuestions() async {
+  Future<dynamic> _pickQuestions() async {
     if ((_formKey.currentState?.validate() ?? false) &&
-        (topicId != null &&
+        (topic?.id != null &&
             duration != null &&
             difficulty != null &&
-            quizType != null)) {
-      questions = await push<List<int>>(
-          PickQuestionsView(
-            type: quizType!,
-            topicId: topicId!,
+            questionType != null)) {
+      final picked = await push(
+          QuestionSelectorScreen(
+            topic: (topic!, questionType!),
           ),
           context);
-      await _notify('Questions selection complete!', loading: false);
+      switch (picked) {
+        case List<MCQData> _:
+          break;
+        case List<DCQData> _:
+          break;
+        default:
+      }
     } else {
       await _notify(
         'You must fill out the fields on this page before you proceed to pick questions',
@@ -116,14 +127,98 @@ class _CreateQuizScreenState extends ConsumerState<CreateQuizScreen>
                                 validator: validator,
                                 onChanged: (value) => description = value,
                                 maxLines: 5),
-                            spacer(y: 20),
+                            spacer(y: 15),
+                            Text('Category', style: small00)
+                                .align(Alignment.centerLeft),
+                            spacer(y: 10),
+                            switch (ref.read(categoriesProvider)) {
+                              AsyncData(value: List<CategoryData> data) =>
+                                CustomDropdownField(
+                                  items: data,
+                                  onChanged: (p0) {
+                                    setState(() => category = p0);
+                                  },
+                                  converter: (p0) => p0.name,
+                                ),
+                              _ => Center(child: Text(''))
+                            },
+                            spacer(y: 15),
                             Text('Topic', style: small00)
                                 .align(Alignment.centerLeft),
                             spacer(y: 10),
-                            CustomDropdownField(
-                                items: vm.state.topics,
-                                onChanged: (topic) => topicId = topic.id,
-                                converter: (topic) => topic.title),
+                            GestureDetector(
+                              onTap: () {
+                                if (category == null) {
+                                  _notify('You must select category first');
+                                } else {
+                                  push(
+                                          TopicSelectorScreen(
+                                              category: category!,
+                                              multiple: false),
+                                          context)
+                                      .then((value) {
+                                    if (value case [TopicData arg]) {
+                                      setState(() => topic = arg);
+                                    } else {
+                                      _notify('Invalid topic selection');
+                                    }
+                                  });
+                                }
+                              },
+                              child: Container(
+                                alignment: Alignment.centerLeft,
+                                padding: EdgeInsets.symmetric(
+                                    horizontal: 15, vertical: 6),
+                                width: maxWidth(context) * 0.9,
+                                height: 50,
+                                decoration: BoxDecoration(
+                                  color: raisingBlack,
+                                  borderRadius: BorderRadius.circular(6),
+                                ),
+                                child: Text(
+                                    topic?.title ?? 'Tap to select topic',
+                                    style: mukta),
+                              ),
+                            ),
+                            spacer(y: 20),
+                            Text('Questions', style: small00)
+                                .align(Alignment.centerLeft),
+                            spacer(y: 15),
+                            GestureDetector(
+                              onTap: () => topic == null || questionType == null
+                                  ? _notify('You must select topic and/or the'
+                                      ' question type before your proceed')
+                                  : push(
+                                          QuestionSelectorScreen(
+                                            topic: (topic!, questionType!),
+                                          ),
+                                          context)
+                                      .then((value) {
+                                      if (value is List) {
+                                        setState(() {
+                                          questions = value
+                                              .map((e) => e.id as int)
+                                              .toList();
+                                        });
+                                      }
+                                    }),
+                              child: Container(
+                                alignment: Alignment.centerLeft,
+                                padding: EdgeInsets.symmetric(
+                                    horizontal: 15, vertical: 6),
+                                width: maxWidth(context) * 0.9,
+                                height: 50,
+                                decoration: BoxDecoration(
+                                  color: raisingBlack,
+                                  borderRadius: BorderRadius.circular(6),
+                                ),
+                                child: Text(
+                                    questions != null
+                                        ? '${questions!.length} Questions selected'
+                                        : 'Tap to select Questions',
+                                    style: mukta),
+                              ),
+                            ),
                             spacer(y: 15),
                             Text('Select Duration', style: small00)
                                 .align(Alignment.centerLeft),
@@ -143,10 +238,12 @@ class _CreateQuizScreenState extends ConsumerState<CreateQuizScreen>
                               };
                               return CustomDropdownField(
                                   items: _map.keys.toList(),
-                                  onChanged: (value) => quizType = _map[value],
+                                  onChanged: (value) =>
+                                      questionType = _map[value],
                                   converter: (value) => value);
                             }(),
                             // Text(quizType.toString()),
+
                             spacer(y: 15),
                             Text('Select Difficulty', style: small00)
                                 .align(Alignment.centerLeft),
@@ -156,13 +253,15 @@ class _CreateQuizScreenState extends ConsumerState<CreateQuizScreen>
                                 onChanged: (value) => difficulty = value,
                                 converter: (value) => value),
                             spacer(y: 15),
+
                             // Text(questions?.toString() ??
                             // 'No questions selected yet')
                           ],
                         ));
                   }),
               // Text(testData.toString()),
-              spacer(y: 50),
+
+              spacer(y: 80),
             ],
           ),
         ),
@@ -174,14 +273,15 @@ class _CreateQuizScreenState extends ConsumerState<CreateQuizScreen>
           child: FilledButton(
               style: ButtonStyle(
                   fixedSize: MaterialStatePropertyAll(Size(
-                    maxWidth(context) * 0.9,
-                    42,
+                    maxWidth(context) * 0.85,
+                    40,
                   )),
                   foregroundColor: MaterialStatePropertyAll(Colors.black),
                   backgroundColor: MaterialStatePropertyAll(Colors.white)),
               onPressed: () async {
                 if (questions == null) {
-                  _goToPickQuestions();
+                  _notify(
+                      'You must select questions for this quiz before you proceed');
                 } else {
                   // try {
                   await _notify('Creating your Quiz', loading: true, delay: 2);
@@ -191,20 +291,24 @@ class _CreateQuizScreenState extends ConsumerState<CreateQuizScreen>
                     title: title!,
                     description: description!,
                     questions: questions!,
-                    topicId: topicId!,
+                    topicId: topic!.id,
                     durationInMinutes: duration!,
                     difficulty: difficulty!,
-                    type: quizType!,
+                    type: questionType!,
                   );
 
                   await _notify(msg, loading: false, delay: 3);
-                  // ignore: use_build_context_synchronously
-                  if (status) Navigator.pop(context);
+
+                  if (status) {
+                    // ref.invalidate(createdQuizzesProvider);
+                    Navigator.pop(context);
+                  }
                 }
               },
+              // icon: Icon(Icons.publish_rounded, color: athensGray, size: 25),
               child: isLoading
-                  ? SpinKitThreeBounce(color: Colors.black, size: 20)
-                  : Text(questions == null ? 'Pick Questions' : 'Create Quiz',
+                  ? SpinKitThreeBounce(color: athensGray, size: 20)
+                  : Text('Publish Quiz',
                       style: rubik)),
         ),
       )

@@ -8,12 +8,14 @@ import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:hive/hive.dart';
 import 'package:qeasily/app_constants.dart';
 import 'package:qeasily/model/model.dart';
+import 'package:qeasily/provider/categories.dart';
 import 'package:qeasily/provider/dio_provider.dart';
 import 'package:qeasily/redux/redux.dart';
+import 'package:qeasily/redux/view_model/topic_vm.dart';
 import 'package:qeasily/styles.dart';
 import 'package:qeasily/util/util.dart';
+import 'package:qeasily/widget/confirm_action.dart';
 import 'package:qeasily/widget/widget.dart';
-
 
 ///The two constructor must either be provided together or not at all
 class CreateQuestionsScreen extends ConsumerStatefulWidget {
@@ -39,6 +41,7 @@ class _CreateQuestionsState extends ConsumerState<CreateQuestionsScreen>
 
   QuestionType? questionType;
   TopicData? topic;
+  CategoryData? category;
   int total = 0, current = 0;
 
   void initaliseParams() {
@@ -49,7 +52,7 @@ class _CreateQuestionsState extends ConsumerState<CreateQuestionsScreen>
       draft = switch (questionType) {
         QuestionType.mcq =>
           List.generate(total, (index) => MCQDraft(topicId: topic!.id)),
-        //if typee is dcq
+        //
         QuestionType.dcq =>
           List.generate(total, (index) => DCQDraft(topicId: topic!.id)),
         _ => null
@@ -229,8 +232,18 @@ class _CreateQuestionsState extends ConsumerState<CreateQuestionsScreen>
               FilledButton(
                   onPressed: () async {
                     if (draft != null && draft!.isNotEmpty) {
+                      final publish = await showModal(
+                        context: context,
+                        builder: (context) => ConfirmAction(
+                            action:
+                                'Are you sure you want to publish these questions',
+                            onConfirm: () => Navigator.pop(context, true)),
+                      );
+                      //return if publish is not true
+                      if (publish != true) return;
                       _notify('Publishing questions', loading: true);
                       final dio = ref.read(generalDioProvider);
+
                       final (status, msg, data) = switch (draft!.first) {
                         MCQDraft _ => await publishMCQuestions(
                             dio,
@@ -254,6 +267,8 @@ class _CreateQuestionsState extends ConsumerState<CreateQuestionsScreen>
                             'are invalid, please review them',
                             loading: false);
                       }
+                    } else {
+                      _notify('Your edit is still empty');
                     }
                   },
                   style: ButtonStyle(
@@ -388,6 +403,17 @@ class _CreateQuestionsState extends ConsumerState<CreateQuestionsScreen>
           if (current == draft!.length - 1)
             FilledButton(
                 onPressed: () async {
+                  final publish = await showModal(
+                      context: context,
+                      builder: (context) => ConfirmAction(
+                            action:
+                                'Are you sure you want to publish these questions',
+                            onConfirm: () => Navigator.pop(context, true),
+                          ));
+                  if (publish != true) {
+                    _notify('Operation cancelled');
+                    return;
+                  }
                   _notify('Publishing Questions', loading: true);
                   final (status, msg, data) = await publishDCQuestions(
                       ref.read(generalDioProvider), draft!.cast<DCQDraft>());
@@ -504,20 +530,53 @@ class _CreateQuestionsState extends ConsumerState<CreateQuestionsScreen>
             }),
             converter: (value) => typeMap[value].toString(),
           ),
+          spacer(y: 15),
+          switch (ref.read(categoriesProvider)) {
+            AsyncData(:final value) => Column(
+                children: [
+                  Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text('Select Category', style: mukta)),
+                  spacer(y: 10),
+                  CustomDropdownField(
+                      items: value,
+                      onChanged: (p0) {
+                        category = p0;
+                      },
+                      converter: (p0) => p0.name),
+                ],
+              ),
+            _ => SizedBox()
+          },
           spacer(y: 25),
           Text('Select Topic of the Questions', style: mukta),
           spacer(y: 10),
-          StoreConnector<QeasilyState, TopicVM>(
-              converter: (store) => TopicVM(store),
-              builder: (context, vm) {
-                return CustomDropdownField(
-                  items: vm.state.topics,
-                  onChanged: (value) {
-                    setState(() => topic = value);
-                  },
-                  converter: (value) => value.title,
-                );
-              }),
+          GestureDetector(
+            onTap: () {
+              if (category == null) {
+                _notify('You must select category first!');
+              } else {
+                push(TopicSelectorScreen(category: category!, multiple: false),
+                        context)
+                    .then((value) {
+                  if (value case [TopicData arg]) {
+                    setState(() => topic = arg);
+                  } else {
+                    _notify('Selection is invalid');
+                  }
+                });
+              }
+            },
+            child: Container(
+              width: maxWidth(context) * 0.9,
+              height: 50,
+              alignment: Alignment.centerLeft,
+              padding: EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+              decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(6), color: raisingBlack),
+              child: Text(topic?.title ?? 'Tap to select Topic', style: mukta),
+            ),
+          ),
           // Text(topic.toString()),
           spacer(y: 200),
           Row(

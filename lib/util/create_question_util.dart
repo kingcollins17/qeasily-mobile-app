@@ -77,15 +77,11 @@ List<DCQDraft>? loadDCQFromStorage(Box<List> box, String draftName) {
 
 ///Returns whether this draft is valid and the indexes of the invalid Drafts in the list
 (bool, List<int>) validateDraft(List<Draft> draft) {
-  var valid = true;
-  final invalidIndexex = <int>[];
+  final invalidIndexes = <int>[];
   for (var i = 0; i < draft.length; i++) {
-    valid = draft[i].isValid;
-
-    ///Add to list of invalids
-    if (!draft[i].isValid) invalidIndexex.add(i);
+    if (!draft[i].isValid) invalidIndexes.add(i);
   }
-  return (valid, invalidIndexex);
+  return (invalidIndexes.isEmpty, invalidIndexes);
 }
 
 enum QuestionType { mcq, dcq }

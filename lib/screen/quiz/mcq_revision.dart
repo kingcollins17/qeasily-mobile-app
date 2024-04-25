@@ -7,16 +7,16 @@ import 'package:qeasily/styles.dart';
 import 'package:redux/redux.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class MCQRevision extends ConsumerStatefulWidget {
-  const MCQRevision(
+class MCQRevisionScreen extends ConsumerStatefulWidget {
+  const MCQRevisionScreen(
       {super.key, required this.options, required this.questions});
   final List<MCQData> questions;
   final List<MCQOption?> options;
   @override
-  ConsumerState<MCQRevision> createState() => _MCQRevisionState();
+  ConsumerState<MCQRevisionScreen> createState() => _MCQRevisionState();
 }
 
-class _MCQRevisionState extends ConsumerState<MCQRevision> with Ui {
+class _MCQRevisionState extends ConsumerState<MCQRevisionScreen> with Ui {
   int currentQuestionIndex = 0;
 
   void goToNextQuestion() => currentQuestionIndex < widget.questions.length - 1
@@ -31,7 +31,7 @@ class _MCQRevisionState extends ConsumerState<MCQRevision> with Ui {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Revision', style: mukta),
+        title: Text('Revision', style: small00),
       ),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 15.0),

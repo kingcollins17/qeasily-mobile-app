@@ -7,7 +7,7 @@ import 'package:qeasily/provider/categories.dart';
 import 'package:qeasily/provider/dio_provider.dart';
 import 'package:qeasily/styles.dart';
 import 'package:qeasily/widget/custom_drop_down.dart';
-import 'package:qeasily/widget/notification.dart';
+import 'package:qeasily/widget/local_notification.dart';
 
 import 'util/util.dart';
 

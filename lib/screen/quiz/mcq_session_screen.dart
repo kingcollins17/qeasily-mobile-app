@@ -3,21 +3,28 @@
 import 'package:animations/animations.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_redux/flutter_redux.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:qeasily/model/model.dart';
 import 'package:qeasily/provider/dio_provider.dart';
+import 'package:qeasily/redux/redux.dart';
 import 'package:qeasily/route_doc.dart';
 import 'package:qeasily/screen/quiz/mcq_revision.dart';
+import 'package:qeasily/screen/quiz/widget/widget.dart';
 import 'package:qeasily/styles.dart';
+import 'package:qeasily/widget/confirm_action.dart';
 
 import 'package:qeasily/widget/widget.dart';
 import 'package:shimmer/shimmer.dart';
 
-import 'result_screen.dart';
+import 'quiz_result_screen.dart';
 
 class MCQSessionScreen extends ConsumerStatefulWidget {
-  const MCQSessionScreen({super.key, required this.data});
-  final QuizData data;
+  const MCQSessionScreen({super.key, this.data, this.savedSession})
+      : assert(data != null || savedSession != null);
+  final QuizData? data;
+  final SavedMCQSession? savedSession;
   @override
   ConsumerState<MCQSessionScreen> createState() => _QuizSessionScreenState();
 }
@@ -29,14 +36,10 @@ class _QuizSessionScreenState extends ConsumerState<MCQSessionScreen>
   final scrollController = ScrollController();
   final timerController = TimerController();
 
-  var nextPage = PageData(page: 1, perPage: 2);
-
-  var currentQuestionIndex = 0;
+  bool hasInitialized = false;
+  var canExit = false;
 
   final double pointerWidth = 55;
-
-  List<MCQData>? mcqs;
-  late List<MCQOption?> options;
 
   LocalNotification? notification;
 
@@ -47,42 +50,12 @@ class _QuizSessionScreenState extends ConsumerState<MCQSessionScreen>
   void initState() {
     super.initState();
     _controller = AnimationController(vsync: this);
-
-    _notify('Please wait ...', loading: true);
-    options = List.generate(widget.data.questionsAsInt.length, (index) => null);
-    fetchMCQQuestions(ref.read(generalDioProvider),
-            page: nextPage, quiz_id: widget.data.id)
-        .then((value) {
-      mcqs = value.data;
-      nextPage = value.page ?? nextPage;
-
-      //if page has next, then advance page
-      if (nextPage.hasNextPage) nextPage.next();
-      _notify(value.detail, loading: false);
-    });
   }
 
   @override
   void dispose() {
     _controller.dispose();
     super.dispose();
-  }
-
-  void goToNextQuestion() {
-    if (mcqs != null && currentQuestionIndex + 1 < mcqs!.length) {
-      setState(() => currentQuestionIndex += 1);
-    } else if (nextPage.hasNextPage) {
-      _fetchNextPage().then((fetched) =>
-          fetched ? setState(() => currentQuestionIndex += 1) : null);
-    }
-    animateToQuestion(currentQuestionIndex);
-  }
-
-  void _goToPreviousQuest() {
-    if (mcqs != null && currentQuestionIndex - 1 >= 0) {
-      setState(() => currentQuestionIndex -= 1);
-      animateToQuestion(currentQuestionIndex);
-    }
   }
 
   void animateToQuestion(int index) {
@@ -133,174 +106,232 @@ class _QuizSessionScreenState extends ConsumerState<MCQSessionScreen>
         ],
       ));
 
-  Future<bool> _fetchNextPage() async {
-    if (nextPage.hasNextPage) {
-      _notify('Fetching next batch of questions', loading: true);
-      final temp = await fetchMCQQuestions(
-        ref.read(generalDioProvider),
-        page: nextPage,
-        quiz_id: widget.data.id,
-      );
-      //add fetched mcqs if its not empty
-      temp.data.isNotEmpty ? mcqs?.addAll(temp.data) : null;
-      if (temp.page != null) nextPage = temp.page!..next();
-      _notify(temp.detail, delay: 3, loading: false);
-
-      //
-      // _notify(temp.page.toString());
-      return temp.page != null;
-    }
-    return false;
-  }
-
   @override
   Widget build(BuildContext context) {
-    return stackWithNotifier([
-      Scaffold(
-        appBar: AppBar(
-          automaticallyImplyLeading: false,
-          title: GestureDetector(
-              onTap: () {
-                showModal(context: context, builder: _confirmSubmission)
-                    .then((value) {
-                  if (value == true) {
-                    // Navigator.pop(context);
-                    final (score, total, attempted, incorrect) =
-                        markMCQQuiz(mcqs!, options);
-                    push<bool>(
-                            ResultScreen(
-                                score: score,
-                                total: total,
-                                attempted: attempted,
-                                incorrect: incorrect),
-                            context)
-                        .then((value) {
-                      Navigator.pop(context);
-                      if (value == true) {
-                        push(MCQRevision(options: options, questions: mcqs!),
-                            context);
-                      }
-                    });
-                  }
-                });
-              },
-              child: Text(widget.data.title, style: mukta)),
-          actions: [
-            TextButton(
-              onPressed: () {},
-              style: ButtonStyle(
-                  foregroundColor: MaterialStatePropertyAll(deepSaffron)),
-              child: Text('Submit', style: small00),
-            )
-          ],
-        ),
-        body: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20.0),
-            child: Column(children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  Icon(Icons.lock_clock, size: 20, color: Color(0xC8FFFFFF)),
-                  spacer(x: 6),
-                  TimerDisplay(
-                    duration: Duration(seconds: widget.data.duration),
-                    controller: timerController,
-                    onElapse: () => timerController.addTime(10),
-                  ),
-                ],
-              ),
+    return StoreConnector<QeasilyState, SessionViewModel>(
+        converter: (store) =>
+            SessionViewModel(store, ref.read(generalDioProvider)),
+        builder: (context, vm) {
+          ///if this widget has been initalized, do nothing
+          if (hasInitialized) {
+          } else if (widget.data != null) {
+            //initialize a new session
+            vm.init(widget.data!);
+          } else if (widget.savedSession != null) {
+            //restore the saveed session
+            vm.restoreSession(widget.savedSession!);
+          }
+          hasInitialized = true;
 
-              spacer(),
-              if (isLoading) _shimmer(),
-              // Text(currentPage.toString()),
-              if (mcqs != null && !isLoading && mcqs!.isNotEmpty)
-                Container(
-                  decoration: BoxDecoration(),
-                  child: Column(
-                    children: [
-                      Align(
-                        alignment: Alignment.centerLeft,
-                        child: Text(
-                          'Questions ${currentQuestionIndex + 1} '
-                          'of ${widget.data.questionsAsInt.length}',
-                          style: xs00,
-                        ),
-                      ),
-                      spacer(y: 15),
-                      Align(
-                          alignment: Alignment.centerLeft,
-                          child: Container(
-                            width: maxWidth(context) * 0.86,
-                            constraints: BoxConstraints(minHeight: 50),
-                            padding: EdgeInsets.symmetric(
-                                horizontal: 10, vertical: 10),
-                            decoration: BoxDecoration(
-                                color: raisingBlack,
-                                borderRadius: BorderRadius.circular(6)),
-                            child: Text(mcqs![currentQuestionIndex].query,
-                                style: small00),
-                          )),
-                      spacer(y: 35),
-                      ...List.generate(
-                          4,
-                          (index) => GestureDetector(
-                                onTap: () => setState(() {
-                                  options[currentQuestionIndex] =
-                                      MCQOption.convert(index);
-                                }),
-                                onDoubleTap: () => setState(() {
-                                  options[currentQuestionIndex] = null;
-                                }),
-                                child: Container(
-                                  width: maxWidth(context) * 0.9,
-                                  margin: EdgeInsets.symmetric(vertical: 4),
-                                  padding: EdgeInsets.symmetric(
-                                      horizontal: 10, vertical: 6),
-                                  constraints: BoxConstraints(minHeight: 50),
-                                  decoration: BoxDecoration(
-                                    // color: Colors.green,
-                                    border: Border.all(
-                                      color: index ==
-                                              options[currentQuestionIndex]
-                                                  ?.index
-                                          ? Colors.greenAccent
-                                          : Colors.grey,
-                                    ),
-                                  ),
-                                  child: Text(_option(index), style: mukta),
-                                ),
-                              ))
-                    ],
+          //check if there is a session, else throw an exception
+          if (!vm.sessionState.inSession) {
+            // context.go('/home/session', extra: widget.data);
+            return ErrorNotificationHint(error: 'No session availalable');
+          }
+          // throw Exception('No session available when there should be!');
+
+          final MCQSessionState(
+            :questions,
+            :quiz,
+            :current,
+            :choices,
+            :timeLeft
+          ) = vm.sessionState.session! as MCQSessionState;
+          return stackWithNotifier([
+            BackButtonListener(
+              onBackButtonPressed: () async {
+                if (canExit) {
+                  context.go('/home');
+                } else {
+                  vm.save(timerController.seconds ?? 1800);
+                  await _notify('This session will be saved', delay: 2);
+                  _notify('Press back again to exit');
+                  canExit = true;
+                }
+                return true;
+              },
+              child: Scaffold(
+                appBar: AppBar(
+                  automaticallyImplyLeading: false,
+                  title: FilledButton(
+                    onPressed: () {
+                      showModal(
+                          context: context,
+                          builder: (context) => ConfirmAction(
+                                action: 'Are you sure you want to submit',
+                                onConfirm: () => Navigator.pop(context, true),
+                              )).then((value) {
+                        ///close session if user wants to submit
+                        if (value == true) {
+                          vm.closeSession();
+                          final (:score, :total, :attempted, :incorrect) =
+                              markMCQQuiz(questions, choices);
+                          push<bool>(
+                                  ResultScreen(
+                                      score: score,
+                                      total: total,
+                                      attempted: attempted,
+                                      incorrect: incorrect),
+                                  context)
+                              .then((value) => value == true
+                                  ? context.go('/home/mcq-revise',
+                                      extra: (choices, questions))
+                                  : context.go('/home/session',
+                                      extra: widget.data));
+                        }
+                      });
+                    },
+                    style: ButtonStyle(
+                        foregroundColor: MaterialStatePropertyAll(Colors.white),
+                        backgroundColor: MaterialStatePropertyAll(jungleGreen)),
+                    child: Text('submit', style: rubik),
                   ),
                 ),
-              spacer(y: 10),
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  GestureDetector(
-                    onTap: _goToPreviousQuest,
-                    child: direction(),
-                  ),
-                  GestureDetector(
-                      onTap: goToNextQuestion, child: direction(dir: 'right'))
-                ],
-              ),
-              // spacer(y: 50),
+                body: SingleChildScrollView(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                    child: Column(children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          Icon(Icons.lock_clock,
+                              size: 20, color: Color(0xC8FFFFFF)),
+                          spacer(x: 6),
+                          TimerDisplay(
+                            style: big00,
+                            duration: timeLeft!,
+                            controller: timerController,
+                            onElapse: () => timerController.addTime(10),
+                          ),
+                        ],
+                      ),
 
-              spacer(y: 60),
-              // Text(parseQuestions(widget.data.questions).toString())
-            ]),
-          ),
-        ),
-      ),
-      Positioned(
-        bottom: 20,
-        width: maxWidth(context),
-        child: Material(child: Center(child: _pointerList())),
-      ),
-    ], notification);
+                      if (vm.sessionState.isLoading) _shimmer(),
+                      if (vm.sessionState.session?.availableQuestions
+                              .isNotEmpty ??
+                          false) ...[
+                        Container(
+                          decoration: BoxDecoration(),
+                          child: Column(
+                            children: [
+                              Align(
+                                alignment: Alignment.centerLeft,
+                                child: Text(
+                                  'Questions ${vm.sessionState.session!.current + 1} '
+                                  'of ${vm.sessionState.session?.availableQuestions.length}',
+                                  style: xs00,
+                                ),
+                              ),
+                              spacer(y: 15),
+                              Align(
+                                  alignment: Alignment.centerLeft,
+                                  child: Container(
+                                    width: maxWidth(context) * 0.86,
+                                    constraints: BoxConstraints(minHeight: 50),
+                                    padding: EdgeInsets.symmetric(
+                                        horizontal: 10, vertical: 10),
+                                    decoration: BoxDecoration(
+                                        color: raisingBlack,
+                                        borderRadius: BorderRadius.circular(6)),
+                                    child: Text(questions[current].query,
+                                        style: small00),
+                                  )),
+                              spacer(y: 35),
+                            ],
+                          ),
+                        ),
+                        spacer(y: 15),
+                        // Text(vm.sessionState.session.toString()),
+                        () {
+                          final question = questions[current];
+                          final options = [
+                            question.A,
+                            question.B,
+                            question.C,
+                            question.D
+                          ];
+                          return OptionSelector(
+                            values: MCQOption.values,
+                            selected: choices[current],
+                            onSelect: (value) {
+                              vm.pickOption(value, current);
+                            },
+                            converter: (value) => options[value.index],
+                            deselect: () {
+                              vm.unpickOption(current);
+                            },
+                          );
+                        }(),
+                        spacer(y: 50),
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            GestureDetector(
+                              onTap: vm.previous,
+                              child: direction(),
+                            ),
+                            GestureDetector(
+                                onTap: vm.next, child: direction(dir: 'right'))
+                          ],
+                        ),
+                        spacer(y: 100),
+                      ] //wrapped by condition (if list is not empty)
+                    ]),
+                  ),
+                ),
+              ),
+            ),
+            Positioned(
+              bottom: 20,
+              width: maxWidth(context),
+              child: Material(
+                  child: Center(
+                      child: SizedBox(
+                          height: 60,
+                          child: ListView.builder(
+                              padding: EdgeInsets.symmetric(horizontal: 6),
+                              controller: scrollController,
+                              scrollDirection: Axis.horizontal,
+                              itemExtent: pointerWidth,
+                              itemCount: vm.sessionState.session?.quiz
+                                      .questionsAsInt.length ??
+                                  0,
+                              itemBuilder: (context, index) => GestureDetector(
+                                    onTap: () => vm.current = index,
+                                    child: Padding(
+                                      padding:
+                                          EdgeInsets.symmetric(horizontal: 3),
+                                      child: AnimatedContainer(
+                                        duration:
+                                            const Duration(milliseconds: 450),
+                                        decoration: BoxDecoration(
+                                            shape: BoxShape.circle,
+                                            color: choices[index] != null
+                                                ? jungleGreen
+                                                : Color(0xFF363636),
+                                            border: Border.all(
+                                              color: current == index
+                                                  ? Colors.white
+                                                  : Colors.transparent,
+                                              width: 2,
+                                            )),
+                                        child: Center(
+                                            child: Text('${index + 1}',
+                                                style: small00)),
+                                      ),
+                                    ),
+                                  ))))),
+            ),
+            Positioned(
+              bottom: 20,
+              child: StoreNotification(
+                message: vm.sessionState.message,
+                closer: () => vm.clearNotification(),
+              ),
+            )
+          ], notification);
+        });
   }
 
   Center _confirmSubmission(BuildContext context) {
@@ -341,82 +372,4 @@ class _QuizSessionScreenState extends ConsumerState<MCQSessionScreen>
           )),
     );
   }
-
-  String _option(int idx) {
-    var opt = switch (idx) {
-      0 => mcqs![currentQuestionIndex].A,
-      1 => mcqs![currentQuestionIndex].B,
-      2 => mcqs![currentQuestionIndex].C,
-      3 => mcqs![currentQuestionIndex].D,
-      _ => mcqs![currentQuestionIndex].A
-    };
-    return opt;
-  }
-
-  SizedBox _pointerList() {
-    return SizedBox(
-      height: 60,
-      child: (mcqs != null)
-          ? ListView.builder(
-              padding: EdgeInsets.symmetric(horizontal: 6),
-              controller: scrollController,
-              scrollDirection: Axis.horizontal,
-              itemExtent: pointerWidth,
-              itemCount: options.length,
-              itemBuilder: (context, index) => GestureDetector(
-                    onTap: () => mcqs != null && (index < mcqs!.length)
-                        ? setState(() {
-                            currentQuestionIndex = index;
-                          })
-                        : null,
-                    child: Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 3),
-                      child: AnimatedContainer(
-                        // width: 50,
-                        // height: 50,
-                        duration: const Duration(milliseconds: 450),
-                        decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: index > mcqs!.length - 1
-                                ? tiber.withOpacity(0.4)
-                                : options[index] != null
-                                    ? jungleGreen
-                                    : Color(0xFF363636),
-                            border: Border.all(
-                              color: index == currentQuestionIndex
-                                  ? Colors.white
-                                  : Colors.transparent,
-                              width: 2,
-                            )),
-                        child:
-                            Center(child: Text('${index + 1}', style: small00)),
-                      ),
-                    ),
-                  ))
-          : Text('No data yet', style: mukta),
-    );
-  }
 }
-
-Future<MCQResp> fetchMCQQuestions(Dio dio,
-    {required PageData page, required int quiz_id}) async {
-  try {
-    final res = await dio.get(APIUrl.fetchQuizQuestions.url,
-        data: page.toJson(), queryParameters: {'quiz_id': quiz_id});
-
-    final _fetchedPage =
-        res.statusCode == 200 ? PageData.fromJson(res.data['page']) : null;
-
-    _fetchedPage?.hasNextPage = (res.data['has_next_page'] as bool?) ?? false;
-
-    return (
-      detail: res.data['detail'].toString(),
-      data: (res.data['data'] as List).map((e) => MCQData.fromJson(e)).toList(),
-      page: _fetchedPage
-    );
-  } catch (e) {
-    return (detail: e.toString(), data: const <MCQData>[], page: null);
-  }
-}
-
-typedef MCQResp = ({List<MCQData> data, String detail, PageData? page});

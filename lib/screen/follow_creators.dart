@@ -1,11 +1,13 @@
-// ignore_for_file: prefer_const_literals_to_create_immutables, prefer_const_constructors, unused_element, unused_local_variable
+// ignore_for_file: prefer_const_literals_to_create_immutables, prefer_const_constructors, unused_element, unused_local_variable, no_leading_underscores_for_local_identifiers
 
 import 'package:dio/dio.dart';
+import 'package:easy_refresh/easy_refresh.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:qeasily/model/model.dart';
 import 'package:qeasily/provider/dio_provider.dart';
+import 'package:qeasily/provider/follow_provider.dart';
 import 'package:qeasily/route_doc.dart';
 import 'package:qeasily/styles.dart';
 import 'package:qeasily/util/util.dart';
@@ -19,44 +21,32 @@ class FollowCreatorScreen extends ConsumerStatefulWidget {
   const FollowCreatorScreen({super.key});
   @override
   ConsumerState<FollowCreatorScreen> createState() =>
-      _FollowCreatorsScreenState();
+      _FollowCreatorScreenState();
 }
 
-class _FollowCreatorsScreenState extends ConsumerState<FollowCreatorScreen>
+class _FollowCreatorScreenState extends ConsumerState<FollowCreatorScreen>
     with Ui, SingleTickerProviderStateMixin {
+  final pageController = PageController();
+  final scrollController = ScrollController();
   late AnimationController _controller;
-
-  final _scrollController = ScrollController();
-
-  final followings = <int>[];
-  int? followIsWaiting;
-
   LocalNotification? notification;
-  var isLoading = false;
-  var page = PageData();
-  var accounts = <FollowAccountData>[];
+  bool isLoading = false;
+
+  var destination = _Destination.unfollowed;
+
+  Future<void> _notify(String message, {bool? loading, int delay = 5}) async {
+    setState(() {
+      isLoading = loading ?? isLoading;
+      notification =
+          LocalNotification(animation: _controller, message: message);
+    });
+    return showNotification(_controller, delay);
+  }
 
   @override
   void initState() {
     super.initState();
     _controller = AnimationController(vsync: this);
-    //attach scroll listener
-    _scrollController.addListener(() {
-      if (_scrollController.position.pixels ==
-          _scrollController.position.maxScrollExtent) {
-        fetchNextPage();
-      }
-    });
-
-    isLoading = true;
-    fetchAccountsToFollow(ref.read(generalDioProvider), page..next())
-        .then((value) {
-      // ignore: no_leading_underscores_for_local_identifiers
-      final (status, msg, data, _page) = value;
-      accounts = data;
-      page = _page;
-      _notify(msg, loading: false);
-    });
   }
 
   @override
@@ -65,157 +55,247 @@ class _FollowCreatorsScreenState extends ConsumerState<FollowCreatorScreen>
     _controller.dispose();
   }
 
-  Future<void> _notify(String message, {bool? loading, int delay = 4}) async {
-    setState(() {
-      isLoading = loading ?? isLoading;
-      notification =
-          LocalNotification(animation: _controller, message: message);
-    });
-
-    return showNotification(_controller, delay);
-  }
-
-  Future<void> fetchNextPage() async {
-    if (page.hasNextPage) {
-      _notify('Please wait ...', loading: true);
-      final (status, msg, data, _page) = await fetchAccountsToFollow(
-          ref.read(generalDioProvider), page..next());
-      page = _page;
-      accounts.addAll(data);
-      _notify(msg, loading: false);
-    } else {
-      _notify('No more data');
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
+    final provider =
+        followNotifierProvider(destination == _Destination.followed);
+    final followState = ref.watch(provider);
     return stackWithNotifier([
       Scaffold(
-        appBar: AppBar(title: Text('Creators to Follow', style: small00)),
-        body: isLoading && accounts.isEmpty
-            ? _shimmer()
-            : ListView(
-                controller: _scrollController,
-                padding: EdgeInsets.symmetric(horizontal: 18, vertical: 6),
+        appBar: AppBar(title: Text('Follow Creators', style: small00)),
+        body: switch (followState) {
+          AsyncData(value: (final data, final page)) => EasyRefresh(
+              onRefresh: () => ref.refresh(provider),
+              onLoad: () => ref.read(provider.notifier).fetchNextPage(),
+              child: Column(
                 children: [
-                  ...List.generate(
-                      accounts.length, (index) => _userTile(index)),
-                  spacer(),
-                  if (isLoading && accounts.isNotEmpty)
-                    SpinKitThreeBounce(color: Colors.white, size: 25),
-                  spacer(y: 500),
+                  spacer(y: 20),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 18.0),
+                    child: Row(
+                      children: [
+                        GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              destination = _Destination.unfollowed;
+                            });
+                          },
+                          child: AnimatedScale(
+                            duration: Duration(milliseconds: 200),
+                            scale: destination == _Destination.unfollowed
+                                ? 1.1
+                                : 1,
+                            child: Text('Accounts',
+                                style: destination == _Destination.unfollowed
+                                    ? rubik
+                                    : mukta),
+                          ),
+                        ),
+                        spacer(x: 18),
+                        GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              destination = _Destination.followed;
+                            });
+                          },
+                          child: AnimatedScale(
+                            scale:
+                                destination == _Destination.followed ? 1.1 : 1,
+                            duration: Duration(milliseconds: 200),
+                            child: Text('People you Follow',
+                                style: destination == _Destination.followed
+                                    ? rubik
+                                    : mukta),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  spacer(y: 15),
+                  Expanded(
+                      child: ListView.builder(
+                    padding: EdgeInsets.symmetric(horizontal: 15),
+                    itemCount: data.length,
+                    itemBuilder: (context, index) => AccountItemTile(
+                      data: data[index],
+                      isFollowed: destination == _Destination.followed,
+                      onPressAction: (value) async {
+                        final dio = ref.read(generalDioProvider);
+                        final (status, msg) =
+                            destination == _Destination.followed
+                                ? await unfollowCreator(dio, value.id)
+                                : await followCreator(dio, value.id);
+                        _notify(msg);
+                      },
+                    ),
+                  ))
                 ],
               ),
-        // body: SingleChildScrollView(
-        //   padding: EdgeInsets.all(8),
-        //   child: Column(
-        //     children: [
-        //       FutureBuilder(
-        //           future: fetchAccountsToFollow(
-        //               ref.read(generalDioProvider), PageData(page: 1)),
-        //           builder: (context, snapshot) => Text(
-        //               snapshot.hasData ? '${snapshot.data}' : 'Please wait ...',
-        //               style: medium00))
-        //     ],
-        //   ),
-        // ),
+            ),
+          AsyncLoading() => _shimmer(),
+          AsyncError(:final error) =>
+            error.toString().startsWith('DioException')
+                ? NetworkErrorNotification(refresh: () => ref.refresh(provider))
+                : ErrorNotificationHint(error: error),
+          _ => null
+        },
       ),
     ], notification);
   }
 
-  Container _userTile(int index) {
-    return Container(
-      constraints: BoxConstraints(minHeight: 65),
-      decoration: BoxDecoration(),
-      child: Row(
-        children: [
-          Container(
-            padding: EdgeInsets.all(15),
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: tiber,
-            ),
-            child: Text(accounts[index].userName[0], style: medium00),
-          ),
-          spacer(x: 10),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+  Widget body({
+    required List<ProfileData> accounts,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.all(15.0),
+      child: Column(children: [
+        Row(
+          children: [
+            spacer(x: 15),
+          ],
+        ),
+        spacer(y: 20),
+        Expanded(
+          child: PageView(
+            onPageChanged: (value) =>
+                Future.delayed(Duration(milliseconds: 700), () {
+              setState(() {
+                destination = _Destination.values[value];
+              });
+            }),
+            controller: pageController,
             children: [
-              Text(accounts[index].userName, style: small00),
-              spacer(),
-              Text(accounts[index].department, style: mukta)
+              // unfollowedWidgetList(unfollowed),
+              // followedWidgetList(followed),
             ],
           ),
-          Expanded(
-              child: Align(
-            alignment: Alignment.centerRight,
-            child: _followButton(index),
-          ))
-        ],
+        )
+      ]),
+    );
+  }
+
+  Widget _shimmer() {
+    return Shimmer.fromColors(
+      baseColor: Colors.transparent,
+      highlightColor: Colors.grey,
+      child: Column(
+        children: List.generate(
+            2,
+            (index) => Padding(
+                  padding: EdgeInsets.all(10),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      shimmer(),
+                      spacer(),
+                      shimmer(w: maxWidth(context) * 0.95, h: 55, br: 4)
+                    ],
+                  ),
+                )),
       ),
     );
   }
 
-  Future<void> handleFollow(int index) async {
-    followIsWaiting = index;
-    _notify('Following creator');
-    final (status, msg) =
-        await followCreator(ref.read(generalDioProvider), accounts[index].id);
-    if (status) {
-      followings.add(accounts[index].id);
-    }
-    followIsWaiting = null;
-    _notify(msg, loading: false);
+  Widget followedWidgetList(List<ProfileData> accounts) {
+    return ListView.builder(
+        itemCount: accounts.length,
+        itemBuilder: (context, index) => AccountItemTile(
+              data: accounts[index],
+              isFollowed: true,
+              onPressAction: (value) {
+                _notify('Please wait... ');
+                unfollowCreator(ref.read(generalDioProvider), value.id)
+                    .then((value) {
+                  _notify(value.$2);
+                  if (value.$1) ref.invalidate(followNotifierProvider);
+                });
+              },
+            ));
   }
 
-  FilledButton _followButton(int index) {
-    return FilledButton(
-        style: ButtonStyle(
-            foregroundColor: MaterialStatePropertyAll(
-                followings.contains(accounts[index].id)
-                    ? Colors.white
-                    : Colors.black),
-            backgroundColor: MaterialStatePropertyAll(
-                followings.contains(accounts[index].id) ? tiber : Colors.white),
-            fixedSize: MaterialStatePropertyAll(Size(110, 30))),
-        onPressed: () => handleFollow(index),
-        child: followIsWaiting == index
-            ? SpinKitThreeBounce(color: Colors.black, size: 18)
-            : Text(
-                followings.contains(accounts[index].id) ? 'Unfollow' : 'Follow',
-                style: rubikSmall));
-  }
-
-  Shimmer _shimmer() {
-    return Shimmer.fromColors(
-        baseColor: Colors.transparent,
-        highlightColor: Colors.grey,
-        child: Padding(
-          padding: const EdgeInsets.all(15.0),
-          child: Column(
-            children: [
-              ...List.generate(
-                4,
-                (index) => Row(
-                  children: [
-                    shimmer(circle: true, w: 40),
-                    spacer(),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // spacer(),
-                        shimmer(),
-                        spacer(),
-                        shimmer(w: maxWidth(context) * 0.7, h: 40),
-                        spacer(y: 20),
-                      ],
-                    ),
-                  ],
-                ),
-              )
-            ],
-          ),
-        ));
+  Widget unfollowedWidgetList(List<ProfileData> accounts) {
+    return ListView.builder(
+      itemCount: accounts.length,
+      itemBuilder: (context, index) => Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 6.0),
+        child: AccountItemTile(
+          data: accounts[index],
+          isFollowed: false,
+          onPressAction: (value) {
+            _notify('Please wait ...');
+            followCreator(ref.read(generalDioProvider), value.id).then((value) {
+              _notify(value.$2);
+              if (value.$1) {
+                ref.invalidate(followNotifierProvider);
+              }
+            });
+          },
+        ),
+      ),
+    );
   }
 }
+
+class AccountItemTile extends StatelessWidget with Ui {
+  AccountItemTile(
+      {super.key,
+      required this.data,
+      required this.isFollowed,
+      this.onPressAction});
+  final ProfileData data;
+  final bool isFollowed;
+  final void Function(ProfileData value)? onPressAction;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () => onPressAction != null ? onPressAction!(data) : null,
+      child: Container(
+        margin: EdgeInsets.symmetric(vertical: 10),
+        decoration: BoxDecoration(),
+        child: Row(
+          children: [
+            circleWrap(data.userName, px: 18),
+            spacer(x: 10),
+            spacer(),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(data.userName, style: small00),
+                spacer(),
+                Text(data.department, style: xs01),
+              ],
+            ),
+            Expanded(
+                child: Align(
+                    alignment: Alignment.centerRight,
+                    child: isFollowed
+                        ? TextButton(
+                            style: ButtonStyle(
+                                foregroundColor:
+                                    MaterialStatePropertyAll(Colors.redAccent)),
+                            onPressed: () {
+                              onPressAction != null
+                                  ? onPressAction!(data)
+                                  : null;
+                            },
+                            child: Text('unfollow', style: rubikSmall))
+                        : FilledButton.icon(
+                            style: ButtonStyle(
+                                backgroundColor:
+                                    MaterialStatePropertyAll(athensGray)),
+                            onPressed: () {
+                              () => onPressAction != null
+                                  ? onPressAction!(data)
+                                  : null;
+                            },
+                            icon: Icon(Icons.add, size: 12),
+                            label: Text('Follow', style: rubikSmall))))
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+enum _Destination { unfollowed, followed }
