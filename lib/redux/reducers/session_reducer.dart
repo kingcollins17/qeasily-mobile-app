@@ -19,7 +19,6 @@ QuizSession _reducer(QuizSession state, action) {
 
       case SessionActionType.clearNotify:
         state.message = null;
-      //creates a new session
       case SessionActionType.createSession when action.payload is QuizData:
         state.session = switch ((action.payload as QuizData).type) {
           'mcq' => MCQSessionState(
@@ -72,7 +71,7 @@ QuizSession _inSessionReducer(QuizSession state, action) {
     switch (action.type) {
       case SessionActionType.updateQuestions:
         if (action.payload case (List data, PageData page, String detail)) {
-          state.message = detail;
+          state.message = data.isEmpty ? detail : null;
           state.session?.currentPage = page;
           state.session?.addQuestions(data);
           state.isLoading = false;
@@ -97,16 +96,18 @@ QuizSession _inSessionReducer(QuizSession state, action) {
         if ((state.session?.availableQuestions.length ?? 0) >
             (state.session?.current ?? 0) + 1) {
           state.session?.current += 1;
-        } else {
-          state.message = 'No more questions';
         }
+        //  else {
+        // state.message = 'No more questions';
+        // }
         break;
       case SessionActionType.previous:
         if ((state.session?.current ?? 0) > 0) {
           state.session?.current -= 1;
-        } else {
-          state.message = 'This is the first question';
-        }
+        } 
+        // else {
+        //   state.message = 'This is the first question';
+        // }
         break;
 
       case SessionActionType.load:

@@ -64,6 +64,36 @@ class _DCQSessionScreenState extends ConsumerState<DCQSessionScreen>
     return showNotification(_controller, delay);
   }
 
+  void _submit(List<DCQData> questions, List<bool?> choices, QuizData quiz) {
+    showModal<bool>(
+        context: context,
+        builder: (context) {
+          return ConfirmAction(
+              action: 'Are you sure you want to submit?',
+              onConfirm: () => Navigator.pop(context, true));
+        }).then((value) {
+      if (value == true) {
+        final (int score, int total, int attempted, int incorrect) =
+            markDCQQuiz(questions, choices, quiz.questionsAsInt.length);
+        push(
+                ResultScreen(
+                    score: score,
+                    total: total,
+                    attempted: attempted,
+                    incorrect: incorrect),
+                context)
+            .then((value) {
+          if (value == true) {
+            context.go('/home/dcq-revise',
+                extra: (questions: questions, choices: choices, quiz: quiz));
+          } else {
+            context.go('/home');
+          }
+        });
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return StoreConnector<QeasilyState, SessionViewModel>(
@@ -189,46 +219,15 @@ class _DCQSessionScreenState extends ConsumerState<DCQSessionScreen>
                   child: Center(
                       child: Material(
                           child: InkWell(
-                              onTap: () {
-                                showModal<bool>(
-                                    context: context,
-                                    builder: (context) {
-                                      return ConfirmAction(
-                                          action:
-                                              'Are you sure you want to submit?',
-                                          onConfirm: () =>
-                                              Navigator.pop(context, true));
-                                    }).then((value) {
-                                  if (value == true) {
-                                    final (
-                                      int score,
-                                      int total,
-                                      int attempted,
-                                      int incorrect
-                                    ) = markDCQQuiz(questions, choices);
-                                    push(
-                                            ResultScreen(
-                                                score: score,
-                                                total: total,
-                                                attempted: attempted,
-                                                incorrect: incorrect),
-                                            context)
-                                        .then((value) => context
-                                                .go('/home/dcq-revise', extra: (
-                                              questions: questions,
-                                              choices: choices,
-                                              quiz: quiz
-                                            )));
-                                  }
-                                });
-                              },
+                              onTap: () => _submit(questions, choices, quiz),
                               borderRadius: BorderRadius.circular(6),
-                              overlayColor: MaterialStatePropertyAll(tiber),
+                              overlayColor:
+                                  MaterialStatePropertyAll(jungleGreen),
                               child: Ink(
                                 height: 42,
                                 width: 120,
                                 decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(6),
+                                  borderRadius: BorderRadius.circular(20),
                                   color: jungleGreen.withOpacity(0.5),
                                 ),
                                 child: Center(
@@ -320,9 +319,9 @@ class _DCQSessionScreenState extends ConsumerState<DCQSessionScreen>
                   )),
               Positioned(
                   bottom: 20,
-                  child: StoreNotification(
+                  child: SleekNotification(
                     closer: vm.clearNotification,
-                    message: vm.sessionState.message,
+                    notification: vm.sessionState.message,
                   ))
             ], notification);
           }
@@ -350,17 +349,18 @@ class _DCQSessionScreenState extends ConsumerState<DCQSessionScreen>
 
 ///Marks a double choice quiz
 (int score, int total, int attempted, int incorrect) markDCQQuiz(
-    List<DCQData> dcqs, List<bool?> choices) {
+    List<DCQData> dcqs, List<bool?> choices,
+    [int? total]) {
   var attempted = 0, score = 0;
-  final total = choices.length;
+  final totalAvailable = choices.length;
   for (var i = 0; i < dcqs.length; i++) {
     score += dcqs[i].correct == choices[i] ? 1 : 0;
   }
 
   return (
     score,
-    total,
+    total ?? totalAvailable,
     choices.where((element) => element != null).length,
-    total - score
+    totalAvailable - score
   );
 }

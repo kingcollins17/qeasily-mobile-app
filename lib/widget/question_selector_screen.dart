@@ -34,6 +34,8 @@ class _QuestionSelectorScreenState extends ConsumerState<QuestionSelectorScreen>
   LocalNotification? notification;
 
   final selected = <Object>[];
+  String? hint =
+      'Long press to select a question, double tap to unselect a question';
 
   void _select(Object object) {
     if (object is DCQData || object is MCQData) {
@@ -106,13 +108,17 @@ class _QuestionSelectorScreenState extends ConsumerState<QuestionSelectorScreen>
                         onDoubleTap: () => _unselect(data[index]),
                         child: Container(
                             margin: EdgeInsets.symmetric(
-                                horizontal: 4, vertical: 4),
+                                horizontal: 6, vertical: 4),
                             padding: EdgeInsets.all(6),
                             decoration: BoxDecoration(
                                 borderRadius: BorderRadius.circular(6),
-                                color: selected.contains(data[index])
-                                    ? jungleGreen
-                                    : Colors.transparent),
+                                border: Border.all(
+                                    color: selected.contains(data[index])
+                                        ? jungleGreen
+                                        : Colors.transparent)),
+                            // color: selected.contains(data[index])
+                            //     ? jungleGreen
+                            //     : Colors.transparent),
                             child: MCQItemWidget(data: data.cast()[index])));
                   } else {
                     return GestureDetector(
@@ -124,35 +130,45 @@ class _QuestionSelectorScreenState extends ConsumerState<QuestionSelectorScreen>
                       onLongPress: () => _select(data[index]),
                       onDoubleTap: () => _unselect(data[index]),
                       child: Container(
-                          margin: EdgeInsets.all(4),
+                          margin:
+                              EdgeInsets.symmetric(horizontal: 6, vertical: 6),
                           padding:
                               EdgeInsets.symmetric(horizontal: 4, vertical: 4),
                           decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(6),
-                              color: selected.contains(data[index])
-                                  ? jungleGreen
-                                  : Colors.transparent),
+                              border: Border.all(
+                                  color: selected.contains(data[index])
+                                      ? jungleGreen
+                                      : Colors.transparent)),
                           child: DCQItemWidget(data: data.cast()[index])),
                     );
                   }
                   // return Text(data[index].toString());
                 },
               )),
-          // AsyncData() => Column(
-          //     children: [
-          //       FutureBuilder(
-          //         future: ref.read(_provider.notifier).fetchNextPage(),
-          //         builder: (context, snapshot) =>
-          //             Text(snapshot.data.toString()),
-          //       )
-          //     ],
-          //   ),
-          AsyncLoading() => _loadingShimmer(context),
-          AsyncError(:final error) =>
-            Center(child: Text(error.toString(), style: small00)),
+          AsyncLoading() => Center(
+              child: SpinKitDualRing(
+                color: athensGray,
+                size: 40,
+                lineWidth: 3,
+              ),
+            ),
+          AsyncError(:final error) => Center(
+                child: NetworkErrorNotification(
+              refresh: () {},
+            )),
           _ => null
         },
       ),
+      Positioned(
+          top: 20,
+          child: SleekNotification(
+              notification: hint,
+              closer: () {
+                setState(() {
+                  hint = null;
+                });
+              })),
       Positioned(
           width: maxWidth(context),
           bottom: 15,
@@ -162,31 +178,35 @@ class _QuestionSelectorScreenState extends ConsumerState<QuestionSelectorScreen>
                 Navigator.pop(context, selected);
               },
               style: ButtonStyle(
+                fixedSize:
+                    MaterialStatePropertyAll(Size(maxWidth(context) * 0.9, 45)),
                 foregroundColor: MaterialStatePropertyAll(Colors.black),
-                backgroundColor: MaterialStatePropertyAll(Colors.white),
+                backgroundColor: MaterialStatePropertyAll(jungleGreen),
               ),
-              child: Text(
-                'select',
-                style: rubik,
-              ),
+              child: isLoading
+                  ? SpinKitDualRing(color: Colors.white, lineWidth: 2, size: 25)
+                  : Text(
+                      'Finish Selection',
+                      style: small00.copyWith(color: Colors.white),
+                    ),
             ),
           ))
     ], notification);
   }
 
-  Shimmer _loadingShimmer(BuildContext context) {
-    return Shimmer.fromColors(
-        baseColor: Colors.transparent,
-        highlightColor: Colors.grey,
-        child: Padding(
-          padding: EdgeInsets.symmetric(horizontal: 15, vertical: 10),
-          child: Column(
-            children: [
-              shimmer(),
-              spacer(),
-              shimmer(h: 60, w: maxWidth(context) * 0.5, br: 4)
-            ],
-          ),
-        ));
-  }
+  // Shimmer _loadingShimmer(BuildContext context) {
+  //   return Shimmer.fromColors(
+  //       baseColor: Colors.transparent,
+  //       highlightColor: Colors.grey,
+  //       child: Padding(
+  //         padding: EdgeInsets.symmetric(horizontal: 15, vertical: 10),
+  //         child: Column(
+  //           children: [
+  //             shimmer(),
+  //             spacer(),
+  //             shimmer(h: 60, w: maxWidth(context) * 0.5, br: 4)
+  //           ],
+  //         ),
+  //       ));
+  // }
 }

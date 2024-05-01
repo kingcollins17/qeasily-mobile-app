@@ -7,6 +7,7 @@ import 'package:flutter_redux/flutter_redux.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:go_router/go_router.dart';
 import 'package:qeasily/model/model.dart';
 import 'package:qeasily/provider/dio_provider.dart';
 import 'package:qeasily/provider/provider.dart';
@@ -34,96 +35,110 @@ class _SearchScreenState extends ConsumerState<SearchScreen> with Ui {
     return StoreConnector<QeasilyState, SearchViewModel>(
         converter: (store) => SearchViewModel(store),
         builder: (context, vm) {
-          return Material(
-            color: Theme.of(context).colorScheme.background,
-            child: Column(
-              children: [
-                spacer(),
-                _searchBar(),
-                spacer(y: 10),
-                if (query == null ||
-                    query!.isEmpty ||
-                    (search.hasValue && search.value!.$1.isEmpty))
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 6.0, vertical: 6),
-                    child: Wrap(
-                      alignment: WrapAlignment.center,
-                      spacing: 2,
-                      runSpacing: 2,
-                      children: [
-                        ...List.generate(
-                            vm.state.history.length,
-                            (index) => GestureDetector(
-                                  onTap: () => setState(
-                                      () => query = vm.state.history[index]),
-                                  child: Container(
-                                    padding: EdgeInsets.symmetric(
-                                        horizontal: 10, vertical: 6),
-                                    decoration: BoxDecoration(
-                                      color: raisingBlack,
-                                      borderRadius: BorderRadius.circular(20),
+          return SafeArea(
+            child: Material(
+              color: Theme.of(context).colorScheme.background,
+              child: Column(
+                children: [
+                  spacer(),
+                  _searchBar(),
+                  spacer(y: 10),
+                  if (query == null ||
+                      query!.isEmpty ||
+                      (search.hasValue && search.value!.$1.isEmpty))
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 6.0, vertical: 6),
+                      child: Wrap(
+                        alignment: WrapAlignment.center,
+                        spacing: 2,
+                        runSpacing: 2,
+                        children: [
+                          ...List.generate(
+                              vm.state.history.length,
+                              (index) => GestureDetector(
+                                    onTap: () => setState(
+                                        () => query = vm.state.history[index]),
+                                    child: Container(
+                                      padding: EdgeInsets.symmetric(
+                                          horizontal: 10, vertical: 6),
+                                      decoration: BoxDecoration(
+                                        color: raisingBlack,
+                                        borderRadius: BorderRadius.circular(20),
+                                      ),
+                                      child: Text(vm.state.history[index],
+                                          style: rubik.copyWith(
+                                              fontSize: 14,
+                                              color: Color(0xFFC5C5C5))),
                                     ),
-                                    child: Text(vm.state.history[index],
-                                        style: rubik.copyWith(
-                                            fontSize: 14,
-                                            color: Color(0xFFC5C5C5))),
-                                  ),
-                                ))
-                      ],
+                                  ))
+                        ],
+                      ),
                     ),
-                  ),
-          
-                spacer(y: 10),
-                switch (search) {
-                  AsyncData(value: (final quizzes, final topics)) => quizzes
-                          .isEmpty
-                      ? NoDataNotification()
-                      : Expanded(
-                          child: ListView(
-                          padding:
-                              EdgeInsets.symmetric(horizontal: 15, vertical: 6),
-                          children: [
-                            Text('Found ${quizzes.length} Quizzes',
-                                style: small00),
-                            spacer(),
-                            ...List.generate(
-                                quizzes.length,
-                                (index) =>
-                                    QuizItemWidget(quiz: quizzes[index])),
-                            spacer(y: 15),
-                            Text('Found ${topics.length} topics',
-                                style: small00),
-                            spacer(),
-                            ...List.generate(
-                                topics.length,
-                                (index) =>
-                                    TopicItemWidget(topic: topics[index]))
-                          ],
-                        )),
-                  AsyncError(:final error) =>
-                    error.toString().startsWith('DioException')
+
+                  spacer(y: 10),
+                  switch (search) {
+                    AsyncData(value: (final quizzes, final topics)) =>
+                      quizzes.isEmpty
+                          ? NoDataNotification()
+                          : Expanded(
+                              child: ListView(
+                              padding: EdgeInsets.symmetric(
+                                  horizontal: 15, vertical: 6),
+                              children: [
+                                Text('Found ${quizzes.length} Quizzes',
+                                    style: small00),
+                                spacer(),
+                                ...List.generate(
+                                    quizzes.length,
+                                    (index) =>
+                                      GestureDetector(
+                                        onTap: () => context.go('/home/session',
+                                            extra: quizzes[index]),
+                                        child: QuizItemWidget(
+                                            quiz: quizzes[index]))),
+                                spacer(y: 15),
+                                Text('Found ${topics.length} topics',
+                                    style: small00),
+                                spacer(),
+                                ...List.generate(
+                                    topics.length,
+                                    (index) =>
+                                      GestureDetector(
+                                        onTap: () => context
+                                                .go('/home/quiz-list', extra: (
+                                              id: topics[index].id,
+                                              isCategory: false
+                                            )),
+                                        child: TopicItemWidget(
+                                            topic: topics[index])))
+                              ],
+                            )),
+                    AsyncError(:final error) => error
+                            .toString()
+                            .startsWith('DioException')
                         ? NetworkErrorNotification(
                             refresh: () => ref.refresh(SearchProvider(query!)),
                           )
                         : query == null
                             ? Center()
                             : ErrorNotificationHint(error: error),
-                  AsyncLoading() => Center(
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          SpinKitDualRing(color: Colors.white, size: 30),
-                          spacer(x: 15),
-                          Text('searching for $query', style: rubik)
-                        ],
+                    AsyncLoading() => Center(
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            SpinKitDualRing(color: Colors.white, size: 30),
+                            spacer(x: 15),
+                            Text('searching for $query', style: rubik)
+                          ],
+                        ),
                       ),
-                    ),
-                  _ => Center()
-                },
+                    _ => Center()
+                  },
 
-                // spacer(y: 300),
-              ],
+                  // spacer(y: 300),
+                ],
+              ),
             ),
           );
         });
@@ -132,7 +147,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> with Ui {
   Container _searchBar() {
     return Container(
       width: maxWidth(context),
-      height: 80,
+      height: 60,
       padding: EdgeInsets.symmetric(horizontal: 8, vertical: 15),
       decoration: BoxDecoration(
           color: Theme.of(context).colorScheme.background,
@@ -143,17 +158,23 @@ class _SearchScreenState extends ConsumerState<SearchScreen> with Ui {
       child: Row(
         children: [
           spacer(x: 6),
-          StoreConnector<QeasilyState, SearchViewModel>(
-              converter: (store) => SearchViewModel(store),
-              builder: (context, vm) {
-                return GestureDetector(
-                    onTap: () {
-                      setState(() {});
-                    },
-                    child: Icon(Icons.arrow_back, color: Colors.white));
-              }),
-          spacer(x: 10),
-          vDivider(),
+          InkWell(
+              onTap: () => context.go('/home'),
+              overlayColor: MaterialStatePropertyAll(raisingBlack),
+              child: Row(
+                children: [
+                  Ink(
+                    decoration: BoxDecoration(shape: BoxShape.circle),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 6.0),
+                      child: Icon(Icons.arrow_back, color: Colors.white),
+                    ),
+                  ),
+                  spacer(x: 10),
+                  vDivider(),
+                ],
+              )),
+          
           spacer(x: 10),
           Expanded(
             // height: 48,
@@ -175,9 +196,9 @@ class _SearchScreenState extends ConsumerState<SearchScreen> with Ui {
                   hintText: 'Enter any keyword', border: InputBorder.none),
             ),
           ),
-          spacer(),
-          Icon(Icons.search, color: Colors.white),
-          spacer(x: 15),
+          // spacer(),
+          // Icon(Icons.search, color: Colors.white),
+          // spacer(x: 15),
         ],
       ),
     );

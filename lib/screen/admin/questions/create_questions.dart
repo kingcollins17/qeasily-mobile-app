@@ -39,6 +39,9 @@ class _CreateQuestionsState extends ConsumerState<CreateQuestionsScreen>
 
   LocalNotification? notification;
 
+  String? hint =
+      'You can save questions in drafts to continue editing them later';
+
   QuestionType? questionType;
   TopicData? topic;
   CategoryData? category;
@@ -249,6 +252,7 @@ class _CreateQuestionsState extends ConsumerState<CreateQuestionsScreen>
                             dio,
                             draft!.cast<MCQDraft>(),
                           ),
+                          
                         DCQDraft _ => await publishDCQuestions(
                             dio,
                             draft!.cast<DCQDraft>(),
@@ -289,7 +293,7 @@ class _CreateQuestionsState extends ConsumerState<CreateQuestionsScreen>
                       await _notify('Saving your Questions to $name');
                       saveMCQToStorage(
                           draft: draft!.cast<MCQDraft>(),
-                          box: Hive.box<List<Map>>(mcqDrafts),
+                          box: Hive.box<List>(mcqDrafts),
                           draftName: name);
                       await _notify('Questions have been saved to draft',
                           loading: false);
@@ -483,8 +487,8 @@ class _CreateQuestionsState extends ConsumerState<CreateQuestionsScreen>
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      spacer(y: 10),
-                      Text('Name your draft', style: small00),
+                      // spacer(y: 10),
+                      // Text('Name your draft', style: small00),
                       spacer(y: 10),
                       _inputField(
                           hint: 'Draft name',
@@ -493,10 +497,11 @@ class _CreateQuestionsState extends ConsumerState<CreateQuestionsScreen>
                       FilledButton(
                           onPressed: () => Navigator.pop(context, draftName),
                           style: ButtonStyle(
+                            fixedSize: MaterialStatePropertyAll(Size(maxWidth(context)* 0.85, 45),),
                               foregroundColor: MaterialStatePropertyAll(
                                 athensGray,
                               ),
-                              backgroundColor: MaterialStatePropertyAll(tiber)),
+                              backgroundColor: MaterialStatePropertyAll(jungleGreen)),
                           child: Text('Save', style: rubik))
                     ],
                   ),
@@ -582,7 +587,11 @@ class _CreateQuestionsState extends ConsumerState<CreateQuestionsScreen>
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              direction(dir: 'left'),
+              GestureDetector(
+                  onTap: () => setState(() {
+                        step = _Step.values[step.index - 1];
+                      }),
+                  child: direction(dir: 'left')),
               GestureDetector(
                 onTap: () async {
                   if (topic != null && questionType != null) {
@@ -615,11 +624,6 @@ class _CreateQuestionsState extends ConsumerState<CreateQuestionsScreen>
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               spacer(y: 20),
-              Text(
-                'How many questions do you wish to add?',
-                style: mukta,
-              ),
-              spacer(y: 20),
               TextField(
                 onChanged: (value) =>
                     setState(() => total = int.tryParse(value) ?? 0),
@@ -627,23 +631,36 @@ class _CreateQuestionsState extends ConsumerState<CreateQuestionsScreen>
                 decoration: InputDecoration(
                   isDense: true,
                   hintText: '10',
-                  labelText: 'Select No of Questions',
+                  labelText: 'How many questions are you adding?',
                   border: OutlineInputBorder(),
                 ),
               ),
               spacer(y: 20),
               // Text(total.toString()),
-              Align(
-                alignment: Alignment.centerLeft,
-                // alignment: Alignment.centerRight,
-                child: GestureDetector(
-                    onTap: () => setState(() {
-                          step = _Step.selectType;
-                        }),
-                    child: direction(dir: 'right')),
-              ),
-              // Text(total.toString()),
-              // Text(draft?.toString() ?? 'No drafts')
+              FilledButton(
+                  onPressed: () {
+                    if (total > 0) {
+                      setState(() => step = _Step.values[step.index + 1]);
+                    } else {
+                      _notify('You fill this page before you proceed');
+                    }
+                  },
+                  style: ButtonStyle(
+                      backgroundColor: MaterialStatePropertyAll(jungleGreen),
+                      fixedSize: MaterialStatePropertyAll(
+                        Size(maxWidth(context) * 0.9, 45),
+                      )),
+                  child: Text('Proceed',
+                      style: small00.copyWith(color: Colors.white)))
+              // Align(
+              //   alignment: Alignment.centerLeft,
+              //   // alignment: Alignment.centerRight,
+              //   child: GestureDetector(
+              //       onTap: () => setState(() {
+              //             step = _Step.selectType;
+              //           }),
+              //       child: direction(dir: 'right')),
+              // ),
             ],
           ),
         ),

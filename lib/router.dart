@@ -9,7 +9,7 @@ import 'package:qeasily/model/model.dart';
 import 'package:qeasily/provider/plan_provider.dart';
 import 'package:qeasily/redux/redux.dart';
 // import 'package:qeasily/screen/admin/admin.dart';
-import 'package:qeasily/screen/admin/manage_views/views.dart';
+import 'package:qeasily/screen/admin/delete_views/views.dart';
 import 'package:qeasily/screen/dashboard.dart';
 import 'package:qeasily/screen/follow_creators.dart';
 import 'package:qeasily/screen/quiz/dcq_revision.dart';
@@ -18,6 +18,8 @@ import 'package:qeasily/screen/quiz/quiz.dart';
 import 'package:qeasily/screen/screen.dart';
 import 'package:qeasily/test.dart';
 import 'package:qeasily/util/create_question_util.dart';
+
+// const debug = true;
 
 GoRouter router(Box config) {
   bool hasLaunched = config.get('hasLaunched', defaultValue: false);
@@ -28,7 +30,9 @@ GoRouter router(Box config) {
           ? '/home'
           : hasLaunched && token == null
               ? '/login'
-              : null, //If the app has been launched and token is stored
+              : null,
+      //If the app has been launched and token is stored
+      // initialLocation: null,
       routes: [
         GoRoute(path: '/', builder: (context, state) => Onboarding()),
         GoRoute(path: '/sign-up', builder: (context, state) => SignupScreen()),
@@ -49,9 +53,9 @@ GoRouter router(Box config) {
                   animatePage(PendingTransactionView(), state),
             ),
             GoRoute(
-              path: 'plans',
-              pageBuilder: (context, state) =>
-                  animatePage(SubscriptionPlanScreen(), state),
+                path: 'plans',
+                pageBuilder: (context, state) =>
+                    animatePage(SubscriptionPlanScreen(), state),
                 routes: [
                   GoRoute(
                       path: 'buy-package',
@@ -62,8 +66,7 @@ GoRouter router(Box config) {
                                 error:
                                     'SubscriptionSessionData was not provided')
                           })
-                ]
-            ),
+                ]),
             GoRoute(
                 path: 'quiz-list',
                 pageBuilder: (context, state) => animatePage(
@@ -167,7 +170,7 @@ GoRouter router(Box config) {
               GoRoute(
                 path: 'view-topics',
                 pageBuilder: (context, state) =>
-                    animatePage(TopicManageView(), state),
+                    animatePage(DeleteTopicScreen(), state),
               ),
               GoRoute(
                   path: 'drafts',

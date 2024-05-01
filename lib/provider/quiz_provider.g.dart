@@ -6,7 +6,7 @@ part of 'quiz_provider.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$quizByCreatorHash() => r'e80eab8651718f0e90be0aab6e9059d662ca92b5';
+String _$quizByCreatorHash() => r'abd250235f4f1b6149ee09a02ef118aed6fff918';
 
 /// See also [QuizByCreator].
 @ProviderFor(QuizByCreator)

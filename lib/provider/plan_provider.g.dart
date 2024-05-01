@@ -67,7 +67,7 @@ Map<String, dynamic> _$PaystackVerificationDataToJson(
 // RiverpodGenerator
 // **************************************************************************
 
-String _$subPlanHash() => r'59b467b42bdfbbdc5b2b51074266be34b7fe6665';
+String _$subPlanHash() => r'2153a1d5437f896259950379d0cfa2cae9ae1f9f';
 
 /// See also [SubPlan].
 @ProviderFor(SubPlan)

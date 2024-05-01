@@ -60,21 +60,23 @@ class _QuestionDraftScreenState extends ConsumerState<QuestionDraftScreen>
         ),
         body: ValueListenableBuilder(
           valueListenable: dcqDraftBox.listenable(),
-          // builder: (context, box) {},
           builder: (context, value, child) => Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20.0),
             child: SingleChildScrollView(
               child: Column(
-          
                 children: [
                   spacer(y: 10),
                   _selectDraftType(),
                   spacer(y: 20),
                   ...switch (type) {
-                    QuestionType.mcq => mcqDraftBox.keys
+                    QuestionType.mcq => mcqDraftBox.keys.isEmpty
+                        ? [NoDataNotification()]
+                        : mcqDraftBox.keys
                         .map((e) => _mcqDrafts(context, e, mcqDraftBox))
                         .toList(),
-                    _ => _dcqDrafts(dcqDraftBox)
+                    _ => dcqDraftBox.keys.isEmpty
+                        ? [NoDataNotification()]
+                        : _dcqDrafts(dcqDraftBox)
                   },
                 ],
               ),
@@ -98,22 +100,23 @@ class _QuestionDraftScreenState extends ConsumerState<QuestionDraftScreen>
         child: Row(
           children: [
             Container(
-              padding: EdgeInsets.all(12),
+              padding: EdgeInsets.all(15),
               decoration: BoxDecoration(
-                color: deepSaffron,
+                color: raisingBlack,
                 shape: BoxShape.circle,
               ),
-              child: Icon(Icons.drafts, size: 18, color: Colors.white),
+              child: Icon(Icons.drafts, size: 20, color: athensGray),
             ),
             spacer(x: 10),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(draftName.toString(), style: small00),
+                Text(draftName.toString(),
+                    style: small00.copyWith(fontWeight: FontWeight.bold)),
                 spacer(),
                 Row(
                   children: [
-                    Icon(Icons.query_builder, size: 12, color: jungleGreen),
+                    Icon(Icons.query_builder, size: 12, color: athensGray),
                     spacer(),
                     Text(
                       '${loadMCQFromStorage(mcqDraftBox, draftName)?.length ?? '0'} Questions',
@@ -150,31 +153,39 @@ class _QuestionDraftScreenState extends ConsumerState<QuestionDraftScreen>
               child: Row(
                 children: [
                   Container(
-                    padding: EdgeInsets.all(12),
+                    padding: EdgeInsets.all(15),
                     decoration: BoxDecoration(
-                      color: deepSaffron,
+                      color: raisingBlack,
                       shape: BoxShape.circle,
                     ),
-                    child: Icon(Icons.drafts, size: 18, color: Colors.white),
+                    child: Icon(Icons.drafts, size: 20, color: athensGray),
                   ),
                   spacer(x: 10),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(e.toString(), style: small10),
+                      Text(e.toString(),
+                          style: small00.copyWith(fontWeight: FontWeight.bold)),
                       spacer(),
                       Row(
                         children: [
                           Icon(Icons.query_builder,
-                              size: 12, color: jungleGreen),
+                              size: 12, color: athensGray),
                           spacer(),
                           Text(
                               '${box.get(e)?.length.toString() ?? '0'} Questions',
                               style: xs00),
                         ],
                       ),
+                      
                     ],
                   ),
+                  Expanded(
+                    child: Align(
+                        alignment: Alignment.centerRight,
+                        child: Icon(Icons.arrow_forward_ios,
+                            size: 8, color: athensGray)),
+                  )
                 ],
               ),
             ),
@@ -184,31 +195,39 @@ class _QuestionDraftScreenState extends ConsumerState<QuestionDraftScreen>
   Row _selectDraftType() {
     return Row(
       children: [
-        GestureDetector(
-          onTap: () => setState(() => type = QuestionType.mcq),
-          child: AnimatedContainer(
-            duration: Duration(milliseconds: 600),
-            padding: EdgeInsets.symmetric(horizontal: 6, vertical: 6),
-            decoration: BoxDecoration(
-                color: type == QuestionType.mcq
-                    ? raisingBlack
-                    : Colors.transparent,
-                borderRadius: BorderRadius.circular(6)),
-            child: Text('Multiple Choice', style: mukta),
+        Expanded(
+          child: GestureDetector(
+            onTap: () => setState(() => type = QuestionType.mcq),
+            child: AnimatedContainer(
+              duration: Duration(milliseconds: 300),
+              padding: EdgeInsets.symmetric(horizontal: 10, vertical: 12),
+              decoration: BoxDecoration(
+                  color: type == QuestionType.mcq
+                      ? athensGray : raisingBlack,
+                  // : Colors.transparent,
+                  borderRadius: BorderRadius.circular(6)),
+              child: Text('Multiple Choice',
+                  style: small00.copyWith(
+                      color: type == QuestionType.mcq ? Colors.black : null)),
+            ),
           ),
         ),
         spacer(x: 8),
-        GestureDetector(
-          onTap: () => setState(() => type = QuestionType.dcq),
-          child: AnimatedContainer(
-            duration: Duration(milliseconds: 600),
-            padding: EdgeInsets.symmetric(horizontal: 6, vertical: 6),
-            decoration: BoxDecoration(
-                color: type == QuestionType.dcq
-                    ? raisingBlack
-                    : Colors.transparent,
-                borderRadius: BorderRadius.circular(6)),
-            child: Text('True or False', style: mukta),
+        Expanded(
+          child: GestureDetector(
+            onTap: () => setState(() => type = QuestionType.dcq),
+            child: AnimatedContainer(
+              duration: Duration(milliseconds: 300),
+              padding: EdgeInsets.symmetric(horizontal: 10, vertical: 12),
+              decoration: BoxDecoration(
+                  color: type == QuestionType.dcq
+                      ? athensGray : raisingBlack,
+                  // : Colors.transparent,
+                  borderRadius: BorderRadius.circular(6)),
+              child: Text('True or False',
+                  style: small00.copyWith(
+                      color: type == QuestionType.dcq ? Colors.black : null)),
+            ),
           ),
         )
       ],

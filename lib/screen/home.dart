@@ -7,6 +7,7 @@ import 'package:flutter_redux/flutter_redux.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hive/hive.dart';
+import 'package:qeasily/provider/dashboard_provider.dart';
 import 'package:qeasily/provider/dio_provider.dart';
 import 'package:qeasily/redux/qeasily_state.dart';
 import 'package:qeasily/redux/redux.dart';
@@ -42,6 +43,7 @@ class _Drawer extends ConsumerWidget with Ui {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final user = ref.watch(userAuthProvider);
+    final dashboard = ref.watch(dashboardProvider);
 
     return SingleChildScrollView(
       child: Material(
@@ -56,7 +58,7 @@ class _Drawer extends ConsumerWidget with Ui {
             children: [
               spacer(y: 40),
               GestureDetector(
-                  onTap: () => push(APIDoc(), context),
+                  // onTap: () => push(APIDoc(), context),
                   child: Text('Qeasily 1.0', style: medium10)),
               spacer(y: 10),
               Divider(color: tiber),
@@ -125,7 +127,14 @@ class _Drawer extends ConsumerWidget with Ui {
               // _drawerTile('Settings', Icons.settings_suggest),
 
               spacer(y: 40),
-              if (user.hasValue && user.value!.type == 'Admin') _AdminTiles(),
+              // if (user.hasValue && user.value!.type == 'Admin') _AdminTiles(),
+              switch (dashboard) {
+                AsyncData(value: (final msg, final data))
+                    when data != null && data.adminPoints > 1 =>
+                  _AdminTiles(),
+                _ => Center(),
+              },
+              // Text(user.value!.type),
               spacer(y: 40),
               Column(mainAxisAlignment: MainAxisAlignment.end, children: [
                 InkWell(
@@ -152,13 +161,15 @@ class _Drawer extends ConsumerWidget with Ui {
                   ]),
                 ),
                 spacer(y: 20),
-                Row(children: [
-                  Icon(Icons.delete, color: Colors.redAccent),
-                  spacer(x: 10),
-                  Text('Delete Account', style: rubik)
-                ]),
+                // Row(children: [
+                //   Icon(Icons.delete, color: Colors.redAccent),
+                //   spacer(x: 10),
+                //   Text('Delete Account', style: rubik)
+                // ]),
                 spacer(y: 10),
-                Text('Terms of use', style: mukta),
+                Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text('Terms of use', style: mukta)),
                 spacer(y: 25)
               ])
             ],
@@ -234,8 +245,8 @@ class _AdminTiles extends StatelessWidget with Ui {
             },
             child: Padding(
               padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 8),
-              child: _drawerTile(
-                  'Create and Manage', Icons.create_new_folder_rounded),
+              child:
+                  _drawerTile('Admin tools', Icons.create_new_folder_rounded),
             )),
         spacer(),
         // Divider(color: Colors.grey),

@@ -133,7 +133,8 @@ class ResultScreen extends StatelessWidget with Ui {
 }
 
 ({int score, int total, int attempted, int incorrect}) markMCQQuiz(
-    List<MCQData> questions, List<MCQOption?> choices) {
+    List<MCQData> questions, List<MCQOption?> choices,
+    [int? total]) {
   var score = 0;
   // var correct = 0;
   var attempted = 0;
@@ -145,7 +146,7 @@ class ResultScreen extends StatelessWidget with Ui {
   }
   return (
     score: score,
-    total: questions.length,
+    total: total ?? questions.length,
     attempted: attempted,
     incorrect: questions.length - score
   );

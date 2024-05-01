@@ -16,7 +16,7 @@ class QuestionsByCreator extends _$QuestionsByCreator
   Future<(List<Object> data, PageData page)> build(QuestionType type) async {
     final dio = ref.watch(generalDioProvider);
     final (:data, :detail, :page, :status) = await fetchCreatedQuestions(dio,
-        page: PageData(page: 1, perPage: 3),
+        page: PageData(page: 1),
         type: type,
         converter: (p0) => switch (type) {
               QuestionType.mcq => p0.map((e) => MCQData.fromJson(e)).toList(),
@@ -55,6 +55,15 @@ class QuestionsByCreator extends _$QuestionsByCreator
     } catch (e) {
       return (false, e.toString());
     }
+  }
+
+  Future<(bool, String)> deleteQuestions(
+      List<int> id, QuestionType type) async {
+    final dio = ref.read(generalDioProvider);
+    final (status, msg) = await _deleteQuestions(dio, id, type);
+    if (status) ref.invalidateSelf(); //invalidate this provider
+    await future;
+    return (status, msg);
   }
 }
 

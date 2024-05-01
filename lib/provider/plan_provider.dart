@@ -1,5 +1,8 @@
+// ignore_for_file: empty_statements, curly_braces_in_flow_control_structures, unused_local_variable
+
 import 'package:dio/dio.dart';
 import 'package:qeasily/provider/dio_provider.dart';
+import 'package:qeasily/provider/provider.dart';
 import 'package:qeasily/route_doc.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:json_annotation/json_annotation.dart';
@@ -8,13 +11,6 @@ import 'keys_provider.dart';
 
 part 'plan_provider.g.dart';
 
-// @Riverpod(keepAlive: true)
-// Future<List<PlanData>> subPlan(SubPlanRef ref) async {
-//   final dio = ref.watch(generalDioProvider);
-//   final (status, detail, data) = await fetchPlans(dio);
-//   if (!status) throw detail;
-//   return data;
-// }
 @Riverpod(keepAlive: true)
 class SubPlan extends _$SubPlan {
   @override
@@ -31,21 +27,28 @@ class SubPlan extends _$SubPlan {
     return subscribe(dio, plan); //
   }
 
-  Future<dynamic> verifyPurchase(String reference) async {
+  Future<(bool, String)> verifyPurchase(String reference) async {
     final dio = ref.watch(generalDioProvider);
-    final api = ref.watch(apiKeysProvider);
-    final paystackResponse = switch (api) {
-      APIKeyPair key => await verifyWithPaystack(key, reference),
-      _ => null
-    };
-    if (paystackResponse == null) return; //
-    if (paystackResponse case (final status, final message, final data!)) {
-      return (data.status == 'success')
-          ? forceVerify(dio, reference)
-          : (false, 'Purchase was ${data.status}');
-    }
+    final api = ref.watch(apiKeysProvider); //the api keys
+    if (api.hasValue) {
+      final paystackResponse = await verifyWithPaystack(
+        api.asData!.value,
+        reference,
+      );
+      final (status, msg, data) = paystackResponse;
+      final response = switch (data?.status) {
+        'success' => await forceVerify(dio, reference),
+        'failed' || 'abandoned' => await deleteTransaction(dio, reference),
+        _ => (false, 'Purchase was ${data?.status}')
+      };
 
-    //else
+      ref.invalidate(pendingTranxProvider);
+      ref.invalidate(dashboardProvider);
+      ref.invalidate(userAuthProvider);
+
+      return response;
+    } else
+      return (false, 'Please check your internet connection and try again');
   }
 }
 
@@ -189,6 +192,17 @@ Future<(bool, String)> forceVerify(Dio dio, String ref) async {
   try {
     final response = await dio
         .get(APIUrl.forceVerifyTransaction.url, queryParameters: {'ref': ref});
+    return (response.statusCode == 200, response.data['detail'].toString());
+  } catch (e) {
+    return (false, e.toString());
+  }
+}
+
+Future<(bool, String)> deleteTransaction(Dio dio, String reference) async {
+  try {
+    final response = await dio.delete(APIUrl.deleteTransaction.url,
+        queryParameters: {'ref': reference});
+
     return (response.statusCode == 200, response.data['detail'].toString());
   } catch (e) {
     return (false, e.toString());

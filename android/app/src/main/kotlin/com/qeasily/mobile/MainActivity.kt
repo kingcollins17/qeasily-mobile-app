@@ -1,4 +1,4 @@
-package com.example.qeasily
+package com.qeasily.mobile
 
 import io.flutter.embedding.android.FlutterActivity
 

@@ -62,14 +62,14 @@ class _QuestionsListViewState extends ConsumerState<QuestionsManageView>
     return stackWithNotifier([
       Scaffold(
           appBar: AppBar(
-            title: Text('Manage Questions', style: small00),
+            title: Text('Delete Questions', style: small00),
           ),
           body: Padding(
             padding: const EdgeInsets.all(18.0),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text('What type of questions do you want to view?',
+                Text('What type of questions do you want to delete?',
                     textAlign: TextAlign.center, style: small00),
                 spacer(),
                 Row(
@@ -77,27 +77,62 @@ class _QuestionsListViewState extends ConsumerState<QuestionsManageView>
                   children: [
                     TextButton(
                       onPressed: () {
-                        push(
-                            QuestionSelectorScreen(
-                              user: (
-                                ref.read(userAuthProvider).value!,
-                                QuestionType.mcq
-                              ),
-                            ),
-                            context);
+                        push<List>(
+                                QuestionSelectorScreen(
+                                  user: (
+                                    ref.read(userAuthProvider).value!,
+                                    QuestionType.mcq
+                                  ),
+                                ),
+                                context)
+                            .then((value) async {
+                          if (value case [MCQData _, ...]) {
+                            _notify(
+                                'Removing multiple choice questions ${value.map((e) => e.id)} ...',
+                                loading: true);
+                            final notifier = ref.read(
+                              questionsByCreatorProvider(QuestionType.mcq)
+                                  .notifier,
+                            );
+                            final response = await notifier.deleteQuestions(
+                              value.map((e) => e.id as int).toList(),
+                              QuestionType.mcq,
+                            );
+                            _notify(response.$2, loading: false);
+                          }
+                        });
                       },
-                      child: Text('Multiple Choice', style: rubik),
+                      child: Text('Multiple Choice',
+                          style: rubik.copyWith(color: jungleGreen)),
                     ),
                     TextButton(
                         onPressed: () {
-                          push(
-                              QuestionSelectorScreen(user: (
-                                ref.read(userAuthProvider).value!,
-                                QuestionType.dcq
-                              )),
-                              context);
+                          push<List>(
+                                  QuestionSelectorScreen(user: (
+                                    ref.read(userAuthProvider).value!,
+                                    QuestionType.dcq
+                                  )),
+                                  context)
+                              .then((value) {
+                            if (value case [DCQData _, ...]) {
+                              _notify(
+                                'Removing ${value.length} Questions',
+                                loading: true,
+                              );
+                              final notifier = ref.read(
+                                  questionsByCreatorProvider(QuestionType.dcq)
+                                      .notifier);
+                              notifier
+                                  .deleteQuestions(
+                                    value.map((e) => e.id as int).toList(),
+                                    QuestionType.dcq,
+                                  )
+                                  .then((value) => _notify(value.$2));
+                            }
+                          });
                         },
-                        child: Text('True or False', style: rubik))
+                        child: Text('True or False',
+                            style: rubik.copyWith(color: deepSaffron)))
                   ],
                 )
               ],

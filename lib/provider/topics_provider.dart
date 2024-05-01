@@ -128,3 +128,15 @@ Future<(bool, String, List<TopicData>, PageData)> fetchCreatedTopics(
   }
   return (false, res.data['detail'].toString(), <TopicData>[], requestedPage);
 }
+
+Future<dynamic> deleteTopic(Dio dio, int id) async {
+  try {
+    final response = await dio.delete(
+      APIUrl.deleteTopic.url,
+      queryParameters: {'topic': id},
+    );
+    return response.data;
+  } catch (e) {
+    return e;
+  }
+}

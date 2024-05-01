@@ -111,7 +111,9 @@ class _SubscriptionPlanScreenState extends ConsumerState<SubscriptionPlanScreen>
                 AsyncError(
                   :final error,
                 ) =>
-                  Center(child: Text(error.toString(), style: small00)),
+                  Center(child: NetworkErrorNotification(refresh: () {})
+                      // child: Text(error.toString(), style: small00)
+                      ),
                 _ => Center()
               },
               spacer(),
@@ -131,6 +133,10 @@ class _SubscriptionPlanScreenState extends ConsumerState<SubscriptionPlanScreen>
                       )),
                   onPressed: () {
                     if (current != null) {
+                      if (current!.id == 1) {
+                        _sleekNotify('You cannot buy the Free package');
+                        return;
+                      }
                       isLoading = true;
                       _sleekNotify(
                           'Please wait while we process your request ...');
@@ -152,7 +158,7 @@ class _SubscriptionPlanScreenState extends ConsumerState<SubscriptionPlanScreen>
                   },
                   child: isLoading
                       ? SpinKitDualRing(
-                          color: Colors.white, size: 25, lineWidth: 7)
+                          color: Colors.white, size: 25, lineWidth: 2)
                       : Text('Buy Package',
                           style: small00.copyWith(
                               fontWeight: FontWeight.bold,

@@ -106,6 +106,31 @@ class _QuizSessionScreenState extends ConsumerState<MCQSessionScreen>
         ],
       ));
 
+  void _submit(
+      List<MCQData> questions, List<MCQOption?> choices, QuizData quiz) {
+    showModal(
+        context: context,
+        builder: (context) => ConfirmAction(
+              action: 'Are you sure you want to submit',
+              onConfirm: () => Navigator.pop(context, true),
+            )).then((value) {
+      if (value == true) {
+        final (:score, :total, :attempted, :incorrect) =
+            markMCQQuiz(questions, choices, quiz.questionsAsInt.length);
+        push<bool>(
+                ResultScreen(
+                    score: score,
+                    total: total,
+                    attempted: attempted,
+                    incorrect: incorrect),
+                context)
+            .then((value) => value == true
+                ? context.go('/home/mcq-revise', extra: (choices, questions))
+                : context.go('/home/session', extra: widget.data));
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return StoreConnector<QeasilyState, SessionViewModel>(
@@ -115,10 +140,8 @@ class _QuizSessionScreenState extends ConsumerState<MCQSessionScreen>
           ///if this widget has been initalized, do nothing
           if (hasInitialized) {
           } else if (widget.data != null) {
-            //initialize a new session
             vm.init(widget.data!);
           } else if (widget.savedSession != null) {
-            //restore the saveed session
             vm.restoreSession(widget.savedSession!);
           }
           hasInitialized = true;
@@ -144,7 +167,7 @@ class _QuizSessionScreenState extends ConsumerState<MCQSessionScreen>
                   context.go('/home');
                 } else {
                   vm.save(timerController.seconds ?? 1800);
-                  await _notify('This session will be saved', delay: 2);
+                  _notify('This session will be saved', delay: 2);
                   _notify('Press back again to exit');
                   canExit = true;
                 }
@@ -154,33 +177,7 @@ class _QuizSessionScreenState extends ConsumerState<MCQSessionScreen>
                 appBar: AppBar(
                   automaticallyImplyLeading: false,
                   title: FilledButton(
-                    onPressed: () {
-                      showModal(
-                          context: context,
-                          builder: (context) => ConfirmAction(
-                                action: 'Are you sure you want to submit',
-                                onConfirm: () => Navigator.pop(context, true),
-                              )).then((value) {
-                        ///close session if user wants to submit
-                        if (value == true) {
-                          vm.closeSession();
-                          final (:score, :total, :attempted, :incorrect) =
-                              markMCQQuiz(questions, choices);
-                          push<bool>(
-                                  ResultScreen(
-                                      score: score,
-                                      total: total,
-                                      attempted: attempted,
-                                      incorrect: incorrect),
-                                  context)
-                              .then((value) => value == true
-                                  ? context.go('/home/mcq-revise',
-                                      extra: (choices, questions))
-                                  : context.go('/home/session',
-                                      extra: widget.data));
-                        }
-                      });
-                    },
+                    onPressed: () => _submit(questions, choices, quiz),
                     style: ButtonStyle(
                         foregroundColor: MaterialStatePropertyAll(Colors.white),
                         backgroundColor: MaterialStatePropertyAll(jungleGreen)),
@@ -325,8 +322,8 @@ class _QuizSessionScreenState extends ConsumerState<MCQSessionScreen>
             ),
             Positioned(
               bottom: 20,
-              child: StoreNotification(
-                message: vm.sessionState.message,
+              child: SleekNotification(
+                notification: vm.sessionState.message,
                 closer: () => vm.clearNotification(),
               ),
             )

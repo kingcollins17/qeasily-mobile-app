@@ -31,7 +31,7 @@ class OptionSelector<ValueType> extends StatelessWidget with Ui {
                   padding: EdgeInsets.symmetric(vertical: 6, horizontal: 6),
                   constraints: BoxConstraints(minHeight: 60),
                   decoration: BoxDecoration(
-                    color: darkShade,
+                    color: Colors.transparent,
                     boxShadow: [
                       BoxShadow(blurRadius: 2, color: Color(0x2D000000))
                     ],
@@ -39,8 +39,8 @@ class OptionSelector<ValueType> extends StatelessWidget with Ui {
                     border: Border.all(
                         color: selected == values[index]
                             ? jungleGreen
-                            : Colors.transparent,
-                        width: 2.5),
+                            : Color(0x638A8A8A),
+                        width: 1.4),
                   ),
                   child: Text(converter(values[index]), style: small00),
                 ),

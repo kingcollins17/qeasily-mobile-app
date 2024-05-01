@@ -12,9 +12,16 @@ import 'package:shimmer/shimmer.dart';
 
 class TopicSelectorScreen extends ConsumerStatefulWidget {
   const TopicSelectorScreen(
-      {super.key, required this.category, this.multiple = true});
-  final CategoryData category;
+      {
+    super.key,
+    this.category,
+    this.multiple = true,
+    this.actionLabel,
+    this.title,
+  });
+  final CategoryData? category;
   final bool multiple;
+  final String? title, actionLabel;
   @override
   ConsumerState<TopicSelectorScreen> createState() =>
       _TopicSelectorScreenState();
@@ -76,7 +83,9 @@ class _TopicSelectorScreenState extends ConsumerState<TopicSelectorScreen>
 
   @override
   Widget build(BuildContext context) {
-    final _provider = topicsByCategoryProvider(widget.category.id);
+    final _provider = widget.category == null
+        ? createdTopicsProvider
+        : topicsByCategoryProvider(widget.category!.id);
     final topics = ref.watch(_provider);
 
     return stackWithNotifier([
@@ -88,7 +97,8 @@ class _TopicSelectorScreenState extends ConsumerState<TopicSelectorScreen>
           AsyncData(value: (List<TopicData> data, PageData page)) =>
             EasyRefresh(
                 onRefresh: () => ref.refresh(_provider),
-                onLoad: () => ref.read(_provider.notifier).fetchNextPage(),
+                onLoad: () =>
+                    ref.read((_provider as dynamic).notifier).fetchNextPage(),
                 child: ListView.builder(
                   padding: EdgeInsets.symmetric(horizontal: 15, vertical: 15),
                   itemCount: data.length,
@@ -101,10 +111,13 @@ class _TopicSelectorScreenState extends ConsumerState<TopicSelectorScreen>
                         padding:
                             EdgeInsets.symmetric(horizontal: 6, vertical: 6),
                         decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(6),
-                            color: selected.contains(data[index])
-                                ? jungleGreen
-                                : Colors.transparent),
+                          borderRadius: BorderRadius.circular(6),
+                          border: Border.all(
+                              width: 1.4,
+                              color: selected.contains(data[index])
+                                  ? jungleGreen
+                                  : Colors.transparent),
+                        ),
                         child: TopicItemWidget(topic: data[index])),
                   ),
                 )),
@@ -137,11 +150,18 @@ class _TopicSelectorScreenState extends ConsumerState<TopicSelectorScreen>
           width: maxWidth(context),
           child: Center(
             child: FilledButton(
-              style: btn,
+              style: ButtonStyle(
+                  fixedSize: MaterialStatePropertyAll(
+                    Size(maxWidth(context) * 0.9, 45),
+                  ),
+                  backgroundColor: MaterialStatePropertyAll(jungleGreen)),
               onPressed: () {
                 Navigator.pop(context, selected);
               },
-              child: Text('Select', style: rubik),
+              child: Text('Select',
+                  style: small00.copyWith(
+                    color: athensGray,
+                  )),
             ),
           ))
     ], notification);

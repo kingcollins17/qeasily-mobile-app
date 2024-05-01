@@ -144,6 +144,6 @@ const onboards = <_OnboardContent>[
     content:
         'Follow creators on our platform to stay'
         ' up to date with their latest Quizzes on the platform',
-    imageUrl: 'asset/undraw/follow_users.svg'
+    imageUrl: 'asset/undraw/sign_up.svg'
   ),
 ];

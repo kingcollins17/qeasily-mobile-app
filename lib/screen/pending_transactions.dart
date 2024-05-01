@@ -29,27 +29,36 @@ class _PendingTransactionViewState extends ConsumerState<PendingTransactionView>
       children: [
         Scaffold(
           appBar: AppBar(title: Text('Pending Transactions', style: small00)),
+          // appBar: AppBar(
+          //   title: FutureBuilder(
+          //       future: deleteTransaction(
+          //           ref.read(generalDioProvider), '45mge29hrf9'),
+          //       builder: (context, sn) => Text(sn.data.toString())),
+          // ),
           body: switch (transactions) {
-            AsyncData(value: final values) => values.isEmpty
+            AsyncData(value: final items) => items.isEmpty
                 ? NoDataNotification()
                 : ListView(
                     children: List.generate(
-                        values.length,
-                        (index) => GestureDetector(
-                            onTap: () {
-                              setState(() {
-                                isLoading = true;
-                                notification =
-                                    'Please wait while we verify your purchase ...';
-                              });
-                              verifyWithPaystack(keys.asData!.value,
-                                      values[index].reference)
-                                  .then((value) => setState(() {
-                                        notification = value.toString();
-                                        isLoading = false;
-                                      }));
-                            },
-                            child: TransactionItem(data: values[index]))),
+                        items.length,
+                        (index) => TransactionItem(
+                              data: items[index],
+                              onPressVerify: (value) {
+                                setState(() {
+                                  isLoading = true;
+                                  notification =
+                                      'Please wait while we verify your purchase ...';
+                                });
+                                final notifier =
+                                    ref.read(subPlanProvider.notifier);
+                                notifier
+                                    .verifyPurchase(items[index].reference)
+                                    .then((response) => setState(() {
+                                          notification = response.$2;
+                                          isLoading = false;
+                                        }));
+                              },
+                            )),
                   ),
             AsyncLoading() => Center(
                 child: SpinKitDualRing(color: Colors.white, size: 40),
@@ -83,8 +92,9 @@ class _PendingTransactionViewState extends ConsumerState<PendingTransactionView>
 }
 
 class TransactionItem extends StatelessWidget with Ui {
-  TransactionItem({super.key, required this.data});
+  TransactionItem({super.key, required this.data, required this.onPressVerify});
   final PendingTransactionData data;
+  final void Function(PendingTransactionData value) onPressVerify;
 
   @override
   Widget build(BuildContext context) {
@@ -136,7 +146,7 @@ class TransactionItem extends StatelessWidget with Ui {
               child: FilledButton(
                   style: ButtonStyle(
                       backgroundColor: MaterialStatePropertyAll(athensGray)),
-                  onPressed: () {},
+                  onPressed: () => onPressVerify(data),
                   child: Text('verify', style: small00.copyWith(color: tiber))),
             ),
           )

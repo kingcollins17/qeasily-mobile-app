@@ -9,6 +9,10 @@ class DashboardData {
 
   final int followers, following, topics;
 
+  @JsonKey(name: 'admin_points')
+  final int adminPoints;
+
+
   @JsonKey(name: 'quizzes_left')
   final int quizzesLeft;
 
@@ -29,6 +33,7 @@ class DashboardData {
       required this.department,
       required this.level,
       required this.plan,
+      required this.adminPoints,
       required this.email,
       required this.followers,
       required this.following,
@@ -42,7 +47,7 @@ class DashboardData {
   @override
   toString() =>
       '{id: $id, email: $email, deparment: $department, level: $level, currentPlan: $plan'
-      ' totalTopics: $topics, totalQuiz: $totalQuiz, totalMCQS: $totalMcqs,'
+      'adminPoints: $adminPoints, totalTopics: $topics, totalQuiz: $totalQuiz, totalMCQS: $totalMcqs,'
       'quizzesLeft: $quizzesLeft'
       ' totalDCQS: $totalDcqs, followers: $followers, following: $following}';
 }

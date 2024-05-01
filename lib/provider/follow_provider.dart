@@ -47,6 +47,13 @@ class FollowNotifier extends _$FollowNotifier implements NextPageFetcher {
       return (false, 'No value for state');
     }
   }
+
+  void remove(ProfileData account) {
+    if (state.hasValue) {
+      final (data, page) = state.value!;
+      state = AsyncData((data..remove(account), page));
+    }
+  }
 }
 
 Future<(bool, String, List<ProfileData>, PageData)> fetchAccountsToFollow(

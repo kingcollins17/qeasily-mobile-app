@@ -86,9 +86,11 @@ class _IndexSubScreenState extends ConsumerState<HomePageSubScreen> with Ui {
               StoreConnector<QeasilyState, SessionViewModel>(
                 builder: (context, vm) => Row(
                   children: [
-                    circleWrap(vm.history.mcqSessions.length.toString()),
+                    circleWrap((vm.history.mcqSessions.length +
+                            vm.history.dcqSessions.length)
+                        .toString()),
                     spacer(),
-                    circleWrap(vm.history.dcqSessions.length.toString()),
+                    circleWrap(user.asData?.value.username![0] ?? '')
                   ],
                 ),
                 converter: (store) =>

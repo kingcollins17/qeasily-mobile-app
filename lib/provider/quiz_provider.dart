@@ -50,6 +50,16 @@ class QuizByCreator extends _$QuizByCreator implements NextPageFetcher {
       return (false, 'No state');
     }
   }
+
+  Future<dynamic> deleteQuiz(int id) async {
+    final dio = ref.read(generalDioProvider);
+    final response = await dio.delete(
+      APIUrl.deleteQuiz.url,
+      queryParameters: {'qid': id},
+    );
+    if (response.statusCode == 200) ref.invalidateSelf();
+    return response.data;
+  }
 }
 
 @Riverpod(keepAlive: true)

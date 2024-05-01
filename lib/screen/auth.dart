@@ -171,7 +171,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                                   spacer(),
                                   TextButton(
                                       onPressed: () {
-                                        context.go('/sign-up');
+                                        context.push('/sign-up');
                                       },
                                       child: Text(
                                         'Create an Account',
