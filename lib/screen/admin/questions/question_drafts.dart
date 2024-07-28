@@ -25,8 +25,11 @@ class _QuestionDraftScreenState extends ConsumerState<QuestionDraftScreen>
   LocalNotification? notification;
 
   var type = QuestionType.mcq;
-
   late AnimationController _controller;
+
+  bool showHelp = false;
+
+  String? selected; //the name (key) of the selected draft list
 
   Future<void> _notify(String message, {bool? loading, int delay = 4}) async {
     setState(() {
@@ -47,6 +50,19 @@ class _QuestionDraftScreenState extends ConsumerState<QuestionDraftScreen>
   void dispose() {
     _controller.dispose();
     super.dispose();
+  }
+
+  void _deleteDraft() {
+    _notify('Deleting draft ...', loading: true);
+    if (selected != null) {
+      final box = switch (type) {
+        QuestionType.mcq => Hive.box<List>(mcqDrafts),
+        _ => Hive.box<List>(dcqDrafts)
+      };
+      box
+          .delete(selected)
+          .then((value) => _notify('Draft $selected deleted')); //delete
+    }
   }
 
   @override
@@ -72,8 +88,8 @@ class _QuestionDraftScreenState extends ConsumerState<QuestionDraftScreen>
                     QuestionType.mcq => mcqDraftBox.keys.isEmpty
                         ? [NoDataNotification()]
                         : mcqDraftBox.keys
-                        .map((e) => _mcqDrafts(context, e, mcqDraftBox))
-                        .toList(),
+                            .map((e) => _mcqDrafts(context, e, mcqDraftBox))
+                            .toList(),
                     _ => dcqDraftBox.keys.isEmpty
                         ? [NoDataNotification()]
                         : _dcqDrafts(dcqDraftBox)
@@ -84,6 +100,33 @@ class _QuestionDraftScreenState extends ConsumerState<QuestionDraftScreen>
           ),
         ),
       ),
+      if (selected != null)
+        Positioned(
+            bottom: 20,
+            width: maxWidth(context),
+            child: Center(
+              child: FilledButton(
+                  onPressed: _deleteDraft,
+                  style: ButtonStyle(
+                      fixedSize: MaterialStatePropertyAll(
+                          Size(maxWidth(context) * 0.8, 45)),
+                      backgroundColor: MaterialStatePropertyAll(jungleGreen)),
+                  child: Text('Delete',
+                      style: small00.copyWith(color: Colors.white))),
+            )),
+      if (showHelp)
+        TutorialHint(
+            title: 'Hint',
+            message:
+                'To select a draft, long press on it and a button will appear under. Press this button '
+                'if you want to delete the draft. '
+                'Double tap on an already selected draft to unselect it',
+            closer: () => setState(() => showHelp = false)),
+      Positioned(
+          bottom: 80,
+          right: 20,
+          child: ShowHelpWidget(
+              onPressHelp: () => setState(() => showHelp = !showHelp)))
     ], notification);
   }
 
@@ -95,44 +138,58 @@ class _QuestionDraftScreenState extends ConsumerState<QuestionDraftScreen>
     return GestureDetector(
       onTap: () =>
           push(DraftListViewWidget(draftName: draftName, type: type), context),
-      child: Padding(
-        padding: EdgeInsets.symmetric(vertical: 15),
-        child: Row(
-          children: [
-            Container(
-              padding: EdgeInsets.all(15),
-              decoration: BoxDecoration(
-                color: raisingBlack,
-                shape: BoxShape.circle,
+      onLongPress: () => setState(() => selected = draftName.toString()),
+      onDoubleTap: selected == draftName.toString()
+          ? () => setState(() => selected = null)
+          : null,
+      child: Container(
+        decoration: BoxDecoration(
+          border: Border.all(
+              color: selected == draftName.toString()
+                  ? jungleGreen
+                  : Colors.transparent,
+              width: 1.5),
+          borderRadius: BorderRadius.circular(6),
+        ),
+        child: Padding(
+          padding: EdgeInsets.symmetric(vertical: 15, horizontal: 6),
+          child: Row(
+            children: [
+              Container(
+                padding: EdgeInsets.all(15),
+                decoration: BoxDecoration(
+                  color: raisingBlack,
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(Icons.drafts, size: 20, color: athensGray),
               ),
-              child: Icon(Icons.drafts, size: 20, color: athensGray),
-            ),
-            spacer(x: 10),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(draftName.toString(),
-                    style: small00.copyWith(fontWeight: FontWeight.bold)),
-                spacer(),
-                Row(
-                  children: [
-                    Icon(Icons.query_builder, size: 12, color: athensGray),
-                    spacer(),
-                    Text(
-                      '${loadMCQFromStorage(mcqDraftBox, draftName)?.length ?? '0'} Questions',
-                      style: xs00,
-                    ),
-                  ],
-                )
-              ],
-            ),
-            Expanded(
-              child: Align(
-                  alignment: Alignment.centerRight,
-                  child: Icon(Icons.arrow_forward_ios,
-                      size: 8, color: athensGray)),
-            )
-          ],
+              spacer(x: 10),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(draftName.toString(),
+                      style: small00.copyWith(fontWeight: FontWeight.bold)),
+                  spacer(),
+                  Row(
+                    children: [
+                      Icon(Icons.query_builder, size: 12, color: athensGray),
+                      spacer(),
+                      Text(
+                        '${loadMCQFromStorage(mcqDraftBox, draftName)?.length ?? '0'} Questions',
+                        style: xs00,
+                      ),
+                    ],
+                  )
+                ],
+              ),
+              Expanded(
+                child: Align(
+                    alignment: Alignment.centerRight,
+                    child: Icon(Icons.arrow_forward_ios,
+                        size: 8, color: athensGray)),
+              )
+            ],
+          ),
         ),
       ),
     );
@@ -147,46 +204,62 @@ class _QuestionDraftScreenState extends ConsumerState<QuestionDraftScreen>
                     type: type,
                   ),
                   context);
+          
             },
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 15.0),
-              child: Row(
-                children: [
-                  Container(
-                    padding: EdgeInsets.all(15),
-                    decoration: BoxDecoration(
-                      color: raisingBlack,
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(Icons.drafts, size: 20, color: athensGray),
-                  ),
-                  spacer(x: 10),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(e.toString(),
-                          style: small00.copyWith(fontWeight: FontWeight.bold)),
-                      spacer(),
-                      Row(
-                        children: [
-                          Icon(Icons.query_builder,
-                              size: 12, color: athensGray),
-                          spacer(),
-                          Text(
-                              '${box.get(e)?.length.toString() ?? '0'} Questions',
-                              style: xs00),
-                        ],
+            onLongPress: () => setState(() => selected = e.toString()),
+            onDoubleTap: selected == e.toString()
+                ? () => setState(() => selected = null)
+                : null,
+            child: Container(
+              decoration: BoxDecoration(
+                border: Border.all(
+                    color: selected == e.toString()
+                        ? jungleGreen
+                        : Colors.transparent,
+                    width: 1.5),
+                borderRadius: BorderRadius.circular(6),
+              ),
+              child: Padding(
+                padding:
+                    const EdgeInsets.symmetric(vertical: 15.0, horizontal: 5),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: EdgeInsets.all(15),
+                      decoration: BoxDecoration(
+                        color: raisingBlack,
+                        shape: BoxShape.circle,
                       ),
-                      
-                    ],
-                  ),
-                  Expanded(
-                    child: Align(
-                        alignment: Alignment.centerRight,
-                        child: Icon(Icons.arrow_forward_ios,
-                            size: 8, color: athensGray)),
-                  )
-                ],
+                      child: Icon(Icons.drafts, size: 20, color: athensGray),
+                    ),
+                    spacer(x: 10),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(e.toString(),
+                            style:
+                                small00.copyWith(fontWeight: FontWeight.bold)),
+                        spacer(),
+                        Row(
+                          children: [
+                            Icon(Icons.query_builder,
+                                size: 12, color: athensGray),
+                            spacer(),
+                            Text(
+                                '${box.get(e)?.length.toString() ?? '0'} Questions',
+                                style: xs00),
+                          ],
+                        ),
+                      ],
+                    ),
+                    Expanded(
+                      child: Align(
+                          alignment: Alignment.centerRight,
+                          child: Icon(Icons.arrow_forward_ios,
+                              size: 8, color: athensGray)),
+                    )
+                  ],
+                ),
               ),
             ),
           ))
@@ -202,8 +275,7 @@ class _QuestionDraftScreenState extends ConsumerState<QuestionDraftScreen>
               duration: Duration(milliseconds: 300),
               padding: EdgeInsets.symmetric(horizontal: 10, vertical: 12),
               decoration: BoxDecoration(
-                  color: type == QuestionType.mcq
-                      ? athensGray : raisingBlack,
+                  color: type == QuestionType.mcq ? athensGray : raisingBlack,
                   // : Colors.transparent,
                   borderRadius: BorderRadius.circular(6)),
               child: Text('Multiple Choice',
@@ -220,8 +292,7 @@ class _QuestionDraftScreenState extends ConsumerState<QuestionDraftScreen>
               duration: Duration(milliseconds: 300),
               padding: EdgeInsets.symmetric(horizontal: 10, vertical: 12),
               decoration: BoxDecoration(
-                  color: type == QuestionType.dcq
-                      ? athensGray : raisingBlack,
+                  color: type == QuestionType.dcq ? athensGray : raisingBlack,
                   // : Colors.transparent,
                   borderRadius: BorderRadius.circular(6)),
               child: Text('True or False',

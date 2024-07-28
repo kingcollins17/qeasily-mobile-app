@@ -39,7 +39,7 @@ class CustomDropdownField<Item> extends StatelessWidget with Ui {
                   padding: const EdgeInsets.symmetric(horizontal: 8.0),
                   child: Text(
                     converter(items[index]),
-                    style: mukta,
+                    style: small00,
                   ),
                 )),
           ),

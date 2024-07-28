@@ -7,41 +7,60 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:qeasily/styles.dart';
 import 'package:go_router/go_router.dart';
 
-class TutorialHint extends StatefulWidget {
-  const TutorialHint({super.key, required this.message});
-  final String message;
-
-  @override
-  State<TutorialHint> createState() => _TutorialHintState();
-}
-
-class _TutorialHintState extends State<TutorialHint> with Ui {
-  bool visible = true;
+class TutorialHint extends StatelessWidget with Ui {
+  TutorialHint({super.key, this.message, this.title, required this.closer});
+  final String? message, title;
+  final void Function() closer;
+  // final
   @override
   Widget build(BuildContext context) {
     final width = maxWidth(context) * 0.85;
-    return visible
+    return message != null
         ? SizedBox(
             width: maxWidth(context),
-            child: Column(
-              children: [
-                header(
-                  width: width,
-                  label: 'Hint',
-                  style: rubik,
-                  closer: () => setState(() => visible = false),
-                ),
-                _body(
+            child: Material(
+              color: Color(0x7D000000),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  header(
                     width: width,
-                    child: Text(
-                      widget.message,
-                      style: rubikSmall,
-                    ),
-                    color: raisingBlack)
-              ],
+                    color: jungleGreen,
+                    label: title ?? 'Hint',
+                    style: rubik,
+                    icon: Icons.help,
+                    closer: closer,
+                  ),
+                  _body(
+                      width: width,
+                      child: Text(
+                        message!,
+                        style: small00,
+                      ),
+                      color: raisingBlack)
+                ],
+              ),
             ),
           ).animate()
         : SizedBox.shrink();
+  }
+}
+
+class ShowHelpWidget extends StatelessWidget with Ui {
+  ShowHelpWidget({super.key, this.onPressHelp});
+  final void Function()? onPressHelp;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onPressHelp,
+      child: Container(
+        padding: EdgeInsets.all(15),
+        decoration: BoxDecoration(shape: BoxShape.circle, color: athensGray),
+        child:
+            Center(child: Icon(Icons.help_sharp, color: deepSaffron, size: 30)),
+      ),
+    );
   }
 }
 
@@ -108,28 +127,31 @@ class NoDataNotification extends StatelessWidget with Ui {
 }
 
 class ErrorNotificationHint extends StatelessWidget with Ui {
-  ErrorNotificationHint({super.key, this.error});
+  ErrorNotificationHint({super.key, this.error, this.closer});
   final dynamic error;
-
+  final void Function()? closer;
   @override
   Widget build(BuildContext context) {
     final width = maxWidth(context) * 0.85;
-
-    const errorMsg = 'Please check your internet connection and retry again';
+    // const errorMsg = 'Please check your internet connection and retry again';
     return SizedBox(
       width: maxWidth(context),
-      child: Column(
-        children: [
-          header(
-            width: width,
-            style: rubik,
-            label: 'Error',
-          ),
-          _body(
-              width: width,
-              child: Text(error.toString(), style: rubik),
-              color: raisingBlack)
-        ],
+      child: Material(
+        color: Color(0x8B000000),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            header(
+                width: width,
+                style: rubik.copyWith(fontWeight: FontWeight.w600),
+                label: 'Error',
+                closer: closer),
+            _body(
+                width: width,
+                child: Text(error.toString(), style: small00),
+                color: raisingBlack)
+          ],
+        ),
       ),
     );
   }
@@ -155,7 +177,7 @@ class InfoHint extends StatelessWidget with Ui {
           ),
           _body(
               width: width,
-              child: Text(info, style: rubikSmall),
+              child: Text(info, style: small00),
               color: raisingBlack)
         ],
       ),

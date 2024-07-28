@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_redux/flutter_redux.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:go_router/go_router.dart';
 import 'package:hive/hive.dart';
 import 'package:qeasily/app_constants.dart';
 import 'package:qeasily/model/model.dart';
@@ -113,10 +114,10 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> with Ui {
                         progressBar(data!.quizzesLeft, 100,
                             '${data.quizzesLeft} Quiz credits',
                             action: TextButton(
-                                onPressed: () {},
+                                onPressed: () => context.push('/home/plans'),
                                 child: Text(
                                   'Buy more',
-                                  style: small00.copyWith(color: jungleGreen),
+                                  style: small00.copyWith(color: deepSaffron),
                                 ))),
                         spacer(y: 20),
                         Row(
@@ -155,10 +156,10 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> with Ui {
                                 style: ButtonStyle(
                                     foregroundColor:
                                         MaterialStatePropertyAll(deepSaffron)),
-                                onPressed: () {},
+                                onPressed: () => context.go('/home/plans'),
                                 icon: Icon(Icons.credit_score, size: 15),
                                 label:
-                                    Text('Buy more credits', style: small00))),
+                                    Text('Buy more ', style: small00))),
                         spacer(y: 20),
                         Wrap(
                           alignment: WrapAlignment.start,

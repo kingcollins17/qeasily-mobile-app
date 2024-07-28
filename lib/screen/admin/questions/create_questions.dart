@@ -6,11 +6,13 @@ import 'package:flutter_redux/flutter_redux.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:hive/hive.dart';
+import 'package:go_router/go_router.dart';
 import 'package:qeasily/app_constants.dart';
 import 'package:qeasily/model/model.dart';
 import 'package:qeasily/provider/categories.dart';
 import 'package:qeasily/provider/dio_provider.dart';
 import 'package:qeasily/redux/redux.dart';
+
 import 'package:qeasily/redux/view_model/topic_vm.dart';
 import 'package:qeasily/styles.dart';
 import 'package:qeasily/util/util.dart';
@@ -68,6 +70,7 @@ class _CreateQuestionsState extends ConsumerState<CreateQuestionsScreen>
   List<Draft>? draft;
   var step = _Step.selectCount;
 
+  bool canExit = false;
   dynamic response;
 
   @override
@@ -104,20 +107,30 @@ class _CreateQuestionsState extends ConsumerState<CreateQuestionsScreen>
   @override
   Widget build(BuildContext context) {
     return stackWithNotifier([
-      Scaffold(
-        appBar: AppBar(
-          title: step == _Step.create
-              ? Text('Set Questions ${current + 1}', style: small00)
-              : null,
-        ),
-        body: SingleChildScrollView(
-          child: switch (step) {
-            _Step.selectCount => _selectTotalCount(),
-            _Step.selectType => _selectTypeAndTopic(),
-            _Step.create when questionType == QuestionType.mcq => _addMCQ(),
-            _Step.create when questionType == QuestionType.dcq => _addDCQ(),
-            _ => SizedBox()
-          },
+      BackButtonListener(
+        onBackButtonPressed: () async {
+          _notify('Press back again to exit');
+          if (!canExit) {
+            canExit = true;
+            return canExit;
+          }
+          return !canExit;
+        },
+        child: Scaffold(
+          appBar: AppBar(
+            title: step == _Step.create
+                ? Text('Set Questions ${current + 1}', style: small00)
+                : null,
+          ),
+          body: SingleChildScrollView(
+            child: switch (step) {
+              _Step.selectCount => _selectTotalCount(),
+              _Step.selectType => _selectTypeAndTopic(),
+              _Step.create when questionType == QuestionType.mcq => _addMCQ(),
+              _Step.create when questionType == QuestionType.dcq => _addDCQ(),
+              _ => SizedBox()
+            },
+          ),
         ),
       ),
     ], notification);
@@ -252,7 +265,6 @@ class _CreateQuestionsState extends ConsumerState<CreateQuestionsScreen>
                             dio,
                             draft!.cast<MCQDraft>(),
                           ),
-                          
                         DCQDraft _ => await publishDCQuestions(
                             dio,
                             draft!.cast<DCQDraft>(),
@@ -421,7 +433,8 @@ class _CreateQuestionsState extends ConsumerState<CreateQuestionsScreen>
                   _notify('Publishing Questions', loading: true);
                   final (status, msg, data) = await publishDCQuestions(
                       ref.read(generalDioProvider), draft!.cast<DCQDraft>());
-                  await _notify(msg, loading: false);
+                  await _notify(msg, loading: false)
+                      .then((value) => status ? context.go('/home') : null);
                   if (!status && data != null) {
                     _notify('Questions $data are invalid, please review them');
                   }
@@ -487,8 +500,6 @@ class _CreateQuestionsState extends ConsumerState<CreateQuestionsScreen>
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // spacer(y: 10),
-                      // Text('Name your draft', style: small00),
                       spacer(y: 10),
                       _inputField(
                           hint: 'Draft name',
@@ -497,11 +508,14 @@ class _CreateQuestionsState extends ConsumerState<CreateQuestionsScreen>
                       FilledButton(
                           onPressed: () => Navigator.pop(context, draftName),
                           style: ButtonStyle(
-                            fixedSize: MaterialStatePropertyAll(Size(maxWidth(context)* 0.85, 45),),
+                              fixedSize: MaterialStatePropertyAll(
+                                Size(maxWidth(context) * 0.85, 45),
+                              ),
                               foregroundColor: MaterialStatePropertyAll(
                                 athensGray,
                               ),
-                              backgroundColor: MaterialStatePropertyAll(jungleGreen)),
+                              backgroundColor:
+                                  MaterialStatePropertyAll(jungleGreen)),
                           child: Text('Save', style: rubik))
                     ],
                   ),

@@ -25,6 +25,8 @@ class SessionViewModel {
     );
   }
 
+
+
   void unpickOption(int index) {
     _store.dispatch(
       SessionAction(type: SessionActionType.unpickOption, payload: index),
@@ -47,8 +49,17 @@ class SessionViewModel {
     }
   }
 
-  void closeSession() {
+  void closeSession(QuizData quiz) {
     _store.dispatch(SessionAction(type: SessionActionType.closeSession));
+
+    //
+    Future.delayed(const Duration(seconds: 2), () {
+      Future.delayed(const Duration(seconds: 2), () {
+        _store.dispatch(
+          SessionAction(type: SessionActionType.removeHistory, payload: quiz),
+        );
+      });
+    });
   }
 
   void notify(String message) {

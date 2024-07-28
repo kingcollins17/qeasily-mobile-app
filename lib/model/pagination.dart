@@ -17,7 +17,7 @@ class PageData {
   factory PageData.fromJson(Map<String, dynamic> json) =>
       _$PageDataFromJson(json);
 
-  PageData({this.page = 0, this.perPage = 10, this.hasNextPage = true});
+  PageData({this.page = 0, this.perPage = 20, this.hasNextPage = true});
   Map<String, dynamic> toJson() => _$PageDataToJson(this);
 
   @override

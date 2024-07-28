@@ -17,7 +17,7 @@ import 'package:qeasily/styles.dart';
 import 'package:qeasily/test.dart';
 import 'package:qeasily/widget/confirm_action.dart';
 import 'package:qeasily/widget/widget.dart';
-// import 'nav/nav.dart';
+
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -161,16 +161,7 @@ class _Drawer extends ConsumerWidget with Ui {
                   ]),
                 ),
                 spacer(y: 20),
-                // Row(children: [
-                //   Icon(Icons.delete, color: Colors.redAccent),
-                //   spacer(x: 10),
-                //   Text('Delete Account', style: rubik)
-                // ]),
-                spacer(y: 10),
-                Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text('Terms of use', style: mukta)),
-                spacer(y: 25)
+               
               ])
             ],
           ),

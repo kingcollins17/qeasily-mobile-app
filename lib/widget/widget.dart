@@ -11,3 +11,4 @@ export 'store_notification.dart';
 export 'topic_selector_screen.dart';
 export 'question_selector_screen.dart';
 export 'notification_hints.dart';
+export 'tutorials.dart';

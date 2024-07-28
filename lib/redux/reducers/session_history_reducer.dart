@@ -1,3 +1,4 @@
+import 'package:qeasily/model/model.dart';
 import 'package:redux/redux.dart';
 
 import '../state/quiz_session.dart';
@@ -13,6 +14,9 @@ SessionHistory sessionHistoryReducer(SessionHistory state, action) {
       case SessionActionType.save when action.payload is SavedDCQSession:
         state.dcqSessions =
             {...state.dcqSessions, action.payload as SavedDCQSession}.toList();
+        break;
+      case SessionActionType.removeHistory when action.payload is QuizData:
+        state.removeSession(action.payload as QuizData);
         break;
       default:
         break;

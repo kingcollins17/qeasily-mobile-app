@@ -96,8 +96,9 @@ class _DCQRevisionState extends ConsumerState<DCQRevision> with Ui {
               children: [
                 Text(
                   'Questions ${index + 1} of ${widget.choices.length}',
-                  style: mukta,
+                  style: xs00,
                 ),
+               
                 () {
                   final crt =
                       widget.questions[index].correct == widget.choices[index];
@@ -106,6 +107,9 @@ class _DCQRevisionState extends ConsumerState<DCQRevision> with Ui {
                 }()
               ],
             ),
+            spacer(y: 20),
+            Text(widget.questions[index].query, style: small00),
+            spacer(y: 15),
             spacer(y: 15),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,

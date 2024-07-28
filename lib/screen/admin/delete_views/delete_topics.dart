@@ -3,6 +3,7 @@
 import 'package:easy_refresh/easy_refresh.dart';
 import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
+import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:qeasily/model/model.dart';
@@ -95,15 +96,20 @@ class _DeleteTopicScreenState extends ConsumerState<DeleteTopicScreen>
                       notification = 'Select a Topic';
                     });
                   } else {
-                    //TODO: delete topic
+                    //
                     setState(() {
                       isLoading = true;
                     });
                     deleteTopic(ref.read(generalDioProvider), topic!.id)
-                        .then((value) => setState(() {
-                              notification = value.toString();
-                              isLoading = false;
-                            }));
+                        .then((value) {
+                      setState(() {
+                        notification = value.toString();
+                        isLoading = false;
+                      });
+
+                      ref.invalidate(createdTopicsProvider);
+                      context.push('/home');
+                    });
                   }
                 },
                 style: ButtonStyle(

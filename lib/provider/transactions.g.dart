@@ -32,12 +32,12 @@ Map<String, dynamic> _$PendingTransactionDataToJson(
 // RiverpodGenerator
 // **************************************************************************
 
-String _$pendingTranxHash() => r'a04c43797538b6fa661a3961ca1fd4ab42c258fa';
+String _$pendingTranxHash() => r'7918f328a8a6f98aec2c342272937f45f49d388f';
 
 /// See also [PendingTranx].
 @ProviderFor(PendingTranx)
-final pendingTranxProvider =
-    AsyncNotifierProvider<PendingTranx, List<PendingTransactionData>>.internal(
+final pendingTranxProvider = AutoDisposeAsyncNotifierProvider<PendingTranx,
+    List<PendingTransactionData>>.internal(
   PendingTranx.new,
   name: r'pendingTranxProvider',
   debugGetCreateSourceHash:
@@ -46,6 +46,6 @@ final pendingTranxProvider =
   allTransitiveDependencies: null,
 );
 
-typedef _$PendingTranx = AsyncNotifier<List<PendingTransactionData>>;
+typedef _$PendingTranx = AutoDisposeAsyncNotifier<List<PendingTransactionData>>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member

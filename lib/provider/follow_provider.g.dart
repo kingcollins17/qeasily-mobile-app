@@ -6,7 +6,7 @@ part of 'follow_provider.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$followNotifierHash() => r'819274947f8e41249d41f967683ba601862d4f3d';
+String _$followNotifierHash() => r'063ad62e018ba06285bf159922a2b05a3ea8657a';
 
 /// Copied from Dart SDK
 class _SystemHash {

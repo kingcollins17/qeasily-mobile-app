@@ -10,13 +10,13 @@ class TopicItemWidget extends StatelessWidget with Ui {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: EdgeInsets.symmetric(vertical: 2),
+      margin: const EdgeInsets.symmetric(vertical: 2),
       width: maxWidth(context),
-      constraints: BoxConstraints(minHeight: 80),
+      constraints: const BoxConstraints(minHeight: 80),
       child: Row(
         children: [
           Container(
-            padding: EdgeInsets.all(15),
+            padding: const EdgeInsets.all(15),
             decoration: BoxDecoration(shape: BoxShape.circle, color: tiber),
             child: Icon(Icons.folder, size: 15, color: athensGray),
           ),
@@ -28,7 +28,7 @@ class TopicItemWidget extends StatelessWidget with Ui {
               spacer(),
               Row(
                 children: [
-                  Icon(Icons.label, size: 15, color: Colors.grey),
+                  const Icon(Icons.label, size: 15, color: Colors.grey),
                   spacer(),
                   Text(topic.category, style: xs01),
                 ],

@@ -6,19 +6,16 @@ import 'package:flutter_redux/flutter_redux.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:go_router/go_router.dart';
 import 'package:qeasily/model/model.dart';
 import 'package:qeasily/provider/categories.dart';
 // import 'package:qeasily/provider/created_quizzes.dart';
 import 'package:qeasily/provider/dio_provider.dart';
 import 'package:qeasily/redux/redux.dart';
-import 'package:qeasily/redux/view_model/topic_vm.dart';
 import 'package:qeasily/route_doc.dart';
 import 'package:qeasily/styles.dart';
 import 'package:qeasily/util/util.dart';
-import 'package:qeasily/widget/local_notification.dart';
 import 'package:qeasily/widget/widget.dart';
-
-import 'widget/widget.dart';
 
 class CreateQuizScreen extends ConsumerStatefulWidget {
   const CreateQuizScreen({super.key});
@@ -31,6 +28,7 @@ class _CreateQuizScreenState extends ConsumerState<CreateQuizScreen>
   final _formKey = GlobalKey<FormState>();
   late AnimationController _controller;
   bool isLoading = false;
+  bool showHelp = false;
   LocalNotification? notification;
 
   //form arguments
@@ -276,8 +274,8 @@ class _CreateQuizScreenState extends ConsumerState<CreateQuizScreen>
                     maxWidth(context) * 0.85,
                     40,
                   )),
-                  foregroundColor: MaterialStatePropertyAll(Colors.black),
-                  backgroundColor: MaterialStatePropertyAll(Colors.white)),
+                  foregroundColor: MaterialStatePropertyAll(Colors.white),
+                  backgroundColor: MaterialStatePropertyAll(jungleGreen)),
               onPressed: () async {
                 if (questions == null) {
                   _notify(
@@ -296,22 +294,36 @@ class _CreateQuizScreenState extends ConsumerState<CreateQuizScreen>
                     difficulty: difficulty!,
                     type: questionType!,
                   );
-
                   await _notify(msg, loading: false, delay: 3);
 
-                  if (status) {
-                    // ref.invalidate(createdQuizzesProvider);
-                    Navigator.pop(context);
-                  }
+                  if (status) context.go('/home');
+                  // }
                 }
               },
               // icon: Icon(Icons.publish_rounded, color: athensGray, size: 25),
               child: isLoading
                   ? SpinKitThreeBounce(color: athensGray, size: 20)
-                  : Text('Publish Quiz',
-                      style: rubik)),
+                  : Text('Publish Quiz', style: small00)),
         ),
-      )
+      ),
+      if (showHelp)
+        Center(
+          child: TutorialHint(
+            title: 'Hint',
+            message: createQuizTutorial,
+            closer: () {
+              setState(() => showHelp = false);
+            },
+          ),
+        ),
+      Positioned(
+          bottom: 80,
+          right: 20,
+          child: ShowHelpWidget(
+            onPressHelp: () => setState(() {
+              showHelp = !showHelp;
+            }),
+          ))
     ], notification);
   }
 }

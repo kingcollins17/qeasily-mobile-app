@@ -24,6 +24,7 @@ class DraftListViewWidget extends StatefulWidget {
 class _DraftListViewWidgetState extends State<DraftListViewWidget> with Ui {
   final pageController = PageController();
   var current = 0;
+  // Draft? selectedDraft;
 
   void _continueEditing(List<Draft> drafts, QuestionType type) {
     context.push(

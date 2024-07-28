@@ -126,7 +126,6 @@ class MCQSessionState extends SessionState {
   @override
   toString() =>
       'MCQSession{quiz: ${quiz.title}, questions: $questions, current: $current '
-    
       'currentPage: $currentPage'
       'questions, choices: $choices}';
 
@@ -234,6 +233,11 @@ class SessionHistory {
 
   @override
   toString() => 'SessionHistory{mcqs: $mcqSessions, dcqs: $dcqSessions}';
+
+  void removeSession(QuizData quiz) {
+    mcqSessions.removeWhere((element) => element.quiz == quiz);
+    dcqSessions.removeWhere((element) => element.quiz == quiz);
+  }
 }
 
 abstract interface class SavedSession {
@@ -347,5 +351,6 @@ enum SessionActionType {
   restore,
   notify,
   clearNotify,
-  closeSession
+  closeSession,
+  removeHistory
 }

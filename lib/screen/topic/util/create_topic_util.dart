@@ -6,6 +6,7 @@ Future<(String, bool)> createTopic(
   required String title,
   required String description,
   required int categoryId,
+    required String level
   // required int userId
 }) async {
   try {
@@ -14,6 +15,7 @@ Future<(String, bool)> createTopic(
         'title': title,
         'description': description,
         'category_id': categoryId,
+        'level': level
         // 'user_id': userId
       }
     ]);

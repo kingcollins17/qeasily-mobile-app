@@ -9,7 +9,7 @@ import 'package:json_annotation/json_annotation.dart';
 
 part 'transactions.g.dart';
 
-@Riverpod(keepAlive: true)
+@riverpod
 class PendingTranx extends _$PendingTranx implements NextPageFetcher {
   @override
   Future<List<PendingTransactionData>> build() async {

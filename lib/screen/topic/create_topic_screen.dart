@@ -3,11 +3,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:go_router/go_router.dart';
 import 'package:qeasily/provider/categories.dart';
 import 'package:qeasily/provider/dio_provider.dart';
 import 'package:qeasily/styles.dart';
-import 'package:qeasily/widget/custom_drop_down.dart';
-import 'package:qeasily/widget/local_notification.dart';
+import 'package:qeasily/widget/widget.dart';
 
 import 'util/util.dart';
 
@@ -23,6 +23,8 @@ class _CreateTopicScreenState extends ConsumerState<CreateTopicScreen>
   bool isLoading = false;
   late AnimationController _controller;
   LocalNotification? notification;
+
+  bool showHelp = false;
 
   //
   String? title, description, level;
@@ -81,12 +83,14 @@ class _CreateTopicScreenState extends ConsumerState<CreateTopicScreen>
                         // labelText: 'Name',
                         border: OutlineInputBorder(),
                         isDense: true,
+                        hintStyle: small00,
+                        labelStyle: small00,
                       ),
                     ),
                     spacer(y: 20),
                     Align(
                         alignment: Alignment.centerLeft,
-                        child: Text('Description', style: mukta)),
+                        child: Text('Description', style: small00)),
                     spacer(y: 10),
                     TextFormField(
                         minLines: 2,
@@ -97,15 +101,15 @@ class _CreateTopicScreenState extends ConsumerState<CreateTopicScreen>
                         onChanged: (value) => description = value,
                         style: small00,
                         decoration: InputDecoration(
-                          border: OutlineInputBorder(),
-                          isDense: true,
-                          hintText: 'Write a short description of this topic',
-                          hintStyle: mukta,
-                        )),
+                            border: OutlineInputBorder(),
+                            isDense: true,
+                            hintText: 'Write a short description of this topic',
+                            hintStyle: small00,
+                            labelStyle: small00)),
                     spacer(y: 25),
                     Align(
                         alignment: Alignment.centerLeft,
-                        child: Text('Select Category', style: mukta)),
+                        child: Text('Select Category', style: small00)),
                     spacer(y: 12),
                     switch (ref.read(categoriesProvider)) {
                       AsyncData(:final value) => CustomDropdownField(
@@ -120,7 +124,7 @@ class _CreateTopicScreenState extends ConsumerState<CreateTopicScreen>
                     spacer(y: 20),
                     Align(
                         alignment: Alignment.centerLeft,
-                        child: Text('Level', style: mukta)),
+                        child: Text('Level', style: small00)),
                     spacer(y: 15),
                     CustomDropdownField(
                       hint: 'What level',
@@ -136,6 +140,21 @@ class _CreateTopicScreenState extends ConsumerState<CreateTopicScreen>
           ),
         ),
       ),
+      if (showHelp)
+        Center(
+            child: TutorialHint(
+          title: 'Help',
+          message: addTopicTutorial,
+          closer: () => setState(() => showHelp = false),
+        )),
+      Positioned(
+          right: 20,
+          bottom: 80,
+          child: ShowHelpWidget(
+            onPressHelp: () => setState(
+              () => showHelp = !showHelp,
+            ),
+          )),
       Positioned(
           bottom: 20,
           width: maxWidth(context),
@@ -158,10 +177,10 @@ class _CreateTopicScreenState extends ConsumerState<CreateTopicScreen>
                       title: title!,
                       description: description!,
                       categoryId: category!.id,
-                      //TODO: Remove this field requirement from backend
-                      // userId: 1,
+                      level: level!,
                     );
-                    _notify(msg, loading: false);
+                    _notify(msg, loading: false)
+                        .then((value) => status ? context.go('/home') : null);
                   } else {
                     _notify('Please fill in all the fields before you proceed',
                         loading: false);
@@ -170,7 +189,7 @@ class _CreateTopicScreenState extends ConsumerState<CreateTopicScreen>
                 child: isLoading
                     ? SpinKitThreeBounce(color: Colors.black, size: 20)
                     : Text('Create Topic', style: rubik)),
-          ))
+          )),
     ], notification);
   }
 }

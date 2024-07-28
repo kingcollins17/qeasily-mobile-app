@@ -101,7 +101,7 @@ mixin Ui {
       minLines: minLines,
       validator: validator,
       onTapOutside: onTapOutside,
-      style: mukta,
+      style: small00,
       decoration: InputDecoration(
         contentPadding:
             const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
@@ -110,10 +110,10 @@ mixin Ui {
         border: border ?? const OutlineInputBorder(),
         // hintText: 'Enter your Question',
         hintText: hint,
-        hintStyle: mukta,
+        hintStyle: small00,
         // labelText: 'Query',
         labelText: label,
-        labelStyle: mukta,
+        labelStyle: small00,
       ),
     );
   }

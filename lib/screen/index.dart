@@ -83,19 +83,16 @@ class _IndexSubScreenState extends ConsumerState<HomePageSubScreen> with Ui {
               spacer(x: 6),
               _searchBar(),
               spacer(),
-              StoreConnector<QeasilyState, SessionViewModel>(
-                builder: (context, vm) => Row(
-                  children: [
-                    circleWrap((vm.history.mcqSessions.length +
-                            vm.history.dcqSessions.length)
-                        .toString()),
-                    spacer(),
-                    circleWrap(user.asData?.value.username![0] ?? '')
-                  ],
+              Expanded(
+                child: Align(
+                  alignment: Alignment.centerRight,
+                  child: circleWrap(switch (user) {
+                    AsyncData(:final value) => value.email[0],
+                    _ => 'U'
+                  }),
                 ),
-                converter: (store) =>
-                    SessionViewModel(store, ref.read(generalDioProvider)),
-              )
+              ),
+              spacer(x: 8)
             ],
           ),
           _categories(),

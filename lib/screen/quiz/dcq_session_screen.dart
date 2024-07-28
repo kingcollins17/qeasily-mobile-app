@@ -64,34 +64,40 @@ class _DCQSessionScreenState extends ConsumerState<DCQSessionScreen>
     return showNotification(_controller, delay);
   }
 
-  void _submit(List<DCQData> questions, List<bool?> choices, QuizData quiz) {
-    showModal<bool>(
-        context: context,
-        builder: (context) {
-          return ConfirmAction(
-              action: 'Are you sure you want to submit?',
-              onConfirm: () => Navigator.pop(context, true));
-        }).then((value) {
-      if (value == true) {
-        final (int score, int total, int attempted, int incorrect) =
-            markDCQQuiz(questions, choices, quiz.questionsAsInt.length);
-        push(
-                ResultScreen(
-                    score: score,
-                    total: total,
-                    attempted: attempted,
-                    incorrect: incorrect),
-                context)
-            .then((value) {
-          if (value == true) {
-            context.go('/home/dcq-revise',
-                extra: (questions: questions, choices: choices, quiz: quiz));
-          } else {
-            context.go('/home');
-          }
-        });
-      }
-    });
+  Future<bool> _submit(
+      List<DCQData> questions, List<bool?> choices, QuizData quiz,
+      {bool forceSubmit = false}) async {
+    bool? action = true;
+    //if user is submitting before time elapses
+    if (!forceSubmit) {
+      action = await showModal<bool>(
+          context: context,
+          builder: (context) {
+            return ConfirmAction(
+                action: 'Are you sure you want to submit?',
+                onConfirm: () => Navigator.pop(context, true));
+          });
+    }
+    if (action == true) {
+      final (int score, int total, int attempted, int incorrect) =
+          markDCQQuiz(questions, choices, quiz.questionsAsInt.length);
+      push(
+              ResultScreen(
+                  score: score,
+                  total: total,
+                  attempted: attempted,
+                  incorrect: incorrect),
+              context)
+          .then((value) {
+        if (value == true) {
+          context.go('/home/dcq-revise',
+              extra: (questions: questions, choices: choices, quiz: quiz));
+        } else {
+          context.go('/home');
+        }
+      });
+    }
+    return action ?? false;
   }
 
   @override
@@ -115,6 +121,7 @@ class _DCQSessionScreenState extends ConsumerState<DCQSessionScreen>
               :choices,
               :questions,
               :current,
+              :timeLeft!,
               :quiz,
             ) = vm.sessionState.session as DCQSessionState;
             return stackWithNotifier([
@@ -139,9 +146,9 @@ class _DCQSessionScreenState extends ConsumerState<DCQSessionScreen>
                     child: Column(
                       children: [
                         spacer(),
-                        if (questions.isEmpty && vm.sessionState.isLoading)
-                          _loadingShimmer(context),
-                        if (questions.isNotEmpty)
+                        if (vm.sessionState.isLoading)
+                          _loadingShimmer(context)
+                        else if (questions.isNotEmpty)
                           Padding(
                             padding:
                                 const EdgeInsets.symmetric(horizontal: 20.0),
@@ -154,8 +161,19 @@ class _DCQSessionScreenState extends ConsumerState<DCQSessionScreen>
                                         size: 20, color: athensGray),
                                     spacer(),
                                     TimerDisplay(
-                                      duration: Duration(seconds: 100),
+                                      // duration: Duration(seconds: 10),
+                                      duration: timeLeft,
                                       controller: timerController,
+                                      onElapse: () {
+                                        _submit(
+                                          questions,
+                                          choices,
+                                          quiz,
+                                          forceSubmit: true,
+                                        ).then(
+                                            (value) => vm.closeSession(quiz));
+                                        // vm.closeSession();
+                                      },
                                       style: big00,
                                     )
                                   ],
@@ -165,7 +183,7 @@ class _DCQSessionScreenState extends ConsumerState<DCQSessionScreen>
                                 Align(
                                   alignment: Alignment.centerLeft,
                                   child: Text(
-                                    'Questions ${current + 1} of ${questions.length}',
+                                    'Questions ${current + 1} of ${quiz.questionsAsInt.length}',
                                     style: mukta,
                                   ),
                                 ),
@@ -219,7 +237,9 @@ class _DCQSessionScreenState extends ConsumerState<DCQSessionScreen>
                   child: Center(
                       child: Material(
                           child: InkWell(
-                              onTap: () => _submit(questions, choices, quiz),
+                              onTap: () => _submit(questions, choices, quiz)
+                                  .then((value) =>
+                                      value ? vm.closeSession(quiz) : null),
                               borderRadius: BorderRadius.circular(6),
                               overlayColor:
                                   MaterialStatePropertyAll(jungleGreen),
@@ -333,13 +353,14 @@ class _DCQSessionScreenState extends ConsumerState<DCQSessionScreen>
         padding: EdgeInsets.all(18),
         child: Shimmer.fromColors(
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 spacer(y: 40),
                 shimmer(),
                 spacer(),
                 shimmer(h: 60, w: maxWidth(context) * 0.9, br: 4),
                 spacer(),
-                SpinKitRotatingCircle(color: athensGray)
+                // SpinKitRotatingCircle(color: athensGray)
               ],
             ),
             baseColor: Colors.transparent,

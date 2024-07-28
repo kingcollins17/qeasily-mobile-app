@@ -135,8 +135,8 @@ Future<dynamic> deleteTopic(Dio dio, int id) async {
       APIUrl.deleteTopic.url,
       queryParameters: {'topic': id},
     );
-    return response.data;
+    return response.data['detail'].toString();
   } catch (e) {
-    return e;
+    return e.toString();
   }
 }

@@ -111,9 +111,17 @@ class MCQItemDetailWidget extends StatelessWidget with Ui {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              spacer(),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  Text(data.topicTitle ?? '', style: small00),
+                ],
+              ),
+              spacer(y: 15),
               Text(
                 data.query,
-                style: small00,
+                style: small00
               ),
               spacer(y: 25),
               _option('A', data.A),

@@ -1,4 +1,4 @@
-// ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables, unused_element, non_constant_identifier_names
+// ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables, unused_element, non_constant_identifier_names, use_build_context_synchronously, curly_braces_in_flow_control_structures, empty_statements
 
 import 'package:animations/animations.dart';
 import 'package:dio/dio.dart';
@@ -37,6 +37,7 @@ class _QuizSessionScreenState extends ConsumerState<MCQSessionScreen>
   final timerController = TimerController();
 
   bool hasInitialized = false;
+  bool showHelp = false;
   var canExit = false;
 
   final double pointerWidth = 55;
@@ -106,29 +107,34 @@ class _QuizSessionScreenState extends ConsumerState<MCQSessionScreen>
         ],
       ));
 
-  void _submit(
-      List<MCQData> questions, List<MCQOption?> choices, QuizData quiz) {
-    showModal(
-        context: context,
-        builder: (context) => ConfirmAction(
-              action: 'Are you sure you want to submit',
-              onConfirm: () => Navigator.pop(context, true),
-            )).then((value) {
-      if (value == true) {
-        final (:score, :total, :attempted, :incorrect) =
-            markMCQQuiz(questions, choices, quiz.questionsAsInt.length);
-        push<bool>(
-                ResultScreen(
-                    score: score,
-                    total: total,
-                    attempted: attempted,
-                    incorrect: incorrect),
-                context)
-            .then((value) => value == true
-                ? context.go('/home/mcq-revise', extra: (choices, questions))
-                : context.go('/home/session', extra: widget.data));
-      }
-    });
+  Future<bool> _submit(
+      List<MCQData> questions, List<MCQOption?> choices, QuizData quiz,
+      {bool forceSubmit = false}) async {
+    bool? action = true;
+    //if user is submitting before time is up
+    if (!forceSubmit) {
+      action = await showModal<bool>(
+          context: context,
+          builder: (context) => ConfirmAction(
+                action: 'Are you sure you want to submit',
+                onConfirm: () => Navigator.pop(context, true),
+              ));
+    }
+    if (action == true) {
+      final (:score, :total, :attempted, :incorrect) =
+          markMCQQuiz(questions, choices, quiz.questionsAsInt.length);
+      push<bool>(
+              ResultScreen(
+                  score: score,
+                  total: total,
+                  attempted: attempted,
+                  incorrect: incorrect),
+              context)
+          .then((value) => value == true
+              ? context.go('/home/mcq-revise', extra: (choices, questions))
+              : context.go('/home', extra: widget.data));
+    }
+    return action ?? false;
   }
 
   @override
@@ -138,17 +144,18 @@ class _QuizSessionScreenState extends ConsumerState<MCQSessionScreen>
             SessionViewModel(store, ref.read(generalDioProvider)),
         builder: (context, vm) {
           ///if this widget has been initalized, do nothing
-          if (hasInitialized) {
-          } else if (widget.data != null) {
+          if (hasInitialized)
+            ;
+          else if (widget.data != null) {
             vm.init(widget.data!);
           } else if (widget.savedSession != null) {
             vm.restoreSession(widget.savedSession!);
           }
+          //
           hasInitialized = true;
 
-          //check if there is a session, else throw an exception
+          //check if there is no session, return an error
           if (!vm.sessionState.inSession) {
-            // context.go('/home/session', extra: widget.data);
             return ErrorNotificationHint(error: 'No session availalable');
           }
           // throw Exception('No session available when there should be!');
@@ -177,7 +184,10 @@ class _QuizSessionScreenState extends ConsumerState<MCQSessionScreen>
                 appBar: AppBar(
                   automaticallyImplyLeading: false,
                   title: FilledButton(
-                    onPressed: () => _submit(questions, choices, quiz),
+                    onPressed: () =>
+                        _submit(questions, choices, quiz).then((value) {
+                      if (value) vm.closeSession(quiz);
+                    }),
                     style: ButtonStyle(
                         foregroundColor: MaterialStatePropertyAll(Colors.white),
                         backgroundColor: MaterialStatePropertyAll(jungleGreen)),
@@ -197,14 +207,25 @@ class _QuizSessionScreenState extends ConsumerState<MCQSessionScreen>
                           TimerDisplay(
                             style: big00,
                             duration: timeLeft!,
+                            // duration: Duration(seconds: 10),
                             controller: timerController,
-                            onElapse: () => timerController.addTime(10),
+                            onElapse: () {
+                              _submit(questions, choices, quiz,
+                                      forceSubmit: true)
+                                  .then(
+                                (value) {
+                                  vm.closeSession(quiz);
+                                  // vm.removeSession(quiz);
+                                },
+                              );
+                            },
                           ),
                         ],
                       ),
 
-                      if (vm.sessionState.isLoading) _shimmer(),
-                      if (vm.sessionState.session?.availableQuestions
+                      if (vm.sessionState.isLoading)
+                        _shimmer()
+                      else if (vm.sessionState.session?.availableQuestions
                               .isNotEmpty ??
                           false) ...[
                         Container(
@@ -215,7 +236,7 @@ class _QuizSessionScreenState extends ConsumerState<MCQSessionScreen>
                                 alignment: Alignment.centerLeft,
                                 child: Text(
                                   'Questions ${vm.sessionState.session!.current + 1} '
-                                  'of ${vm.sessionState.session?.availableQuestions.length}',
+                                  'of ${vm.sessionState.session?.quiz.questionsAsInt.length}',
                                   style: xs00,
                                 ),
                               ),
@@ -326,7 +347,19 @@ class _QuizSessionScreenState extends ConsumerState<MCQSessionScreen>
                 notification: vm.sessionState.message,
                 closer: () => vm.clearNotification(),
               ),
-            )
+            ),
+            if (showHelp)
+              Center(
+                  child: TutorialHint(
+                      title: 'Help',
+                      message: quizSessionTutorial,
+                      closer: () => setState(() => showHelp = false))),
+            Positioned(
+                right: 20,
+                bottom: 80,
+                child: ShowHelpWidget(
+                  onPressHelp: () => setState(() => showHelp = !showHelp),
+                ))
           ], notification);
         });
   }

@@ -22,7 +22,12 @@ class _AdminManageScreenState extends ConsumerState<AdminManageScreen> with Ui {
     return stackWithNotifier([
       Scaffold(
           appBar: AppBar(
-            title: Text('Admin Tools', style: small00),
+            title: Row(
+              children: [
+                spacer(x: 10),
+                Text('Admin Tools', style: small00),
+              ],
+            ),
           ),
           body: SingleChildScrollView(
             padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -31,6 +36,7 @@ class _AdminManageScreenState extends ConsumerState<AdminManageScreen> with Ui {
               children: [
                 // Icon(Icons.visibility, size: 18, color: athensGray),
                 // spacer(),
+                spacer(y: 15),
                 Text('Delete Tool', style: small00),
                 spacer(y: 10),
                 InkWell(
