@@ -15,7 +15,7 @@ Qeasily is an educational quiz app designed specifically for higher institutions
   - **Admin Package**: Exclusive ability to add and edit questions or quizzes.
 
 ## Screenshots
-- ![User Dashboard](https://drive.google.com/file/d/1-yfKkORF2mNsASpbNduj_rMBd5_xXq0A/view?usp=drivesdk)
+- ![User Dashboards](https://drive.google.com/uc?export=view&id=1-yfKkORF2mNsASpbNduj_rMBd5_xXq0A)
 
 
 ## State Management
