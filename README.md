@@ -4,10 +4,12 @@ Qeasily is an educational quiz app designed specifically for higher institutions
 
 ## Features
 
-- **Take Quizzes**: Engage in quizzes across various subjects and topics.
+- **Take Quizzes**: Engage in quizzes across various subjects and topics. ![Quiz session](https://drive.google.com/uc?export=view&id=1-wBWJY5pyaqgtNlnQ_GdvuYJ1mSzwhYC)
 - **Create Quizzes**: Design custom quizzes to test your peers or students.
 - **Contribute Questions**: Add questions to the communal question bank.
 - **Subscription Tiers**:
+![Subscription plans](https://drive.google.com/uc?export=view&id=1-yzC7Pnosf_w53r36BADWOLdluKoI_fK)
+
   - **Free Tier**: Basic access to quiz-taking features.
   - **Basic Package**: Additional features and more quiz access.
   - **Scholar Package**: Enhanced functionality and resources.
@@ -16,6 +18,8 @@ Qeasily is an educational quiz app designed specifically for higher institutions
 
 ## Screenshots
 - ![User Dashboards](https://drive.google.com/uc?export=view&id=1-yfKkORF2mNsASpbNduj_rMBd5_xXq0A)
+
+- ![Topics and Courses](https://drive.google.com/uc?export=view&id=1-wqWcyU6MR5Jt58hwufevfwD_1XsIkmt)
 
 
 ## State Management
