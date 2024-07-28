@@ -1,16 +1,40 @@
-# qeasily
+# Qeasily
 
-A new Flutter project.
+Qeasily is an educational quiz app designed specifically for higher institutions and universities. It offers a variety of features to enhance the learning experience, including taking quizzes, creating quizzes, and contributing questions to a communal question bank. The app supports a tiered subscription model, providing different levels of access and functionality.
 
-## Getting Started
+## Features
 
-This project is a starting point for a Flutter application.
+- **Take Quizzes**: Engage in quizzes across various subjects and topics.
+- **Create Quizzes**: Design custom quizzes to test your peers or students.
+- **Contribute Questions**: Add questions to the communal question bank.
+- **Subscription Tiers**:
+  - **Free Tier**: Basic access to quiz-taking features.
+  - **Basic Package**: Additional features and more quiz access.
+  - **Scholar Package**: Enhanced functionality and resources.
+  - **Genius Package**: Full access to all quiz features and content.
+  - **Admin Package**: Exclusive ability to add and edit questions or quizzes.
 
-A few resources to get you started if this is your first Flutter project:
+## Screenshots
+- 
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+## State Management
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+Qeasily utilizes a combination of Riverpod and Redux to efficiently manage the state of the app. This approach ensures smooth performance and scalability for large and complex projects.
+
+## Dark Mode Only
+
+For a seamless and modern user experience, Qeasily is exclusively available in dark mode.
+
+
+https://github.com/kingcollins17/qeasily.git
+
+### Contact
+King Collins - kingcollins172@gmail.com
+GitHub: kingcollins17
+License
+This project is licensed under the MIT License. See the LICENSE file for details.
+
+### Acknowledgements
+- Flutter
+- Riverpod
+- Redux
