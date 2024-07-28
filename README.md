@@ -17,6 +17,7 @@ Qeasily is an educational quiz app designed specifically for higher institutions
 ## Screenshots
 - ![User Dashboard](https://drive.google.com/file/d/1-yfKkORF2mNsASpbNduj_rMBd5_xXq0A/view?usp=drivesdk)
 
+
 ## State Management
 
 Qeasily utilizes a combination of Riverpod and Redux to efficiently manage the state of the app. This approach ensures smooth performance and scalability for large and complex projects.
